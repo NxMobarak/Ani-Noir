@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { questionBank, levels, getRandomQuestions, emojiQuestions } from './questions/index';
+import CHARACTER_BIRTHDAYS_DATA from './birthdays';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -141,60 +142,7 @@ const ANIME_FRAMES_QUESTIONS = [
 ];
 
 // ─── Character Birthdays ────────────────────────────────────
-const CHARACTER_BIRTHDAYS = [
-  { name: "Naruto Uzumaki", anime: "Naruto", month: 10, day: 10 },
-  { name: "Luffy", anime: "One Piece", month: 5, day: 5 },
-  { name: "Goku", anime: "Dragon Ball", month: 4, day: 16 },
-  { name: "Ichigo Kurosaki", anime: "Bleach", month: 7, day: 15 },
-  { name: "Sakura Haruno", anime: "Naruto", month: 3, day: 28 },
-  { name: "Sasuke Uchiha", anime: "Naruto", month: 7, day: 23 },
-  { name: "Hinata Hyuga", anime: "Naruto", month: 12, day: 27 },
-  { name: "Zoro", anime: "One Piece", month: 11, day: 11 },
-  { name: "Nami", anime: "One Piece", month: 7, day: 3 },
-  { name: "Tanjiro Kamado", anime: "Demon Slayer", month: 7, day: 14 },
-  { name: "Nezuko Kamado", anime: "Demon Slayer", month: 12, day: 28 },
-  { name: "Levi Ackerman", anime: "Attack on Titan", month: 12, day: 25 },
-  { name: "Eren Yeager", anime: "Attack on Titan", month: 3, day: 30 },
-  { name: "Mikasa Ackerman", anime: "Attack on Titan", month: 2, day: 10 },
-  { name: "Light Yagami", anime: "Death Note", month: 2, day: 28 },
-  { name: "Edward Elric", anime: "Fullmetal Alchemist", month: 2, day: 3 },
-  { name: "Itachi Uchiha", anime: "Naruto", month: 6, day: 9 },
-  { name: "Kakashi Hatake", anime: "Naruto", month: 9, day: 15 },
-  { name: "Vegeta", anime: "Dragon Ball", month: 8, day: 15 },
-  { name: "Gojo Satoru", anime: "Jujutsu Kaisen", month: 12, day: 7 },
-  { name: "Yuji Itadori", anime: "Jujutsu Kaisen", month: 3, day: 20 },
-  { name: "Deku (Izuku Midoriya)", anime: "My Hero Academia", month: 7, day: 15 },
-  { name: "Todoroki Shoto", anime: "My Hero Academia", month: 1, day: 11 },
-  { name: "Killua Zoldyck", anime: "Hunter x Hunter", month: 7, day: 7 },
-  { name: "Gon Freecss", anime: "Hunter x Hunter", month: 5, day: 5 },
-  { name: "Asta", anime: "Black Clover", month: 10, day: 4 },
-  { name: "Zenitsu Agatsuma", anime: "Demon Slayer", month: 9, day: 3 },
-  { name: "Sanji", anime: "One Piece", month: 3, day: 2 },
-  { name: "Robin", anime: "One Piece", month: 2, day: 6 },
-  { name: "Rem", anime: "Re:Zero", month: 2, day: 2 },
-  { name: "Roronoa Zoro", anime: "One Piece", month: 11, day: 11 },
-  { name: "Erza Scarlet", anime: "Fairy Tail", month: 5, day: 15 },
-  { name: "Natsu Dragneel", anime: "Fairy Tail", month: 7, day: 7 },
-  { name: "Spike Spiegel", anime: "Cowboy Bebop", month: 6, day: 26 },
-  { name: "Lelouch Lamperouge", anime: "Code Geass", month: 12, day: 5 },
-  { name: "Saitama", anime: "One Punch Man", month: 3, day: 19 },
-  { name: "Genos", anime: "One Punch Man", month: 7, day: 4 },
-  { name: "Ochaco Uraraka", anime: "My Hero Academia", month: 12, day: 27 },
-  { name: "Bakugo Katsuki", anime: "My Hero Academia", month: 4, day: 20 },
-  { name: "Megumi Fushiguro", anime: "Jujutsu Kaisen", month: 12, day: 22 },
-  { name: "Sukuna", anime: "Jujutsu Kaisen", month: 1, day: 1 },
-  { name: "Senku Ishigami", anime: "Dr. Stone", month: 1, day: 4 },
-  { name: "Emilia", anime: "Re:Zero", month: 9, day: 23 },
-  { name: "Licht", anime: "Plunderer", month: 2, day: 14 },
-  { name: "Shinji Ikari", anime: "Evangelion", month: 6, day: 6 },
-  { name: "Asuka Langley", anime: "Evangelion", month: 12, day: 4 },
-  { name: "Rei Ayanami", anime: "Evangelion", month: 3, day: 30 },
-  { name: "Sailor Moon (Usagi)", anime: "Sailor Moon", month: 6, day: 30 },
-  { name: "Inuyasha", anime: "Inuyasha", month: 5, day: 27 },
-  { name: "Kaneki Ken", anime: "Tokyo Ghoul", month: 12, day: 20 },
-  { name: "Misa Amane", anime: "Death Note", month: 12, day: 25 },
-  { name: "Gaara", anime: "Naruto", month: 1, day: 19 },
-];
+const CHARACTER_BIRTHDAYS = CHARACTER_BIRTHDAYS_DATA;
 
 
 // ─── Leaderboard helpers ────────────────────────────────────
@@ -550,14 +498,14 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
         })}
       </div>
       <div className="sidebar-footer">
-        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt">
-          <div className="sidebar-footer-card-title">▶ AnimeTMTalks</div>
-          <div className="sidebar-footer-card-sub">Watch anime content on YouTube</div>
-        </a>
-        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig">
-          <div className="sidebar-footer-card-title">📷 @AniNoir</div>
-          <div className="sidebar-footer-card-sub">Follow for daily anime posts</div>
-        </a>
+        <div style={{ display:'flex', gap:10 }}>
+          <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'12px 8px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'12px 8px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </a>
+        </div>
       </div>
     </>
   );
@@ -716,7 +664,7 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
       <div className="card">
         <div className="card-title" style={{ color: T.teal }}>⚡ QUICK PLAY</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['frames','🖼️','Frames'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
+          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['frames','🖼️','Frames'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Challenge of the Day']].map(([id,ico,lbl])=>(
             <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
               <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
             </button>
@@ -2002,10 +1950,10 @@ function DailyPage({ spades, setSpades, showFeedback }) {
       {question && (
         <div className="card">
           <div className="card-title" style={{color:T.violet}}>
-            {question.type==='mcq'?'🧠 QUESTION':'🔤 ANAGRAM'}
+            {question.type==='mcq'?'🧠 QUESTION':'🔤 SCRAMBLE'}
           </div>
           <div className="question-text" style={{fontSize:16}}>
-            {question.type==='mcq'?question.text:'🔤 UNTANGLE THE ANAGRAM'}
+            {question.type==='mcq'?question.text:'🔤 UNSCRAMBLE THE ANIME'}
           </div>
           {question.type === 'mcq' ? (
             <div>
@@ -2405,7 +2353,7 @@ function CharacterSearchPage({ showFeedback }) {
     <div>
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="card-title" style={{ color: T.violet }}>👤 CHARACTER SEARCH</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Search for anime characters using the Jikan API (MyAnimeList).</p>
+        <p style={{ fontSize: 13, color: T.textMid }}>Find your favorite anime characters instantly.</p>
       </div>
       <div className="search-input-wrap">
         <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
