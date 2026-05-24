@@ -2487,7 +2487,7 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
             else if (idx === selectedOption) cls += ' wrong';
           }
           return (
-            <button key={idx} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
           );
         })}
       </div>
