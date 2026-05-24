@@ -1887,7 +1887,7 @@ function WatchlistPage({ showFeedback }) {
 }
 
 
-// ─── News Page (Fixed RSS + filter tabs) ─────────────────────
+// ─── News Page (Crunchyroll RSS with images) ─────────────────────
 function NewsPage() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1895,19 +1895,13 @@ function NewsPage() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.animenewsnetwork.com/all/rss.xml');
+      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss');
       const data = await res.json();
       if (data.items?.length) {
-        // Extract image from description HTML if thumbnail/enclosure not available
-        const extractImg = (html) => {
-          if (!html) return '';
-          const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-          return match ? match[1] : '';
-        };
         setNews(data.items.slice(0,15).map(item => ({
           title: item.title, link: item.link,
           desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'…',
-          image: item.thumbnail || item.enclosure?.link || extractImg(item.description) || extractImg(item.content) || '',
+          image: item.thumbnail || item.enclosure?.link || '',
           date: new Date(item.pubDate).toLocaleDateString(),
         })));
       }
@@ -1934,7 +1928,7 @@ function NewsPage() {
         {!loading && news.map((item,i)=>(
           <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="news-item">
             {item.image ? (
-              <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.src='';e.target.style.display='none';}}/>
+              <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.style.display='none';}}/>
             ) : (
               <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>📰</div>
             )}
