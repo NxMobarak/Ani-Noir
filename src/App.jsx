@@ -2073,10 +2073,6 @@ function BirthdaysPage() {
           <div style={{ fontSize: 22, fontWeight: 800, color: T.rose }}>{thisWeekBirthdays.length}</div>
           <div style={{ fontSize: 11, color: T.textMid }}>This Week</div>
         </div>
-        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: T.gold }}>{CHARACTER_BIRTHDAYS.length}</div>
-          <div style={{ fontSize: 11, color: T.textMid }}>Total Characters</div>
-        </div>
       </div>
 
       {/* Birthday list */}
