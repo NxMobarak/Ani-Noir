@@ -769,7 +769,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
   const getFilteredPool = (levelNum) => {
     let pool = questionBank.filter(q => q.level === levelNum);
-    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq' && !hasEmoji(q.text));
+    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq');
     if (anagramOnly) pool = pool.filter(q => q.type === 'anagram');
     return shuffle(pool).slice(0, 5);
   };
