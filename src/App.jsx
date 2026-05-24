@@ -32,6 +32,7 @@ function shuffle(arr) {
   return a;
 }
 
+
 // ─── Web Audio Sound Effects ────────────────────────────────
 const audioCtx = { ctx: null };
 function getAudioCtx() {
@@ -68,6 +69,7 @@ function playCombo() {
   [523,659,784,1046].forEach((f,i) => playTone(f,'sine',0.1,0.3,i*0.07));
 }
 
+
 // ─── Anime of the Day ───────────────────────────────────────
 const ANIME_OF_DAY_LIST = [
   { title: "Fullmetal Alchemist: Brotherhood", genre: "Action/Fantasy", rating: "9.1", desc: "Two brothers use alchemy to find the Philosopher's Stone after a failed human transmutation costs them dearly.", image: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg" },
@@ -92,6 +94,42 @@ const QUOTES = [
 ];
 const getDailyQuote = () => { const d = Math.floor(Date.now()/86400000); return QUOTES[d%QUOTES.length]; };
 
+
+// ─── Character Birthdays ────────────────────────────────────
+const CHARACTER_BIRTHDAYS = [
+  { name: "Naruto Uzumaki", anime: "Naruto", month: 10, day: 10 },
+  { name: "Luffy", anime: "One Piece", month: 5, day: 5 },
+  { name: "Goku", anime: "Dragon Ball", month: 4, day: 16 },
+  { name: "Ichigo Kurosaki", anime: "Bleach", month: 7, day: 15 },
+  { name: "Sakura Haruno", anime: "Naruto", month: 3, day: 28 },
+  { name: "Sasuke Uchiha", anime: "Naruto", month: 7, day: 23 },
+  { name: "Hinata Hyuga", anime: "Naruto", month: 12, day: 27 },
+  { name: "Zoro", anime: "One Piece", month: 11, day: 11 },
+  { name: "Nami", anime: "One Piece", month: 7, day: 3 },
+  { name: "Tanjiro Kamado", anime: "Demon Slayer", month: 7, day: 14 },
+  { name: "Nezuko Kamado", anime: "Demon Slayer", month: 12, day: 28 },
+  { name: "Levi Ackerman", anime: "Attack on Titan", month: 12, day: 25 },
+  { name: "Eren Yeager", anime: "Attack on Titan", month: 3, day: 30 },
+  { name: "Mikasa Ackerman", anime: "Attack on Titan", month: 2, day: 10 },
+  { name: "Light Yagami", anime: "Death Note", month: 2, day: 28 },
+  { name: "Edward Elric", anime: "Fullmetal Alchemist", month: 2, day: 3 },
+  { name: "Itachi Uchiha", anime: "Naruto", month: 6, day: 9 },
+  { name: "Kakashi Hatake", anime: "Naruto", month: 9, day: 15 },
+  { name: "Vegeta", anime: "Dragon Ball", month: 8, day: 15 },
+  { name: "Gojo Satoru", anime: "Jujutsu Kaisen", month: 12, day: 7 },
+  { name: "Yuji Itadori", anime: "Jujutsu Kaisen", month: 3, day: 20 },
+  { name: "Deku (Izuku Midoriya)", anime: "My Hero Academia", month: 7, day: 15 },
+  { name: "Todoroki Shoto", anime: "My Hero Academia", month: 1, day: 11 },
+  { name: "Killua Zoldyck", anime: "Hunter x Hunter", month: 7, day: 7 },
+  { name: "Gon Freecss", anime: "Hunter x Hunter", month: 5, day: 5 },
+  { name: "Asta", anime: "Black Clover", month: 10, day: 4 },
+  { name: "Zenitsu Agatsuma", anime: "Demon Slayer", month: 9, day: 3 },
+  { name: "Sanji", anime: "One Piece", month: 3, day: 2 },
+  { name: "Robin", anime: "One Piece", month: 2, day: 6 },
+  { name: "Rem", anime: "Re:Zero", month: 2, day: 2 },
+];
+
+
 // ─── Leaderboard helpers ────────────────────────────────────
 const getLeaderboard = () => { try { return JSON.parse(localStorage.getItem('ani_leaderboard') || '{}'); } catch { return {}; } };
 const saveLeaderboard = (lb) => localStorage.setItem('ani_leaderboard', JSON.stringify(lb));
@@ -108,18 +146,25 @@ const updateBestScore = (mode, levelIdx, score, total) => {
 const getWatchlist = () => { try { return JSON.parse(localStorage.getItem('ani_watchlist') || '[]'); } catch { return []; } };
 const saveWatchlist = (list) => localStorage.setItem('ani_watchlist', JSON.stringify(list));
 
+// ─── Emoji detection helper ─────────────────────────────────
+const hasEmoji = (text) => /[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27FF}]|[\u{FE00}-\u{FEFF}]/u.test(text);
+
 // ─── NAV ────────────────────────────────────────────────────
 const NAV = [
   { id: 'home', icon: '🏠', label: 'Home' },
   { id: 'quiz', icon: '🧠', label: 'Quiz' },
+  { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
   { id: 'anagram', icon: '🔤', label: 'Anagram' },
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
+  { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
   { id: 'watchlist', icon: '📋', label: 'Watchlist' },
   { id: 'news', icon: '📰', label: 'News' },
+  { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge' },
   { id: 'profile', icon: '👤', label: 'Profile' },
 ];
+
 
 // ─── CSS ─────────────────────────────────────────────────────
 const css = `
@@ -132,23 +177,34 @@ const css = `
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: ${T.border}; border-radius: 2px; }
 
-  .app-shell { display: flex; height: 100dvh; max-width: 480px; margin: 0 auto; position: relative; overflow: hidden; }
+  /* RESPONSIVE: Desktop vs Mobile */
+  .app-shell { display: flex; height: 100dvh; margin: 0 auto; position: relative; overflow: hidden; }
+
+  @media (max-width: 768px) {
+    .app-shell { max-width: 100%; }
+    .desktop-sidebar { display: none; }
+  }
+  @media (min-width: 769px) {
+    .app-shell { max-width: 900px; border-left: 1px solid ${T.border}; border-right: 1px solid ${T.border}; }
+    .desktop-sidebar { display: flex; flex-direction: column; width: 240px; background: ${T.surface}; border-right: 1px solid ${T.border}; flex-shrink: 0; overflow-y: auto; }
+    .menu-btn { display: none !important; }
+    .sidebar-overlay, .sidebar { display: none !important; }
+  }
 
   /* Page entrance animation */
   @keyframes pageIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   .page-enter { animation: pageIn 0.25s ease both; }
 
-  /* Sidebar */
+  /* Sidebar (mobile) */
   .sidebar-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.3s; }
   .sidebar-overlay.open { opacity:1;pointer-events:all; }
-
   .sidebar { position:fixed;left:-270px;top:0;bottom:0;width:270px;background:${T.surface};border-right:1px solid ${T.border};z-index:101;transition:left 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:0 0 20px;overflow-y:auto; }
   .sidebar.open { left:0; }
 
   .sidebar-header { padding:24px 20px 16px;border-bottom:1px solid ${T.border}; }
   .sidebar-logo { font-size:22px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,${T.rose},${T.violet});-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
   .sidebar-tagline { font-size:11px;color:${T.textDim};margin-top:3px;letter-spacing:0.5px;text-transform:uppercase; }
-  .sidebar-spades { display:flex;align-items:center;gap:6px;margin-top:10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:5px 12px;width:fit-content;font-size:13px;font-weight:700;color:${T.gold}; }
+  .sidebar-spades { display:flex;align-items:center;gap:6px;margin-top:10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:5px 12px;width:fit-content;font-size:13px;font-weight:700;color:${T.gold};cursor:pointer; }
 
   .sidebar-nav { padding:12px 10px;flex:1; }
   .nav-item { display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:none;background:transparent;width:100%;text-align:left;font-size:14px;font-weight:500;color:${T.textMid};transition:all 0.2s;margin-bottom:2px; }
@@ -157,14 +213,22 @@ const css = `
   .nav-item .icon { font-size:18px;width:24px;text-align:center; }
   .nav-item .lock-badge { margin-left:auto;font-size:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:${T.gold};border-radius:8px;padding:1px 6px; }
 
-  .sidebar-footer { padding:12px 20px;border-top:1px solid ${T.border};font-size:12px;color:${T.textDim}; }
 
-  .main { flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%; }
+  .sidebar-footer { padding:16px 20px;border-top:1px solid ${T.border}; }
+  .sidebar-footer-card { border-radius:12px;padding:12px;margin-bottom:10px;text-decoration:none;display:block;color:${T.text};transition:transform 0.2s; }
+  .sidebar-footer-card:hover { transform:translateY(-2px); }
+  .sidebar-footer-card.yt { background:linear-gradient(135deg,#ff0000,#cc0000);border:1px solid rgba(255,0,0,0.4); }
+  .sidebar-footer-card.ig { background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:1px solid rgba(131,58,180,0.4); }
+  .sidebar-footer-card-title { font-size:12px;font-weight:700; }
+  .sidebar-footer-card-sub { font-size:10px;opacity:0.8;margin-top:2px; }
+
+  .main { flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;min-width:0; }
   .topbar { display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:1px solid ${T.border};background:${T.surface};flex-shrink:0; }
   .menu-btn { background:none;border:1px solid ${T.border};border-radius:10px;padding:8px 10px;font-size:16px;line-height:1;flex-shrink:0; }
   .topbar-title { font-size:16px;font-weight:700;flex:1; }
   .topbar-chips { display:flex;gap:8px; }
-  .chip { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:${T.textMid};white-space:nowrap; }
+  .chip { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:${T.textMid};white-space:nowrap;cursor:pointer;transition:all 0.2s; }
+  .chip:hover { border-color:${T.gold}; }
 
   .page { flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch; }
 
@@ -190,6 +254,7 @@ const css = `
   .level-meta { font-size:12px;color:${T.textMid};margin-top:2px; }
   .level-best { font-size:11px;color:${T.gold};margin-top:3px; }
 
+
   /* Quiz */
   .quiz-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px; }
 
@@ -200,7 +265,6 @@ const css = `
   .timer-fill { fill:none;stroke:${T.rose};stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.3s; }
   .timer-text { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${T.text}; }
   .timer-text.urgent { color:${T.rose};animation:pulse 0.5s infinite; }
-
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
   /* Combo badge */
@@ -230,6 +294,7 @@ const css = `
   .power-btns { display:flex;gap:8px;margin-top:12px; }
   .power-btn { flex:1;background:${T.surface};border:1px solid ${T.border};border-radius:10px;padding:9px 6px;font-size:11px;text-align:center;cursor:pointer;color:${T.textMid};transition:all 0.2s; }
   .power-btn:hover:not(:disabled) { border-color:${T.gold};color:${T.gold}; }
+
 
   /* Feedback toast */
   .feedback-toast { position:fixed;top:70px;left:50%;transform:translateX(-50%);background:${T.card};border:1px solid ${T.border};border-radius:40px;padding:10px 20px;font-size:14px;font-weight:600;z-index:200;pointer-events:none;animation:slideDown 0.3s ease;max-width:90vw;text-align:center;white-space:nowrap; }
@@ -267,9 +332,14 @@ const css = `
   .news-text { flex:1;min-width:0; }
   .news-title { font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
   .news-desc { font-size:11px;color:${T.textMid};margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+  .news-filter-tabs { display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap; }
+  .news-tab { background:${T.surface};border:1px solid ${T.border};border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;color:${T.textMid};transition:all 0.2s; }
+  .news-tab.active { background:rgba(244,63,94,0.15);border-color:${T.rose};color:${T.rose}; }
+
 
   /* YouTube card */
-  .yt-card { display:flex;gap:12px;text-decoration:none;color:${T.text}; }
+  .yt-card { display:flex;gap:12px;text-decoration:none;color:${T.text};padding:12px;background:linear-gradient(135deg,rgba(255,0,0,0.08),rgba(139,92,246,0.08));border-radius:14px;border:1px solid rgba(255,0,0,0.2);transition:all 0.2s; }
+  .yt-card:hover { border-color:rgba(255,0,0,0.4);transform:translateY(-2px); }
   .yt-thumb { width:96px;height:64px;border-radius:10px;object-fit:cover;background:${T.surface};flex-shrink:0;border:2px solid #ff0000; }
   .yt-info { flex:1;min-width:0; }
   .yt-title { font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
@@ -314,7 +384,19 @@ const css = `
   /* Skeleton shimmer */
   @keyframes shimmer { from{background-position:-200%} to{background-position:200%} }
   .skeleton { background:linear-gradient(90deg,${T.card} 25%,${T.surface} 50%,${T.card} 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px; }
+
+  /* Modal/Popup */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);animation:fadeIn 0.2s; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal-content { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:24px;max-width:380px;width:100%;max-height:80vh;overflow-y:auto; }
+  .modal-title { font-size:18px;font-weight:800;margin-bottom:12px; }
+  .modal-close { background:none;border:1px solid ${T.border};border-radius:10px;padding:6px 12px;font-size:14px;cursor:pointer;color:${T.textMid}; }
+
+  /* Survival */
+  .survival-lives { display:flex;gap:4px;font-size:20px; }
+  .survival-stat { display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700; }
 `;
+
 
 // ─── Circular Timer ─────────────────────────────────────────
 function CircularTimer({ timeLeft, maxTime }) {
@@ -336,6 +418,81 @@ function CircularTimer({ timeLeft, maxTime }) {
   );
 }
 
+// ─── Spades Info Modal ──────────────────────────────────────
+function SpadesModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+          <div className="modal-title" style={{ color: T.gold }}>♠ Spades Guide</div>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div style={{ marginBottom:16 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>💰 Earn Spades:</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>✅ Completing quizzes: +10-100♠</li>
+            <li>🔥 Combo streaks: +5♠ per 3x combo</li>
+            <li>📅 Daily challenges: +30♠</li>
+            <li>💀 Survival mode: +100♠ per 5 correct</li>
+          </ul>
+        </div>
+        <div>
+          <div style={{ fontSize:14, fontWeight:700, color:T.rose, marginBottom:8 }}>🛒 Spend Spades:</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>💡 Hints: 30♠</li>
+            <li>⏭️ Skips: 50♠</li>
+            <li>🔓 Unlocking modes: 200♠</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Sidebar Content (shared between mobile and desktop) ────
+function SidebarContent({ page, navigate, spades, onSpadesClick }) {
+  const SHADOW_COST = 200;
+  const EMOJI_COST = 200;
+  return (
+    <>
+      <div className="sidebar-header">
+        <div className="sidebar-logo">⚔️ AniNoir</div>
+        <div className="sidebar-tagline">Your Anime Universe</div>
+        <div className="sidebar-spades" onClick={onSpadesClick}>♠ {spades} Spades</div>
+      </div>
+      <div className="sidebar-nav">
+        {NAV.map(n => {
+          const isShadow = n.id === 'shadow';
+          const isEmoji = n.id === 'emoji';
+          const showLock = isShadow || isEmoji;
+          const cost = isShadow ? SHADOW_COST : EMOJI_COST;
+          const unlockKey = isShadow ? 'ani_shadow_unlocked' : 'ani_emoji_unlocked';
+          const isUnlocked = localStorage.getItem(unlockKey) === '1';
+          return (
+            <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => navigate(n.id)}>
+              <span className="icon">{n.icon}</span>
+              {n.label}
+              {showLock && <span className="lock-badge">{isUnlocked ? '✨' : `🔒 ${cost}♠`}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <div className="sidebar-footer">
+        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt">
+          <div className="sidebar-footer-card-title">▶ AnimeTMTalks</div>
+          <div className="sidebar-footer-card-sub">Watch anime content on YouTube</div>
+        </a>
+        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig">
+          <div className="sidebar-footer-card-title">📷 @AniNoir</div>
+          <div className="sidebar-footer-card-sub">Follow for daily anime posts</div>
+        </a>
+      </div>
+    </>
+  );
+}
+
+
 // ─── App Root ───────────────────────────────────────────────
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -344,6 +501,7 @@ export default function App() {
   const [spades, setSpades] = useState(() => parseInt(localStorage.getItem('ani_spades') || '100'));
   const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
   const [feedback, setFeedback] = useState('');
+  const [spadesModal, setSpadesModal] = useState(false);
   const feedbackTimer = useRef(null);
 
   const showFeedback = (msg) => {
@@ -363,38 +521,22 @@ export default function App() {
   };
 
   const pageTitle = NAV.find(n => n.id === page)?.label || 'AniNoir';
-  const SHADOW_COST = 150;
+  const SHADOW_COST = 200;
+  const EMOJI_COST = 200;
 
   return (
     <>
       <style>{css}</style>
       <div className="app-shell">
-        <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
+        {/* Desktop sidebar (always visible on >768px) */}
+        <div className="desktop-sidebar">
+          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
+        </div>
 
+        {/* Mobile sidebar overlay */}
+        <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
         <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-          <div className="sidebar-header">
-            <div className="sidebar-logo">⚔️ AniNoir</div>
-            <div className="sidebar-tagline">Your Anime Universe</div>
-            <div className="sidebar-spades">♠ {spades} Spades</div>
-          </div>
-          <div className="sidebar-nav">
-            {NAV.map(n => {
-              const isShadow = n.id === 'shadow';
-              const locked = isShadow && spades < SHADOW_COST;
-              return (
-                <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => navigate(n.id)}>
-                  <span className="icon">{n.icon}</span>
-                  {n.label}
-                  {isShadow && <span className="lock-badge">{locked ? `🔒 ${SHADOW_COST}♠` : '✨'}</span>}
-                </button>
-              );
-            })}
-          </div>
-          <div className="sidebar-footer">
-            <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" style={{ color: T.rose, textDecoration: 'none' }}>📷 @AniNoir</a>
-            <span style={{ margin: '0 8px' }}>·</span>
-            <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" style={{ color: '#ff4444', textDecoration: 'none' }}>▶ YouTube</a>
-          </div>
+          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
         </div>
 
         <div className="main">
@@ -402,7 +544,7 @@ export default function App() {
             <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
             <span className="topbar-title">{pageTitle}</span>
             <div className="topbar-chips">
-              <span className="chip">♠ {spades}</span>
+              <span className="chip" onClick={() => setSpadesModal(true)}>♠ {spades}</span>
               <span className="chip">🏅 {badges.length}</span>
             </div>
           </div>
@@ -411,11 +553,14 @@ export default function App() {
             <div className="page-enter">
               {page === 'home' && <HomePage navigate={navigate} dailyAnime={getDailyAnime()} dailyQuote={getDailyQuote()} />}
               {page === 'quiz' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />}
+              {page === 'emoji' && <EmojiQuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} unlockCost={EMOJI_COST} />}
               {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
               {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={SHADOW_COST} />}
+              {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'search' && <SearchPage showFeedback={showFeedback} />}
               {page === 'watchlist' && <WatchlistPage showFeedback={showFeedback} />}
               {page === 'news' && <NewsPage />}
+              {page === 'birthdays' && <BirthdaysPage />}
               {page === 'daily' && <DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'profile' && <ProfilePage spades={spades} badges={badges} />}
             </div>
@@ -423,10 +568,12 @@ export default function App() {
         </div>
 
         {feedback && <div className="feedback-toast">{feedback}</div>}
+        {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
       </div>
     </>
   );
 }
+
 
 // ─── Home Page ───────────────────────────────────────────────
 function LatestYouTubeCard() {
@@ -441,13 +588,15 @@ function LatestYouTubeCard() {
 
   if (!video) return null;
   return (
-    <div className="card">
-      <div className="card-title" style={{ color: '#ff4444' }}>▶ LATEST VIDEO</div>
-      <a href={video.link} target="_blank" rel="noopener noreferrer" className="yt-card">
+    <div className="card" style={{ padding:0, overflow:'hidden' }}>
+      <div style={{ padding:'14px 16px 8px' }}>
+        <div className="card-title" style={{ color: '#ff4444', marginBottom:8 }}>▶ LATEST VIDEO</div>
+      </div>
+      <a href={video.link} target="_blank" rel="noopener noreferrer" className="yt-card" style={{ margin:'0 12px 12px', borderRadius:14 }}>
         <img src={video.thumb} alt="" className="yt-thumb" onError={e=>e.target.style.display='none'} />
         <div className="yt-info">
           <div className="yt-title">{video.title}</div>
-          <div className="yt-sub">AnimeTMTalks · {video.date}</div>
+          <div className="yt-sub">🔴 AnimeTMTalks · {video.date}</div>
         </div>
       </a>
     </div>
@@ -493,9 +642,9 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
 
       <div className="card">
         <div className="card-title" style={{ color: T.teal }}>⚡ QUICK PLAY</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[['quiz','🧠','Quiz'],['anagram','🔤','Anagram'],['shadow','🕵️','Shadow'],['daily','📅','Daily'],['search','🔍','Search']].map(([id,ico,lbl])=>(
-            <button key={id} className="btn btn-secondary" style={{ flex:1, flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Anagram'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
+            <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
               <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
             </button>
           ))}
@@ -505,11 +654,11 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
   );
 }
 
+
 // ─── Anagram Tile Component ─────────────────────────────────
 function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correctAnswer }) {
-  // scrambled is array of letters, each with an id
   const [tiles, setTiles] = useState(() => scrambled.map((l, i) => ({ id: i, letter: l, used: false })));
-  const [answer, setAnswer] = useState([]); // [{tileId, letter}]
+  const [answer, setAnswer] = useState([]);
 
   useEffect(() => {
     setTiles(scrambled.map((l, i) => ({ id: i, letter: l, used: false })));
@@ -543,7 +692,6 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
 
   return (
     <div className="anagram-display">
-      {/* Answer slots */}
       <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Your Answer</div>
       <div className="answer-slots">
         {answer.length === 0
@@ -555,8 +703,6 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
             ))
         }
       </div>
-
-      {/* Available tiles */}
       <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Available Letters</div>
       <div className="tile-pool">
         {tiles.map(tile => (
@@ -565,7 +711,6 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
           </div>
         ))}
       </div>
-
       {hintRevealed && hint && (
         <div style={{ marginBottom: 10, fontSize: 13, color: T.gold }}>💡 {hint}</div>
       )}
@@ -574,7 +719,6 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
           Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
         </div>
       )}
-
       <div className="anagram-actions">
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>⌫</button>
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={clearAll} disabled={!answer.length || answered}>Clear</button>
@@ -583,6 +727,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
     </div>
   );
 }
+
 
 // ─── Quiz / Anagram Page ─────────────────────────────────────
 function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly = false, anagramOnly = false, mode = 'quiz' }) {
@@ -624,7 +769,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
   const getFilteredPool = (levelNum) => {
     let pool = questionBank.filter(q => q.level === levelNum);
-    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq');
+    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq' && !hasEmoji(q.text));
     if (anagramOnly) pool = pool.filter(q => q.type === 'anagram');
     return shuffle(pool).slice(0, 5);
   };
@@ -651,6 +796,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
   };
 
   const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
+
 
   const handleTimeout = () => {
     clearTimer();
@@ -727,6 +873,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     }
   };
 
+
   const submitAnagram = (ans) => {
     if (answered) return;
     clearTimer();
@@ -799,6 +946,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     }
   };
 
+
   if (phase === 'levels') {
     const lb = getLeaderboard();
     return (
@@ -852,10 +1000,10 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
   const q = questions[qIndex];
   const progress = (qIndex / questions.length) * 100;
 
+
   return (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-
       <div className="quiz-header">
         <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
@@ -869,16 +1017,8 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
         <div className="question-text">
           {q.type === 'mcq' ? q.text : '🔤 UNTANGLE THE ANAGRAM'}
         </div>
-
         {q.type === 'anagram' ? (
-          <AnagramTiles
-            scrambled={scrambled}
-            onSolve={submitAnagram}
-            hintRevealed={hintRevealed}
-            hint={q.hint}
-            answered={answered}
-            correctAnswer={q.answer}
-          />
+          <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
         ) : (
           <div>
             {hintRevealed && q.hint && (
@@ -916,6 +1056,431 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     </div>
   );
 }
+
+
+// ─── Emoji Quiz Page (NEW) ───────────────────────────────────
+function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unlockCost }) {
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_emoji_unlocked') === '1');
+  const [phase, setPhase] = useState('levels');
+  const [currentLevel, setCurrentLevel] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [maxTime, setMaxTime] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
+  const [hintRevealed, setHintRevealed] = useState(false);
+  const [skipUsed, setSkipUsed] = useState(false);
+  const [answered, setAnswered] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [correctOption, setCorrectOption] = useState(null);
+  const [finalScore, setFinalScore] = useState(0);
+  const timerRef = useRef(null);
+  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
+
+  const unlock = () => {
+    if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Emoji Quiz!`); return; }
+    setSpades(s => s - unlockCost);
+    setUnlocked(true);
+    localStorage.setItem('ani_emoji_unlocked', '1');
+    showFeedback('🎯 Emoji Quiz unlocked!');
+  };
+
+  useEffect(() => {
+    if (timerActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
+      return () => clearInterval(timerRef.current);
+    }
+    if (timerActive && timeLeft === 0) handleTimeout();
+  }, [timerActive, timeLeft]);
+
+  const getEmojiPool = (levelNum) => {
+    const pool = questionBank.filter(q => q.level === levelNum && q.type === 'mcq' && hasEmoji(q.text));
+    return shuffle(pool).slice(0, 5);
+  };
+
+  const startLevel = (idx) => {
+    const qs = getEmojiPool(idx + 1);
+    if (!qs.length) { showFeedback('No emoji questions for this level!'); return; }
+    setCurrentLevel(idx);
+    setQuestions(qs);
+    setQIndex(0);
+    setScore(0);
+    setStreak(0);
+    setCombo(0);
+    setHintRevealed(false);
+    setSkipUsed(false);
+    setAnswered(false);
+    setSelectedOption(null);
+    setCorrectOption(null);
+    const t = levels[idx].timeSeconds;
+    setTimeLeft(t);
+    setMaxTime(t);
+    setTimerActive(true);
+    setPhase('playing');
+  };
+
+  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
+
+
+  const handleTimeout = () => {
+    clearTimer();
+    setAnswered(true);
+    const q = questions[qIndex];
+    setCorrectOption(q.correct);
+    playWrong();
+    showFeedback('⏰ Time\'s up!');
+    setTimeout(() => advance(false, score), 1200);
+  };
+
+  const advance = (wasCorrect, currentScore) => {
+    const nextIdx = qIndex + 1;
+    if (nextIdx < questions.length) {
+      setQIndex(nextIdx);
+      setHintRevealed(false);
+      setSkipUsed(false);
+      setAnswered(false);
+      setSelectedOption(null);
+      setCorrectOption(null);
+      const t = levels[currentLevel].timeSeconds;
+      setTimeLeft(t);
+      setMaxTime(t);
+      setTimerActive(true);
+    } else {
+      const fs = wasCorrect ? currentScore + 1 : currentScore;
+      const passed = fs >= levels[currentLevel].minCorrect;
+      if (passed) {
+        const reward = levels[currentLevel].reward;
+        setSpades(s => s + reward);
+      }
+      updateBestScore('emoji', currentLevel, fs, questions.length);
+      setFinalScore(fs);
+      clearTimer();
+      setPhase('result');
+    }
+  };
+
+  const submitMCQ = (optIdx) => {
+    if (answered) return;
+    clearTimer();
+    const q = questions[qIndex];
+    const isCorrect = optIdx === q.correct;
+    setSelectedOption(optIdx);
+    setCorrectOption(q.correct);
+    setAnswered(true);
+    if (isCorrect) {
+      const newCombo = combo + 1;
+      setScore(s => s + 1);
+      setStreak(streak + 1);
+      setCombo(newCombo);
+      playCorrect();
+      if (newCombo >= 3) {
+        const bonus = Math.floor(newCombo / 3) * 5;
+        setSpades(s => s + bonus);
+        playCombo();
+        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
+      } else {
+        showFeedback('✅ Correct!');
+      }
+      setTimeout(() => advance(true, score + 1), 1000);
+    } else {
+      setStreak(0);
+      setCombo(0);
+      playWrong();
+      showFeedback('❌ Wrong!');
+      setTimeout(() => advance(false, score), 1000);
+    }
+  };
+
+  const doHint = () => {
+    if (spades < 30 || hintRevealed || answered) return;
+    setSpades(s => s - 30);
+    setHintRevealed(true);
+    showFeedback('💡 Hint revealed! -30♠');
+  };
+
+  const doSkip = () => {
+    if (spades < 50 || skipUsed || answered) return;
+    setSpades(s => s - 50);
+    setSkipUsed(true);
+    clearTimer();
+    setAnswered(true);
+    showFeedback('⏭️ Skipped! -50♠');
+    setTimeout(() => advance(false, score), 800);
+  };
+
+
+  if (!unlocked) return (
+    <div className="shadow-lock">
+      <div className="shadow-silhouette">🎯</div>
+      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Emoji Quiz</div>
+      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+        Guess the anime from emoji clues!<br />A fun twist on anime trivia.
+      </div>
+      <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
+        <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
+        <div style={{ fontSize: 12, color: T.textMid }}>One-time unlock · You have {spades}♠</div>
+      </div>
+      <button className="btn btn-primary" onClick={unlock} disabled={spades < unlockCost} style={{ width: '100%' }}>
+        {spades >= unlockCost ? '🎯 Unlock Emoji Quiz' : `Need ${unlockCost - spades} more ♠`}
+      </button>
+    </div>
+  );
+
+  if (phase === 'levels') {
+    const lb = getLeaderboard();
+    return (
+      <div>
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title" style={{ color: T.teal }}>🎯 EMOJI QUIZ</div>
+          <p style={{ fontSize: 13, color: T.textMid }}>Guess the anime from emoji clues! 5 questions per level.</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
+        </div>
+        {levels.map((lvl, idx) => {
+          const best = lb[`emoji_${idx}`];
+          return (
+            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
+              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+              <div className="level-info">
+                <div className="level-name">{lvl.name}</div>
+                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
+              </div>
+              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (phase === 'result') {
+    const passed = finalScore >= levels[currentLevel].minCorrect;
+    return (
+      <div className="result-screen">
+        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
+        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
+        <div className="result-sub">You scored {finalScore}/{questions.length}</div>
+        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
+          {passed && currentLevel < levels.length - 1 && (
+            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const q = questions[qIndex];
+  const progress = (qIndex / questions.length) * 100;
+
+
+  return (
+    <div>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="quiz-header">
+        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13 }}>✅ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+        </div>
+      </div>
+      <div className="card">
+        <div className="question-text" style={{ fontSize: 36, textAlign: 'center', marginBottom: 24 }}>
+          {q.text}
+        </div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={idx} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          </button>
+        )}
+        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
+          ⏭️ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Survival Mode (NEW) ────────────────────────────────────
+function SurvivalPage({ spades, setSpades, showFeedback }) {
+  const [phase, setPhase] = useState('intro');
+  const [questions, setQuestions] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [answered, setAnswered] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [correctOption, setCorrectOption] = useState(null);
+  const [hintRevealed, setHintRevealed] = useState(false);
+
+  const startGame = () => {
+    const allMcq = questionBank.filter(q => q.type === 'mcq');
+    setQuestions(shuffle(allMcq));
+    setQIndex(0);
+    setLives(3);
+    setScore(0);
+    setStreak(0);
+    setAnswered(false);
+    setSelectedOption(null);
+    setCorrectOption(null);
+    setHintRevealed(false);
+    setPhase('playing');
+  };
+
+  const advance = () => {
+    const nextIdx = qIndex + 1;
+    if (nextIdx >= questions.length) {
+      setPhase('result');
+      return;
+    }
+    setQIndex(nextIdx);
+    setAnswered(false);
+    setSelectedOption(null);
+    setCorrectOption(null);
+    setHintRevealed(false);
+  };
+
+  const submitAnswer = (optIdx) => {
+    if (answered) return;
+    const q = questions[qIndex];
+    const isCorrect = optIdx === q.correct;
+    setSelectedOption(optIdx);
+    setCorrectOption(q.correct);
+    setAnswered(true);
+
+    if (isCorrect) {
+      const newScore = score + 1;
+      const newStreak = streak + 1;
+      setScore(newScore);
+      setStreak(newStreak);
+      playCorrect();
+      // Every 5 correct = +100 spades
+      if (newScore % 5 === 0) {
+        setSpades(s => s + 100);
+        showFeedback(`✅ Correct! 💰 +100♠ (${newScore} streak!)`);
+      } else {
+        showFeedback(`✅ Correct! Streak: ${newStreak}`);
+      }
+      setTimeout(advance, 1000);
+    } else {
+      const newLives = lives - 1;
+      setLives(newLives);
+      setStreak(0);
+      playWrong();
+      if (newLives <= 0) {
+        showFeedback('💀 Game Over!');
+        setTimeout(() => setPhase('result'), 1200);
+      } else {
+        showFeedback(`❌ Wrong! ${newLives} ❤️ left`);
+        setTimeout(advance, 1200);
+      }
+    }
+  };
+
+  const doHint = () => {
+    if (spades < 30 || hintRevealed || answered) return;
+    setSpades(s => s - 30);
+    setHintRevealed(true);
+    showFeedback('💡 Hint revealed! -30♠');
+  };
+
+
+  if (phase === 'intro') return (
+    <div className="shadow-lock">
+      <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
+      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode</div>
+      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+        Infinite quiz from ALL questions mixed.<br/>
+        You have 3 lives (❤️❤️❤️). Wrong answer = lose 1 life.<br/>
+        Game over at 0 lives. Every 5 correct = +100♠!
+      </div>
+      <button className="btn btn-primary" style={{ width: '100%' }} onClick={startGame}>
+        💀 Start Survival
+      </button>
+    </div>
+  );
+
+  if (phase === 'result') return (
+    <div className="result-screen">
+      <span className="result-emoji">💀</span>
+      <div className="result-title">Game Over!</div>
+      <div className="result-sub">You survived {score} questions</div>
+      <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>
+        💰 Earned {Math.floor(score / 5) * 100}♠ total
+      </div>
+      <button className="share-btn" onClick={() => {
+        const text = `I survived ${score} questions in AniNoir Survival Mode! 💀 #AniNoir`;
+        if (navigator.share) navigator.share({ title: 'AniNoir Survival', text }).catch(()=>{});
+        else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
+      }}>📤 Share Result</button>
+      <button className="btn btn-primary btn-full" style={{ marginTop: 8 }} onClick={startGame}>
+        Play Again 💀
+      </button>
+    </div>
+  );
+
+  const q = questions[qIndex];
+  if (!q) return <div className="card"><p>No more questions!</p></div>;
+
+  return (
+    <div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14, padding:'0 4px' }}>
+        <div className="survival-lives">
+          {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '❤️' : '🖤'}</span>)}
+        </div>
+        <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
+        <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
+      </div>
+
+      <div className="card">
+        <div className="question-text">{q.text}</div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 // ─── Shadow Quiz Page ────────────────────────────────────────
 const SHADOW_QUESTIONS = [
@@ -964,6 +1529,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   );
 
   const q = SHADOW_QUESTIONS[qIdx];
+
 
   if (phase === 'result') return (
     <div className="result-screen">
@@ -1049,6 +1615,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   );
 }
 
+
 // ─── Search Page ─────────────────────────────────────────────
 const STREAMING_MAP = { 'Crunchyroll':'🟠 Crunchyroll','Netflix':'🔴 Netflix','Funimation':'🟣 Funimation','Amazon':'🔵 Prime Video','Hulu':'🟢 Hulu','Disney':'🔵 Disney+','HIDIVE':'⚪ HIDIVE' };
 
@@ -1099,6 +1666,7 @@ function SearchPage({ showFeedback }) {
   };
 
   const inWatchlist = result && watchlist.find(x => x.malId === result.malId);
+
 
   return (
     <div>
@@ -1168,6 +1736,7 @@ function SearchPage({ showFeedback }) {
   );
 }
 
+
 // ─── Watchlist Page ──────────────────────────────────────────
 function WatchlistPage({ showFeedback }) {
   const [watchlist, setWatchlist] = useState(getWatchlist);
@@ -1197,7 +1766,6 @@ function WatchlistPage({ showFeedback }) {
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:14,fontWeight:700,lineHeight:1.3}}>{item.title}</div>
               {item.genres && <div style={{fontSize:11,color:T.textMid,marginTop:3}}>{item.genres.split(',').slice(0,2).join(', ')}</div>}
-              {item.score && <div style={{fontSize:11,color:T.gold,marginTop:2}}>⭐ {item.score}</div>}
             </div>
             <button onClick={()=>remove(item.malId)} style={{background:'none',border:`1px solid ${T.border}`,borderRadius:8,padding:'4px 8px',fontSize:12,color:T.textDim,flexShrink:0}}>✕</button>
           </div>
@@ -1207,18 +1775,21 @@ function WatchlistPage({ showFeedback }) {
   );
 }
 
-// ─── News Page ───────────────────────────────────────────────
+
+// ─── News Page (Fixed RSS + filter tabs) ─────────────────────
 function NewsPage() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('All');
+  const FILTERS = ['All', 'Anime', 'Manga', 'Games'];
 
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.animenewsnetwork.com/all/rss.xml&count=15');
+      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://myanimelist.net/rss/news.xml');
       const data = await res.json();
       if (data.items?.length) {
-        setNews(data.items.slice(0,12).map(item => ({
+        setNews(data.items.slice(0,15).map(item => ({
           title: item.title, link: item.link,
           desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'…',
           image: item.thumbnail||item.enclosure?.link||'',
@@ -1231,18 +1802,27 @@ function NewsPage() {
 
   useEffect(() => { fetchNews(); }, []);
 
+  const filteredNews = filter === 'All' ? news : news.filter(item =>
+    item.title.toLowerCase().includes(filter.toLowerCase())
+  );
+
   return (
     <div>
       <div className="card">
         <div className="card-title" style={{color:T.teal}}>📰 ANIME NEWS</div>
+        <div className="news-filter-tabs">
+          {FILTERS.map(f => (
+            <button key={f} className={`news-tab ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{f}</button>
+          ))}
+        </div>
         {loading && [1,2,3,4].map(i=>(
           <div key={i} style={{display:'flex',gap:10,padding:'10px 0',borderBottom:`1px solid ${T.border}`}}>
             <div className="skeleton" style={{width:72,height:52,borderRadius:8,flexShrink:0}}/>
             <div style={{flex:1}}><div className="skeleton" style={{height:13,marginBottom:6}}/><div className="skeleton" style={{height:11,width:'80%'}}/></div>
           </div>
         ))}
-        {!loading && news.length===0 && <p style={{color:T.textMid,fontSize:13}}>No news available. Check your connection.</p>}
-        {!loading && news.map((item,i)=>(
+        {!loading && filteredNews.length===0 && <p style={{color:T.textMid,fontSize:13}}>No news found for this filter.</p>}
+        {!loading && filteredNews.map((item,i)=>(
           <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="news-item">
             {item.image && <img src={item.image} alt="" className="news-thumb" onError={e=>e.target.style.display='none'}/>}
             <div className="news-text">
@@ -1257,6 +1837,42 @@ function NewsPage() {
     </div>
   );
 }
+
+
+// ─── Birthdays Page (NEW) ────────────────────────────────────
+function BirthdaysPage() {
+  const currentMonth = new Date().getMonth() + 1;
+  const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const thisMonthBirthdays = CHARACTER_BIRTHDAYS.filter(c => c.month === currentMonth)
+    .sort((a,b) => a.day - b.day);
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-title" style={{ color: T.rose }}>🎂 ANIME BIRTHDAYS — {MONTHS[currentMonth].toUpperCase()}</div>
+        <p style={{ fontSize: 13, color: T.textMid }}>Popular anime character birthdays this month!</p>
+      </div>
+      {thisMonthBirthdays.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '30px 20px' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🎂</div>
+          <div style={{ fontSize: 14, color: T.textMid }}>No birthdays this month! Check back next month.</div>
+        </div>
+      ) : (
+        thisMonthBirthdays.map((char, i) => (
+          <div key={i} className="card" style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px' }}>
+            <div style={{ fontSize:28, width:44, textAlign:'center', background:T.roseGlow, borderRadius:12, padding:'8px 0' }}>🎂</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:14, fontWeight:700 }}>{char.name}</div>
+              <div style={{ fontSize:12, color:T.textMid }}>{char.anime}</div>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, color:T.gold }}>{MONTHS[char.month]} {char.day}</div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
 
 // ─── Daily Challenge Page ────────────────────────────────────
 function DailyPage({ spades, setSpades, showFeedback }) {
@@ -1318,7 +1934,6 @@ function DailyPage({ spades, setSpades, showFeedback }) {
           <div className="question-text" style={{fontSize:16}}>
             {question.type==='mcq'?question.text:'🔤 UNTANGLE THE ANAGRAM'}
           </div>
-
           {question.type === 'mcq' ? (
             <div>
               {question.options?.map((opt,idx) => {
@@ -1328,14 +1943,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
               })}
             </div>
           ) : (
-            <AnagramTiles
-              scrambled={scrambledLetters}
-              onSolve={(ans) => submit(ans)}
-              hintRevealed={false}
-              hint={null}
-              answered={answered}
-              correctAnswer={question.answer}
-            />
+            <AnagramTiles scrambled={scrambledLetters} onSolve={(ans) => submit(ans)} hintRevealed={false} hint={null} answered={answered} correctAnswer={question.answer} />
           )}
         </div>
       )}
@@ -1343,11 +1951,12 @@ function DailyPage({ spades, setSpades, showFeedback }) {
   );
 }
 
+
 // ─── Profile Page ────────────────────────────────────────────
 function ProfilePage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
-  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Anagram' : '🕵️ Shadow';
+  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Anagram' : k.startsWith('emoji') ? '🎯 Emoji' : '🕵️ Shadow';
   const levelLabel = (k) => { const i = parseInt(k.split('_').pop()); return levels[i]?.name || `L${i+1}`; };
 
   return (
@@ -1366,6 +1975,7 @@ function ProfilePage({ spades, badges }) {
         <div className="stat-row"><span className="stat-label">🏅 Badges Earned</span><span className="stat-value">{badges.length}</span></div>
         <div className="stat-row"><span className="stat-label">📅 Daily Streak</span><span className="stat-value">{localStorage.getItem('ani_daily')===new Date().toDateString()?'🔥 Active':'—'}</span></div>
         <div className="stat-row"><span className="stat-label">🕵️ Shadow Quiz</span><span className="stat-value">{localStorage.getItem('ani_shadow_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
+        <div className="stat-row"><span className="stat-label">🎯 Emoji Quiz</span><span className="stat-value">{localStorage.getItem('ani_emoji_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
         <div className="stat-row"><span className="stat-label">📋 Watchlist</span><span className="stat-value">{getWatchlist().length} anime</span></div>
       </div>
 
@@ -1394,11 +2004,35 @@ function ProfilePage({ spades, badges }) {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-title" style={{color:T.teal}}>ℹ️ ABOUT</div>
-        <p style={{fontSize:13,color:T.textMid,lineHeight:1.6}}>AniNoir — Your ultimate anime quiz and discovery app. Built with ❤️ for the anime community.</p>
-        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" style={{display:'block',marginTop:12,color:T.rose,fontSize:13,textDecoration:'none'}}>📷 Follow @AniNoir on Instagram</a>
-        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" style={{display:'block',marginTop:8,color:'#ff4444',fontSize:13,textDecoration:'none'}}>▶ AnimeTMTalks on YouTube</a>
+
+      <div className="card" style={{ background:'linear-gradient(135deg,rgba(244,63,94,0.12),rgba(139,92,246,0.15))', border:'1px solid rgba(244,63,94,0.25)' }}>
+        <div className="card-title" style={{color:T.rose}}>ℹ️ ABOUT</div>
+        <p style={{fontSize:13,color:T.text,lineHeight:1.8}}>
+          Hey! I'm an anime lover who built this app for the community 🔥 I eat, sleep, and breathe anime.
+          AniNoir is my love letter to all otakus out there. More features coming soon — stay tuned!
+          Follow me for updates.
+        </p>
+      </div>
+
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ textDecoration:'none', color:'white' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:24 }}>▶</span>
+            <div>
+              <div className="sidebar-footer-card-title">AnimeTMTalks on YouTube</div>
+              <div className="sidebar-footer-card-sub">Watch anime reviews, discussions & more</div>
+            </div>
+          </div>
+        </a>
+        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ textDecoration:'none', color:'white' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:24 }}>📷</span>
+            <div>
+              <div className="sidebar-footer-card-title">@AniNoir on Instagram</div>
+              <div className="sidebar-footer-card-sub">Daily anime posts, memes & community</div>
+            </div>
+          </div>
+        </a>
       </div>
     </div>
   );
