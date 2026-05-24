@@ -881,6 +881,9 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
           />
         ) : (
           <div>
+            {hintRevealed && q.hint && (
+              <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
+            )}
             {q.options.map((opt, idx) => {
               let cls = 'option-btn';
               if (answered) {
@@ -901,7 +904,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
             🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20♠</span>
           </button>
         )}
-        {q.type === 'anagram' && (
+        {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
             💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
