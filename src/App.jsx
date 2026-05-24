@@ -1891,8 +1891,6 @@ function WatchlistPage({ showFeedback }) {
 function NewsPage() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('All');
-  const FILTERS = ['All', 'Anime', 'Manga', 'Games'];
 
   const fetchNews = async () => {
     setLoading(true);
@@ -1900,10 +1898,16 @@ function NewsPage() {
       const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.animenewsnetwork.com/all/rss.xml');
       const data = await res.json();
       if (data.items?.length) {
+        // Extract image from description HTML if thumbnail/enclosure not available
+        const extractImg = (html) => {
+          if (!html) return '';
+          const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+          return match ? match[1] : '';
+        };
         setNews(data.items.slice(0,15).map(item => ({
           title: item.title, link: item.link,
           desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'…',
-          image: item.thumbnail||item.enclosure?.link||'',
+          image: item.thumbnail || item.enclosure?.link || extractImg(item.description) || extractImg(item.content) || '',
           date: new Date(item.pubDate).toLocaleDateString(),
         })));
       }
@@ -1913,18 +1917,12 @@ function NewsPage() {
 
   useEffect(() => { fetchNews(); }, []);
 
-  const filteredNews = filter === 'All' ? news : news.filter(item =>
-    item.title.toLowerCase().includes(filter.toLowerCase())
-  );
-
   return (
     <div>
       <div className="card">
-        <div className="card-title" style={{color:T.teal}}>📰 ANIME NEWS</div>
-        <div className="news-filter-tabs">
-          {FILTERS.map(f => (
-            <button key={f} className={`news-tab ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{f}</button>
-          ))}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+          <div className="card-title" style={{color:T.teal,marginBottom:0}}>📰 ANIME NEWS</div>
+          <button className="btn btn-secondary" style={{padding:'6px 14px',fontSize:12}} onClick={fetchNews} disabled={loading}>{loading?'⟳ Loading…':'⟳ Refresh'}</button>
         </div>
         {loading && [1,2,3,4].map(i=>(
           <div key={i} style={{display:'flex',gap:10,padding:'10px 0',borderBottom:`1px solid ${T.border}`}}>
@@ -1932,10 +1930,14 @@ function NewsPage() {
             <div style={{flex:1}}><div className="skeleton" style={{height:13,marginBottom:6}}/><div className="skeleton" style={{height:11,width:'80%'}}/></div>
           </div>
         ))}
-        {!loading && filteredNews.length===0 && <p style={{color:T.textMid,fontSize:13}}>No news found for this filter.</p>}
-        {!loading && filteredNews.map((item,i)=>(
+        {!loading && news.length===0 && <p style={{color:T.textMid,fontSize:13}}>No news available right now.</p>}
+        {!loading && news.map((item,i)=>(
           <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="news-item">
-            {item.image && <img src={item.image} alt="" className="news-thumb" onError={e=>e.target.style.display='none'}/>}
+            {item.image ? (
+              <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.src='';e.target.style.display='none';}}/>
+            ) : (
+              <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>📰</div>
+            )}
             <div className="news-text">
               <div className="news-title">{item.title}</div>
               <div className="news-desc">{item.desc}</div>
@@ -1944,7 +1946,6 @@ function NewsPage() {
           </a>
         ))}
       </div>
-      <button className="btn btn-secondary btn-full" onClick={fetchNews} disabled={loading}>{loading?'⟳ Loading…':'⟳ Refresh News'}</button>
     </div>
   );
 }
