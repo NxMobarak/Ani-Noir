@@ -208,8 +208,8 @@ const hasEmoji = (text) => /[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27FF}]|[\u{FE00}-
 const NAV = [
   { id: 'home', icon: '🏠', label: 'Home' },
   { id: 'quiz', icon: '🧠', label: 'Quiz' },
-  { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
   { id: 'anagram', icon: '🔤', label: 'Anime Scrambler' },
+  { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
