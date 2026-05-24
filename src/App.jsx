@@ -2415,10 +2415,6 @@ function CharacterSearchPage({ showFeedback }) {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div className="card-title" style={{ color: T.violet }}>👤 CHARACTER SEARCH</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Search for anime characters using the Jikan API (MyAnimeList).</p>
-      </div>
       <div className="search-input-wrap">
         <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
           onKeyDown={e=>e.key==='Enter'&&search()} placeholder="Search character name..." autoComplete="off" />
