@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { questionBank, levels, getRandomQuestions, emojiQuestions } from './questions/index';
+import { questionBank, levels, getRandomQuestions } from './questions/index';
 import level1Frames from './questions/level1_frames';
 import level2Frames from './questions/level2_frames';
 import level3Frames from './questions/level3_frames';
@@ -10,6 +10,11 @@ import level2Shadow from './questions/level2_shadow';
 import level3Shadow from './questions/level3_shadow';
 import level4Shadow from './questions/level4_shadow';
 import level5Shadow from './questions/level5_shadow';
+import level1Emoji from './questions/level1_emoji';
+import level2Emoji from './questions/level2_emoji';
+import level3Emoji from './questions/level3_emoji';
+import level4Emoji from './questions/level4_emoji';
+import level5Emoji from './questions/level5_emoji';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -112,6 +117,15 @@ const ANIME_FRAMES_QUESTIONS = [
   ...level3Frames,
   ...level4Frames,
   ...level5Frames,
+];
+
+// ─── Emoji Questions (250 total, 50 per level) ──────────────
+const ALL_EMOJI_QUESTIONS = [
+  ...level1Emoji,
+  ...level2Emoji,
+  ...level3Emoji,
+  ...level4Emoji,
+  ...level5Emoji,
 ];
 
 // ─── Character Birthdays ────────────────────────────────────
@@ -1136,7 +1150,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
   }, [timerActive, timeLeft]);
 
   const getEmojiPool = (levelNum) => {
-    const pool = emojiQuestions.filter(q => q.level === levelNum);
+    const pool = ALL_EMOJI_QUESTIONS.filter(q => q.level === levelNum);
     return shuffle(pool).slice(0, 5);
   };
 
@@ -1375,7 +1389,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   const [hintRevealed, setHintRevealed] = useState(false);
 
   const startGame = () => {
-    const allMcq = [...questionBank.filter(q => q.type === 'mcq'), ...emojiQuestions];
+    const allMcq = [...questionBank.filter(q => q.type === 'mcq'), ...ALL_EMOJI_QUESTIONS];
     setQuestions(shuffle(allMcq));
     setQIndex(0);
     setLives(3);
