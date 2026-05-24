@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { questionBank, levels, getRandomQuestions } from './questions/index';
+import { questionBank, levels, getRandomQuestions, emojiQuestions } from './questions/index';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -1097,7 +1097,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
   }, [timerActive, timeLeft]);
 
   const getEmojiPool = (levelNum) => {
-    const pool = questionBank.filter(q => q.level === levelNum && q.type === 'mcq' && hasEmoji(q.text));
+    const pool = emojiQuestions.filter(q => q.level === levelNum);
     return shuffle(pool).slice(0, 5);
   };
 
@@ -1336,7 +1336,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   const [hintRevealed, setHintRevealed] = useState(false);
 
   const startGame = () => {
-    const allMcq = questionBank.filter(q => q.type === 'mcq');
+    const allMcq = [...questionBank.filter(q => q.type === 'mcq'), ...emojiQuestions];
     setQuestions(shuffle(allMcq));
     setQIndex(0);
     setLives(3);

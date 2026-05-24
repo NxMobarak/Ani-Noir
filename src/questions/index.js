@@ -8,6 +8,9 @@ import level4mcq from './level4_mcq';
 import level4ana from './level4_anagram';
 import level5mcq from './level5_mcq';
 import level5ana from './level5_anagram';
+import { emojiQuestions } from './emoji_mcq';
+
+export { emojiQuestions };
 
 // Combine all questions with level and type
 export const questionBank = [
