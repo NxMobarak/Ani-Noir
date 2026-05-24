@@ -5,6 +5,11 @@ import level2Frames from './questions/level2_frames';
 import level3Frames from './questions/level3_frames';
 import level4Frames from './questions/level4_frames';
 import level5Frames from './questions/level5_frames';
+import level1Shadow from './questions/level1_shadow';
+import level2Shadow from './questions/level2_shadow';
+import level3Shadow from './questions/level3_shadow';
+import level4Shadow from './questions/level4_shadow';
+import level5Shadow from './questions/level5_shadow';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -1518,24 +1523,24 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 
 // ─── Shadow Quiz Page ────────────────────────────────────────
 const SHADOW_QUESTIONS = [
-  { silhouette: '🗡️', hints: ['Carries a special sword', 'From a shonen series', 'Known for his spiky hair'], answer: 'Ichigo Kurosaki', anime: 'Bleach' },
-  { silhouette: '⚡', hints: ['Has lightning powers', 'Wears a headband', 'His rival is also powerful'], answer: 'Sasuke Uchiha', anime: 'Naruto' },
-  { silhouette: '🔱', hints: ['Wears a straw hat', 'Can stretch like rubber', 'Wants to be King of the Pirates'], answer: 'Monkey D. Luffy', anime: 'One Piece' },
-  { silhouette: '⚙️', hints: ['Uses alchemy', 'Has a metal arm', 'Travels with his brother'], answer: 'Edward Elric', anime: 'Fullmetal Alchemist' },
-  { silhouette: '🌸', hints: ['Demon slayer', 'Uses water breathing', 'Has a sister who is a demon'], answer: 'Tanjiro Kamado', anime: 'Demon Slayer' },
-  { silhouette: '🕶️', hints: ['Uses genjutsu', 'Tragic backstory', 'Belongs to Uchiha clan'], answer: 'Itachi Uchiha', anime: 'Naruto' },
-  { silhouette: '💀', hints: ['Has a death notebook', 'High school student', 'Wants to become god of the new world'], answer: 'Light Yagami', anime: 'Death Note' },
-  { silhouette: '👁️', hints: ['Has special eyes', 'From Jujutsu Kaisen', 'Called the strongest'], answer: 'Satoru Gojo', anime: 'Jujutsu Kaisen' },
+  ...level1Shadow,
+  ...level2Shadow,
+  ...level3Shadow,
+  ...level4Shadow,
+  ...level5Shadow,
 ];
 
 function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_shadow_unlocked') === '1');
+  const [phase, setPhase] = useState('levels');
+  const [currentLevel, setCurrentLevel] = useState(0);
+  const [questions, setQuestions] = useState([]);
   const [qIdx, setQIdx] = useState(0);
   const [hintsRevealed, setHintsRevealed] = useState(0);
   const [input, setInput] = useState('');
   const [answered, setAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState('playing');
+  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
 
   const unlock = () => {
     if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Shadow Quiz!`); return; }
@@ -1543,6 +1548,20 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
     setUnlocked(true);
     localStorage.setItem('ani_shadow_unlocked', '1');
     showFeedback('🕵️ Shadow Quiz unlocked!');
+  };
+
+  const startLevel = (idx) => {
+    const pool = SHADOW_QUESTIONS.filter(q => q.level === idx + 1);
+    const qs = shuffle(pool).slice(0, 5);
+    if (!qs.length) { showFeedback('No shadow questions for this level!'); return; }
+    setCurrentLevel(idx);
+    setQuestions(qs);
+    setQIdx(0);
+    setScore(0);
+    setHintsRevealed(0);
+    setAnswered(false);
+    setInput('');
+    setPhase('playing');
   };
 
   if (!unlocked) return (
@@ -1562,24 +1581,62 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
     </div>
   );
 
-  const q = SHADOW_QUESTIONS[qIdx];
+  if (phase === 'levels') {
+    const lb = getLeaderboard();
+    return (
+      <div>
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title" style={{ color: T.violet }}>🕵️ SHADOW QUIZ</div>
+          <p style={{ fontSize: 13, color: T.textMid }}>Identify anime characters from emoji silhouettes and hints! 5 characters per level.</p>
+        </div>
+        {levels.map((lvl, idx) => {
+          const best = lb[`shadow_${idx}`];
+          return (
+            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
+              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+              <div className="level-info">
+                <div className="level-name">{lvl.name}</div>
+                <div className="level-meta">5 characters · +{lvl.reward}♠</div>
+                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
+              </div>
+              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
+  if (phase === 'result') {
+    const passed = score >= levels[currentLevel].minCorrect;
+    if (passed) {
+      const reward = levels[currentLevel].reward;
+      // reward is given once on result render
+    }
+    updateBestScore('shadow', currentLevel, score, questions.length);
+    return (
+      <div className="result-screen">
+        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
+        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
+        <div className="result-sub">You identified {score}/{questions.length} characters</div>
+        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
+        <button className="share-btn" onClick={() => {
+          const text = `I identified ${score}/${questions.length} shadow characters on ${levels[currentLevel].name}! 🕵️ #AniNoir`;
+          if (navigator.share) navigator.share({ title: 'AniNoir Shadow Quiz', text }).catch(()=>{});
+          else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
+        }}>📤 Share Result</button>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
+          {passed && currentLevel < levels.length - 1 && (
+            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-  if (phase === 'result') return (
-    <div className="result-screen">
-      <span className="result-emoji">🕵️</span>
-      <div className="result-title">Shadow Complete!</div>
-      <div className="result-sub">You identified {score}/{SHADOW_QUESTIONS.length} characters</div>
-      <button className="share-btn" onClick={() => {
-        const text = `I identified ${score}/${SHADOW_QUESTIONS.length} shadow characters! 🕵️ #AniNoir`;
-        if (navigator.share) navigator.share({ title: 'AniNoir Shadow Quiz', text }).catch(()=>{});
-        else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
-      }}>📤 Share Result</button>
-      <button className="btn btn-primary" onClick={() => { setQIdx(0); setScore(0); setPhase('playing'); setAnswered(false); setInput(''); setHintsRevealed(0); }}>
-        Play Again
-      </button>
-    </div>
-  );
+  const q = questions[qIdx];
+  if (!q) return null;
 
   const submit = () => {
     if (!input.trim() || answered) return;
@@ -1598,7 +1655,13 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
 
   const next = () => {
     const nextIdx = qIdx + 1;
-    if (nextIdx >= SHADOW_QUESTIONS.length) { setPhase('result'); return; }
+    if (nextIdx >= questions.length) {
+      // Give reward if passed
+      const passed = (score + (answered ? 0 : 0)) >= levels[currentLevel].minCorrect;
+      if (passed) setSpades(s => s + levels[currentLevel].reward);
+      setPhase('result');
+      return;
+    }
     setQIdx(nextIdx);
     setAnswered(false);
     setInput('');
@@ -1607,9 +1670,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
 
   return (
     <div>
-      <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx/SHADOW_QUESTIONS.length)*100}%` }} /></div>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx/questions.length)*100}%` }} /></div>
       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:12, fontSize:13, color:T.textMid }}>
-        <span>Character {qIdx+1}/{SHADOW_QUESTIONS.length}</span>
+        <span>{levels[currentLevel].name} · {qIdx+1}/{questions.length}</span>
         <span>✅ {score} identified</span>
       </div>
       <div className="card" style={{ textAlign:'center' }}>
@@ -1627,7 +1690,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
           <div>
             <div style={{ fontSize:18, fontWeight:800, color:T.success, marginBottom:12 }}>{q.answer}</div>
             <button className="btn btn-primary btn-full" onClick={next}>
-              {qIdx+1 >= SHADOW_QUESTIONS.length ? 'See Results' : 'Next Character →'}
+              {qIdx+1 >= questions.length ? 'See Results' : 'Next Character →'}
             </button>
           </div>
         ) : (
