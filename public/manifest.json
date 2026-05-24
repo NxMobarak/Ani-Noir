@@ -1,0 +1,11 @@
+{
+  "short_name": "AniNoir",
+  "name": "AniNoir – Anime Quiz",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#050811",
+  "background_color": "#050811"
+}
