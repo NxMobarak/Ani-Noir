@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { questionBank, levels, getRandomQuestions, emojiQuestions } from './questions/index';
+import level1Frames from './questions/level1_frames';
+import level2Frames from './questions/level2_frames';
+import level3Frames from './questions/level3_frames';
+import level4Frames from './questions/level4_frames';
+import level5Frames from './questions/level5_frames';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -95,49 +100,13 @@ const QUOTES = [
 const getDailyQuote = () => { const d = Math.floor(Date.now()/86400000); return QUOTES[d%QUOTES.length]; };
 
 
-// ─── Anime Frames Questions ─────────────────────────────────
+// ─── Anime Frames Questions (250 total, 50 per level) ───────
 const ANIME_FRAMES_QUESTIONS = [
-  // Level 1
-  { level: 1, text: "A boy with a straw hat stands on the bow of a small ship, grinning at the vast ocean ahead.", options: ["One Piece", "Naruto", "Fairy Tail", "Black Clover"], correct: 0, hint: "Pirates and dreams of becoming king" },
-  { level: 1, text: "A young ninja in an orange jumpsuit sits alone on a swing outside the academy while others celebrate.", options: ["Naruto", "Boruto", "Hunter x Hunter", "Bleach"], correct: 0, hint: "The lonely boy who becomes Hokage" },
-  { level: 1, text: "A spiky-haired warrior powers up with golden aura while the ground beneath him cracks.", options: ["Dragon Ball Z", "One Punch Man", "My Hero Academia", "Fairy Tail"], correct: 0, hint: "Super Saiyan transformation" },
-  { level: 1, text: "A boy writes a name in a black notebook under lamplight, with a shinigami floating behind him.", options: ["Death Note", "Bleach", "Soul Eater", "Blue Exorcist"], correct: 0, hint: "The power to kill with a pen" },
-  { level: 1, text: "Two brothers stand before a massive stone door with alchemical symbols, one missing an arm.", options: ["Fullmetal Alchemist", "Blue Exorcist", "D.Gray-man", "Magi"], correct: 0, hint: "Equivalent exchange" },
-  { level: 1, text: "A pink-haired boy throws a flaming punch while yelling about his guild.", options: ["Fairy Tail", "One Piece", "Black Clover", "Fire Force"], correct: 0, hint: "He's looking for a dragon" },
-  { level: 1, text: "Titans break through a massive wall while terrified citizens flee through narrow streets.", options: ["Attack on Titan", "Kabaneri", "God Eater", "Claymore"], correct: 0, hint: "On that day humanity received a grim reminder" },
-
-  // Level 2
-  { level: 2, text: "A blindfolded man with white hair casually blocks an attack with one finger, smiling.", options: ["Jujutsu Kaisen", "Naruto", "Bleach", "One Punch Man"], correct: 0, hint: "The strongest sorcerer" },
-  { level: 2, text: "A green-haired boy breaks his own fingers while throwing a powerful punch during a tournament.", options: ["My Hero Academia", "Dragon Ball", "Kengan Ashura", "Baki"], correct: 0, hint: "One For All at 100%" },
-  { level: 2, text: "A demon slayer breathes underwater-like patterns as his blade turns blue in moonlight.", options: ["Demon Slayer", "Bleach", "Inuyasha", "Dororo"], correct: 0, hint: "Water breathing first form" },
-  { level: 2, text: "A bald hero defeats a monster with a single punch, looking bored and disappointed.", options: ["One Punch Man", "Mob Psycho 100", "Dragon Ball", "My Hero Academia"], correct: 0, hint: "He trained so hard he lost his hair" },
-  { level: 2, text: "A boy with silver hair pulls his hand out of a man's chest, electricity crackling around it.", options: ["Hunter x Hunter", "Naruto", "Jujutsu Kaisen", "Bleach"], correct: 0, hint: "Assassin family's youngest son" },
-  { level: 2, text: "A maid with blue hair smiles gently in a mansion while snow falls outside the window.", options: ["Re:Zero", "The Quintessential Quintuplets", "Violet Evergarden", "Miss Kobayashi's Dragon Maid"], correct: 0, hint: "Who's Rem?" },
-  { level: 2, text: "Red and blue ice and fire clash as a half-white half-red haired boy unleashes both powers.", options: ["My Hero Academia", "Fairy Tail", "Fire Force", "Blue Exorcist"], correct: 0, hint: "Endeavor's masterpiece" },
-
-  // Level 3
-  { level: 3, text: "A man in a black cloak with red clouds stands in the rain, tears mixing with raindrops.", options: ["Naruto", "Bleach", "One Piece", "Jujutsu Kaisen"], correct: 0, hint: "He massacred his own clan for peace" },
-  { level: 3, text: "A girl plays violin on a sunlit stage while colorful lights fill the scene like a dream.", options: ["Your Lie in April", "Sound! Euphonium", "K-On!", "Nodame Cantabile"], correct: 0, hint: "She brought color to his black and white world" },
-  { level: 3, text: "A short soldier spins mid-air, dual-wielding blades, slicing through a giant humanoid neck.", options: ["Attack on Titan", "Claymore", "God Eater", "Kabaneri"], correct: 0, hint: "Humanity's strongest soldier" },
-  { level: 3, text: "Two people swap bodies and frantically write on their hands to remember each other.", options: ["Your Name", "Weathering With You", "A Silent Voice", "5 Centimeters Per Second"], correct: 0, hint: "Makoto Shinkai's masterpiece about a comet" },
-  { level: 3, text: "A man sits in a dark room surrounded by screens, typing rapidly while eating potato chips dramatically.", options: ["Death Note", "Steins;Gate", "Serial Experiments Lain", "Psycho-Pass"], correct: 0, hint: "I'll take a potato chip... and eat it!" },
-  { level: 3, text: "A boy claps his hands together and transmutes a spear from the ground in a crumbling city.", options: ["Fullmetal Alchemist", "Magi", "Fire Force", "Black Clover"], correct: 0, hint: "No circle needed" },
-
-  // Level 4
-  { level: 4, text: "A man in a lab coat sends a text message that changes the world line, microwave in the background.", options: ["Steins;Gate", "Death Note", "Psycho-Pass", "Erased"], correct: 0, hint: "El Psy Kongroo" },
-  { level: 4, text: "A girl with prosthetic metal arms types letters at a desk, a single tear falling on paper.", options: ["Violet Evergarden", "Fullmetal Alchemist", "Ghost in the Shell", "Psycho-Pass"], correct: 0, hint: "An auto memory doll learning about love" },
-  { level: 4, text: "A crew of cowboys drifts through space in a beat-up ship while jazz music plays.", options: ["Cowboy Bebop", "Space Dandy", "Outlaw Star", "Trigun"], correct: 0, hint: "See you space cowboy..." },
-  { level: 4, text: "A boy lies in a hospital bed connected to a giant mecha while an angel attacks the city outside.", options: ["Neon Genesis Evangelion", "Darling in the Franxx", "Eureka Seven", "Gundam"], correct: 0, hint: "Get in the robot, Shinji" },
-  { level: 4, text: "A classroom of students must kill their yellow octopus teacher before graduation or Earth explodes.", options: ["Assassination Classroom", "Great Teacher Onizuka", "Ansatsu Kyoushitsu", "My Hero Academia"], correct: 0, hint: "Mach 20 teacher with a smiley face" },
-  { level: 4, text: "A swordsman with three swords in his mouth and hands cuts through a building diagonally.", options: ["One Piece", "Bleach", "Samurai Champloo", "Rurouni Kenshin"], correct: 0, hint: "Three-sword style" },
-
-  // Level 5
-  { level: 5, text: "A boy touches a red stone and sees visions of an ancient civilization in a vast desert.", options: ["Magi", "Fullmetal Alchemist", "JoJo's Bizarre Adventure", "Hunter x Hunter"], correct: 0, hint: "Dungeons and djinn" },
-  { level: 5, text: "A humanoid cat-bus flies through the night sky with children hanging onto its fur.", options: ["My Neighbor Totoro", "Spirited Away", "Howl's Moving Castle", "Kiki's Delivery Service"], correct: 0, hint: "Studio Ghibli countryside magic" },
-  { level: 5, text: "A girl walks through a tunnel and enters a spirit world where her parents have turned into pigs.", options: ["Spirited Away", "My Neighbor Totoro", "Howl's Moving Castle", "Princess Mononoke"], correct: 0, hint: "Chihiro's journey in the bathhouse" },
-  { level: 5, text: "A pink-haired girl in a mech suit fights alongside her partner with the words 'darling' repeated.", options: ["Darling in the Franxx", "Evangelion", "Eureka Seven", "Gurren Lagann"], correct: 0, hint: "Zero Two" },
-  { level: 5, text: "A gambler girl with red eyes bets everything on a single card game with a crazed expression.", options: ["Kakegurui", "No Game No Life", "Kaiji", "Death Parade"], correct: 0, hint: "The thrill of risking it all in an elite school" },
-  { level: 5, text: "Warriors stand on floating platforms in a martial arts tournament between multiple universes.", options: ["Dragon Ball Super", "Dragon Ball Z", "Kengan Ashura", "Baki"], correct: 0, hint: "Tournament of Power" },
+  ...level1Frames,
+  ...level2Frames,
+  ...level3Frames,
+  ...level4Frames,
+  ...level5Frames,
 ];
 
 // ─── Character Birthdays ────────────────────────────────────
