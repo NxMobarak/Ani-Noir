@@ -226,7 +226,7 @@ const NAV = [
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
-  { id: 'charsearch', icon: '👤', label: 'Character Search' },
+
   { id: 'watchlist', icon: '📋', label: 'Watchlist' },
   { id: 'news', icon: '📰', label: 'News' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
@@ -550,14 +550,26 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
         })}
       </div>
       <div className="sidebar-footer">
-        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt">
-          <div className="sidebar-footer-card-title">▶ AnimeTMTalks</div>
-          <div className="sidebar-footer-card-sub">Watch anime content on YouTube</div>
-        </a>
-        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig">
-          <div className="sidebar-footer-card-title">📷 @AniNoir</div>
-          <div className="sidebar-footer-card-sub">Follow for daily anime posts</div>
-        </a>
+        <div style={{ display:'flex', gap:8 }}>
+          <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ flex:1, marginBottom:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              <div>
+                <div className="sidebar-footer-card-title">YouTube</div>
+                <div className="sidebar-footer-card-sub">AnimeTMTalks</div>
+              </div>
+            </div>
+          </a>
+          <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ flex:1, marginBottom:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+              <div>
+                <div className="sidebar-footer-card-title">Instagram</div>
+                <div className="sidebar-footer-card-sub">@AniNoir</div>
+              </div>
+            </div>
+          </a>
+        </div>
       </div>
     </>
   );
@@ -630,7 +642,7 @@ export default function App() {
               {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
               {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'search' && <SearchPage showFeedback={showFeedback} />}
-              {page === 'charsearch' && <CharacterSearchPage showFeedback={showFeedback} />}
+
               {page === 'watchlist' && <WatchlistPage showFeedback={showFeedback} />}
               {page === 'news' && <NewsPage />}
               {page === 'birthdays' && <BirthdaysPage />}
@@ -2374,74 +2386,4 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
 }
 
 
-// ─── Character Search Page (NEW) ─────────────────────────────
-function CharacterSearchPage({ showFeedback }) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [notFound, setNotFound] = useState(false);
 
-  const search = async () => {
-    const q = query.trim();
-    if (!q) return;
-    setLoading(true); setResults([]); setNotFound(false);
-    try {
-      const res = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10`);
-      const data = await res.json();
-      if (!data.data?.length) { setNotFound(true); setLoading(false); return; }
-      setResults(data.data.map(c => ({
-        id: c.mal_id,
-        name: c.name,
-        nameKanji: c.name_kanji,
-        image: c.images?.jpg?.image_url,
-        favorites: c.favorites,
-        about: c.about?.slice(0, 200) || '',
-      })));
-    } catch { showFeedback('Network error. Try again.'); }
-    finally { setLoading(false); }
-  };
-
-  return (
-    <div>
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div className="card-title" style={{ color: T.violet }}>👤 CHARACTER SEARCH</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Search for anime characters using the Jikan API (MyAnimeList).</p>
-      </div>
-      <div className="search-input-wrap">
-        <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
-          onKeyDown={e=>e.key==='Enter'&&search()} placeholder="Search character name..." autoComplete="off" />
-        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'…':'🔍'}</button>
-      </div>
-
-      {loading && <div className="card"><div className="skeleton" style={{height:20,width:'60%',marginBottom:8}}/><div className="skeleton" style={{height:14,width:'90%',marginBottom:6}}/><div className="skeleton" style={{height:14,width:'70%'}}/></div>}
-
-      {notFound && !loading && (
-        <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
-          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
-          <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Character Not Found</div>
-          <div style={{fontSize:13,color:T.textMid}}>No characters matched your search. Try a different name.</div>
-        </div>
-      )}
-
-      {!loading && results.map((char) => (
-        <div key={char.id} className="card" style={{ marginBottom: 10 }}>
-          <div className="anime-result">
-            {char.image && <img src={char.image} alt={char.name} className="anime-poster" style={{ width: 64, height: 90, borderRadius: 10 }} onError={e=>e.target.style.display='none'} />}
-            <div className="anime-info">
-              <div className="anime-title">{char.name}</div>
-              {char.nameKanji && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{char.nameKanji}</div>}
-              <div className="anime-meta">
-                {char.favorites > 0 && <span className="meta-badge">❤️ {char.favorites.toLocaleString()} favorites</span>}
-              </div>
-              {char.about && <p className="anime-synopsis" style={{ marginTop: 6 }}>{char.about}{char.about.length >= 200 ? '...' : ''}</p>}
-            </div>
-          </div>
-          <a href={`https://myanimelist.net/character/${char.id}`} target="_blank" rel="noopener noreferrer"
-            style={{ display:'block', textAlign:'center', fontSize:12, color:T.teal, marginTop:10, textDecoration:'none' }}>
-            View full profile on MAL →
-          </a>
-        </div>
-      ))}
-    </div>
-  );
-}
