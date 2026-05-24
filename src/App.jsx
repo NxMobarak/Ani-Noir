@@ -95,7 +95,7 @@ const ANIME_OF_DAY_LIST = [
   { title: "One Piece", genre: "Adventure/Fantasy", rating: "8.9", desc: "A boy with rubber powers sails the seas to become the King of the Pirates and find the legendary One Piece.", image: "https://cdn.myanimelist.net/images/anime/6/73245.jpg" },
   { title: "Naruto Shippuden", genre: "Action/Adventure", rating: "8.7", desc: "Naruto Uzumaki continues his journey as a ninja, facing powerful enemies and uncovering dark secrets.", image: "https://cdn.myanimelist.net/images/anime/1565/111305.jpg" },
 ];
-const getDailyAnime = () => { const d = Math.floor(Date.now()/86400000); return ANIME_OF_DAY_LIST[d%ANIME_OF_DAY_LIST.length]; };
+const getDailyAnime = () => { const now = new Date(); const ist = new Date(now.getTime() + (5.5*60*60*1000)); const d = Math.floor(ist.getTime()/86400000); return ANIME_OF_DAY_LIST[d%ANIME_OF_DAY_LIST.length]; };
 
 const QUOTES = [
   { text: "It's not the face that makes someone a monster, it's the choices they make with their lives.", char: "Naruto Uzumaki", anime: "Naruto" },
@@ -107,7 +107,7 @@ const QUOTES = [
   { text: "Fear is not evil. It tells you what your weakness is.", char: "Gildarts Clive", anime: "Fairy Tail" },
   { text: "I'll leave tomorrow's problems to tomorrow's me.", char: "Saitama", anime: "One Punch Man" },
 ];
-const getDailyQuote = () => { const d = Math.floor(Date.now()/86400000); return QUOTES[d%QUOTES.length]; };
+const getDailyQuote = () => { const now = new Date(); const ist = new Date(now.getTime() + (5.5*60*60*1000)); const d = Math.floor(ist.getTime()/86400000); return QUOTES[d%QUOTES.length]; };
 
 
 // ─── Anime Frames Questions (250 total, 50 per level) ───────
@@ -213,12 +213,12 @@ const NAV = [
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
+  { id: 'daily', icon: '📅', label: 'Daily Challenge' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
   { id: 'charsearch', icon: '👤', label: 'Character Search' },
   { id: 'watchlist', icon: '📋', label: 'Watchlist' },
   { id: 'news', icon: '📰', label: 'News' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
-  { id: 'daily', icon: '📅', label: 'Daily Challenge' },
   { id: 'about', icon: 'ℹ️', label: 'About' },
 ];
 
