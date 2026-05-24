@@ -550,14 +550,6 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
         })}
       </div>
       <div className="sidebar-footer">
-        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt">
-          <div className="sidebar-footer-card-title">▶ AnimeTMTalks</div>
-          <div className="sidebar-footer-card-sub">Watch anime content on YouTube</div>
-        </a>
-        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig">
-          <div className="sidebar-footer-card-title">📷 @AniNoir</div>
-          <div className="sidebar-footer-card-sub">Follow for daily anime posts</div>
-        </a>
       </div>
     </>
   );
@@ -895,7 +887,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
+      const fs = currentScore;
       const passed = fs >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
@@ -1029,7 +1021,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
             {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANIME SCRAMBLER'}
           </div>
           <p style={{ fontSize: 13, color: T.textMid }}>
-            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Unscramble anime titles! Tap tiles to build the name.'}
+            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Scramble anime titles! Tap tiles to build the name.'}
           </p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
         </div>
@@ -1088,7 +1080,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
       <div className="card">
         <div className="question-text">
-          {q.type === 'mcq' ? q.text : '🔤 UNSCRAMBLE THE ANIME'}
+          {q.type === 'mcq' ? q.text : '🔤 ANIME SCRAMBLE'}
         </div>
         {q.type === 'anagram' ? (
           <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
@@ -1104,7 +1096,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
                 else if (idx === selectedOption) cls += ' wrong';
               }
               return (
-                <button key={idx} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+                <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
               );
             })}
           </div>
@@ -1222,7 +1214,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
+      const fs = currentScore;
       const passed = fs >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
@@ -2002,10 +1994,10 @@ function DailyPage({ spades, setSpades, showFeedback }) {
       {question && (
         <div className="card">
           <div className="card-title" style={{color:T.violet}}>
-            {question.type==='mcq'?'🧠 QUESTION':'🔤 ANAGRAM'}
+            {question.type==='mcq'?'🧠 QUESTION':'🔤 ANIME SCRAMBLE'}
           </div>
           <div className="question-text" style={{fontSize:16}}>
-            {question.type==='mcq'?question.text:'🔤 UNTANGLE THE ANAGRAM'}
+            {question.type==='mcq'?question.text:'🔤 ANIME SCRAMBLE'}
           </div>
           {question.type === 'mcq' ? (
             <div>
@@ -2202,7 +2194,7 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
+      const fs = currentScore;
       const passed = fs >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
@@ -2405,7 +2397,6 @@ function CharacterSearchPage({ showFeedback }) {
     <div>
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="card-title" style={{ color: T.violet }}>👤 CHARACTER SEARCH</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Search for anime characters using the Jikan API (MyAnimeList).</p>
       </div>
       <div className="search-input-wrap">
         <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
@@ -2433,7 +2424,6 @@ function CharacterSearchPage({ showFeedback }) {
               <div className="anime-meta">
                 {char.favorites > 0 && <span className="meta-badge">❤️ {char.favorites.toLocaleString()} favorites</span>}
               </div>
-              {char.about && <p className="anime-synopsis" style={{ marginTop: 6 }}>{char.about}{char.about.length >= 200 ? '...' : ''}</p>}
             </div>
           </div>
           <a href={`https://myanimelist.net/character/${char.id}`} target="_blank" rel="noopener noreferrer"
