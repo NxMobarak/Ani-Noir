@@ -221,7 +221,7 @@ const NAV = [
   { id: 'home', icon: '🏠', label: 'Home' },
   { id: 'quiz', icon: '🧠', label: 'Quiz' },
   { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
-  { id: 'anagram', icon: '🔤', label: 'Anime Scrambler' },
+  { id: 'anagram', icon: '🔤', label: 'Anime Scramble' },
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
@@ -348,8 +348,8 @@ const css = `
   .option-btn.wrong { border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error}; }
   .option-btn.selected { border-color:${T.violet};background:rgba(139,92,246,0.12); }
 
-  /* Anagram tiles */
-  .anagram-display { text-align:center;margin:16px 0;padding:16px;background:${T.surface};border-radius:16px;border:1px solid ${T.border}; }
+  /* Scramble tiles */
+  .scramble-display { text-align:center;margin:16px 0;padding:16px;background:${T.surface};border-radius:16px;border:1px solid ${T.border}; }
   .tile-pool { display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px;min-height:44px; }
   .letter-tile { width:38px;height:44px;background:linear-gradient(145deg,${T.card},${T.surface});border:1.5px solid ${T.rose};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:${T.rose};cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;box-shadow:0 2px 8px rgba(244,63,94,0.15); }
   .letter-tile:hover { transform:translateY(-3px);box-shadow:0 6px 16px rgba(244,63,94,0.3); }
@@ -358,7 +358,7 @@ const css = `
   .answer-slot { width:38px;height:44px;background:${T.surface};border:1.5px dashed ${T.border};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:${T.text};cursor:pointer;transition:all 0.15s; }
   .answer-slot.filled { border-style:solid;border-color:${T.violet};background:rgba(139,92,246,0.1); }
   .answer-slot.filled:hover { border-color:${T.rose};background:rgba(244,63,94,0.08); }
-  .anagram-actions { display:flex;gap:8px;justify-content:center;margin-top:8px; }
+  .scramble-actions { display:flex;gap:8px;justify-content:center;margin-top:8px; }
 
   .power-btns { display:flex;gap:8px;margin-top:12px; }
   .power-btn { flex:1;background:${T.surface};border:1px solid ${T.border};border-radius:10px;padding:9px 6px;font-size:11px;text-align:center;cursor:pointer;color:${T.textMid};transition:all 0.2s; }
@@ -549,28 +549,6 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
           );
         })}
       </div>
-      <div className="sidebar-footer">
-        <div style={{ display:'flex', gap:8 }}>
-          <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ flex:1, marginBottom:0 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-              <div>
-                <div className="sidebar-footer-card-title">YouTube</div>
-                <div className="sidebar-footer-card-sub">AnimeTMTalks</div>
-              </div>
-            </div>
-          </a>
-          <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ flex:1, marginBottom:0 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-              <div>
-                <div className="sidebar-footer-card-title">Instagram</div>
-                <div className="sidebar-footer-card-sub">@AniNoir</div>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
     </>
   );
 }
@@ -740,8 +718,8 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
 }
 
 
-// ─── Anagram Tile Component ─────────────────────────────────
-function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correctAnswer }) {
+// ─── Scramble Tile Component ─────────────────────────────────
+function ScrambleTiles({ scrambled, onSolve, hintRevealed, hint, answered, correctAnswer }) {
   const [tiles, setTiles] = useState(() => scrambled.map((l, i) => ({ id: i, letter: l, used: false })));
   const [answer, setAnswer] = useState([]);
 
@@ -776,7 +754,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
   };
 
   return (
-    <div className="anagram-display">
+    <div className="scramble-display">
       <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Your Answer</div>
       <div className="answer-slots">
         {answer.length === 0
@@ -804,7 +782,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
           Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
         </div>
       )}
-      <div className="anagram-actions">
+      <div className="scramble-actions">
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>⌫</button>
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={clearAll} disabled={!answer.length || answered}>Clear</button>
         <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit ✓</button>
@@ -814,7 +792,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
 }
 
 
-// ─── Quiz / Anagram Page ─────────────────────────────────────
+// ─── Quiz / Scramble Page ─────────────────────────────────────
 function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly = false, anagramOnly = false, mode = 'quiz' }) {
   const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
@@ -907,8 +885,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
+      const passed = currentScore >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
         setSpades(s => s + reward);
@@ -918,8 +895,8 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
           if (!badges.includes(bid)) setBadges(b => [...b, bid]);
         }
       }
-      updateBestScore(mode, currentLevel, fs, questions.length);
-      setFinalScore(fs);
+      updateBestScore(mode, currentLevel, currentScore, questions.length);
+      setFinalScore(currentScore);
       clearTimer();
       setPhase('result');
     }
@@ -1038,10 +1015,10 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
       <div>
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-title" style={{ color: mcqOnly ? T.rose : T.violet }}>
-            {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANIME SCRAMBLER'}
+            {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANIME SCRAMBLE'}
           </div>
           <p style={{ fontSize: 13, color: T.textMid }}>
-            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Unscramble anime titles! Tap tiles to build the name.'}
+            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Scramble anime titles! Tap tiles to build the name.'}
           </p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
         </div>
@@ -1100,10 +1077,10 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
       <div className="card">
         <div className="question-text">
-          {q.type === 'mcq' ? q.text : '🔤 UNSCRAMBLE THE ANIME'}
+          {q.type === 'mcq' ? q.text : '🔤 SCRAMBLE THE ANIME'}
         </div>
         {q.type === 'anagram' ? (
-          <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
+          <ScrambleTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
         ) : (
           <div>
             {hintRevealed && q.hint && (
@@ -1111,7 +1088,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
             )}
             {q.options.map((opt, idx) => {
               let cls = 'option-btn';
-              if (answered) {
+              if (answered && correctOption !== null) {
                 if (idx === correctOption) cls += ' correct';
                 else if (idx === selectedOption) cls += ' wrong';
               }
@@ -1234,14 +1211,13 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
+      const passed = currentScore >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
         setSpades(s => s + reward);
       }
-      updateBestScore('emoji', currentLevel, fs, questions.length);
-      setFinalScore(fs);
+      updateBestScore('emoji', currentLevel, currentScore, questions.length);
+      setFinalScore(currentScore);
       clearTimer();
       setPhase('result');
     }
@@ -1383,7 +1359,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
-          if (answered) {
+          if (answered && correctOption !== null) {
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
@@ -1546,7 +1522,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
-          if (answered) {
+          if (answered && correctOption !== null) {
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
@@ -2014,10 +1990,10 @@ function DailyPage({ spades, setSpades, showFeedback }) {
       {question && (
         <div className="card">
           <div className="card-title" style={{color:T.violet}}>
-            {question.type==='mcq'?'🧠 QUESTION':'🔤 ANAGRAM'}
+            {question.type==='mcq'?'🧠 QUESTION':'🔤 SCRAMBLE'}
           </div>
           <div className="question-text" style={{fontSize:16}}>
-            {question.type==='mcq'?question.text:'🔤 UNTANGLE THE ANAGRAM'}
+            {question.type==='mcq'?question.text:'🔤 SCRAMBLE THE ANIME'}
           </div>
           {question.type === 'mcq' ? (
             <div>
@@ -2028,7 +2004,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
               })}
             </div>
           ) : (
-            <AnagramTiles scrambled={scrambledLetters} onSolve={(ans) => submit(ans)} hintRevealed={false} hint={null} answered={answered} correctAnswer={question.answer} />
+            <ScrambleTiles scrambled={scrambledLetters} onSolve={(ans) => submit(ans)} hintRevealed={false} hint={null} answered={answered} correctAnswer={question.answer} />
           )}
         </div>
       )}
@@ -2041,7 +2017,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
 function ProfilePage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
-  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : k.startsWith('frames') ? '🖼️ Frames' : '🕵️ Shadow';
+  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scramble' : k.startsWith('emoji') ? '🎯 Emoji' : k.startsWith('frames') ? '🖼️ Frames' : '🕵️ Shadow';
   const levelLabel = (k) => { const i = parseInt(k.split('_').pop()); return levels[i]?.name || `L${i+1}`; };
 
   return (
@@ -2214,14 +2190,13 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
       setMaxTime(t);
       setTimerActive(true);
     } else {
-      const fs = wasCorrect ? currentScore + 1 : currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
+      const passed = currentScore >= levels[currentLevel].minCorrect;
       if (passed) {
         const reward = levels[currentLevel].reward;
         setSpades(s => s + reward);
       }
-      updateBestScore('frames', currentLevel, fs, questions.length);
-      setFinalScore(fs);
+      updateBestScore('frames', currentLevel, currentScore, questions.length);
+      setFinalScore(currentScore);
       clearTimer();
       setPhase('result');
     }
@@ -2362,7 +2337,7 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
-          if (answered) {
+          if (answered && correctOption !== null) {
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
