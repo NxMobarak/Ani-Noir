@@ -1356,7 +1356,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
             else if (idx === selectedOption) cls += ' wrong';
           }
           return (
-            <button key={idx} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
           );
         })}
       </div>
@@ -1519,7 +1519,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
             else if (idx === selectedOption) cls += ' wrong';
           }
           return (
-            <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
           );
         })}
       </div>
@@ -1798,7 +1798,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
             else if (idx === selectedOption) cls += ' wrong';
           }
           return (
-            <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
           );
         })}
       </div>
