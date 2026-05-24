@@ -231,7 +231,7 @@ const NAV = [
   { id: 'news', icon: '📰', label: 'News' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge' },
-  { id: 'profile', icon: '👤', label: 'Profile' },
+  { id: 'about', icon: 'ℹ️', label: 'About' },
 ];
 
 
@@ -439,7 +439,7 @@ const css = `
   .result-sub { color:${T.textMid};font-size:15px;margin-bottom:24px; }
   .share-btn { background:linear-gradient(135deg,${T.violet},${T.rose});border:none;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-bottom:10px;width:100%; }
 
-  /* Profile */
+  /* About */
   .stat-row { display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid ${T.border}; }
   .stat-row:last-child { border-bottom:none; }
   .stat-label { color:${T.textMid};font-size:13px; }
@@ -627,7 +627,7 @@ export default function App() {
               {page === 'news' && <NewsPage />}
               {page === 'birthdays' && <BirthdaysPage />}
               {page === 'daily' && <DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
-              {page === 'profile' && <ProfilePage spades={spades} badges={badges} />}
+              {page === 'about' && <AboutPage spades={spades} badges={badges} />}
             </div>
           </div>
         </div>
@@ -2017,8 +2017,8 @@ function DailyPage({ spades, setSpades, showFeedback }) {
 }
 
 
-// ─── Profile Page ────────────────────────────────────────────
-function ProfilePage({ spades, badges }) {
+// ─── About Page ──────────────────────────────────────────────
+function AboutPage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
   const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : k.startsWith('frames') ? '🖼️ Frames' : '🕵️ Shadow';
@@ -2027,10 +2027,10 @@ function ProfilePage({ spades, badges }) {
   return (
     <div>
       <div className="hero-banner">
-        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>⚔️</div>
+        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>🎴</div>
         <div style={{textAlign:'center'}}>
-          <div style={{fontSize:18,fontWeight:800}}>AniNoir Player</div>
-          <div style={{fontSize:13,color:T.textMid}}>Anime Enthusiast</div>
+          <div style={{fontSize:18,fontWeight:800}}>About AniNoir</div>
+          <div style={{fontSize:13,color:T.textMid}}>Your Anime Trivia Companion</div>
         </div>
       </div>
 
@@ -2072,9 +2072,21 @@ function ProfilePage({ spades, badges }) {
 
 
       <div className="card" style={{ background:'linear-gradient(135deg,rgba(244,63,94,0.12),rgba(139,92,246,0.15))', border:'1px solid rgba(244,63,94,0.25)' }}>
-        <div className="card-title" style={{color:T.rose}}>ℹ️ ABOUT</div>
-        <p style={{fontSize:13,color:T.text,lineHeight:1.8}}>
-          Hey! I'm an anime lover who built this app for the community 🔥 I eat, sleep, and breathe anime. AniNoir is my love letter to all otakus out there. More features coming soon... Stay tuned! Follow me for updates.
+        <div className="card-title" style={{color:T.rose}}>ℹ️ ABOUT ANI-NOIR</div>
+        <p style={{fontSize:13,color:T.text,lineHeight:1.8,marginBottom:12}}>
+          <strong>AniNoir</strong> — The ultimate anime trivia & discovery app for true otakus! 🔥
+        </p>
+        <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
+          Test your anime knowledge across multiple game modes: classic quizzes, emoji challenges, anagram scramblers, shadow quizzes, anime frame guessing, and survival mode. Level up, earn spades, collect badges, and climb the leaderboard!
+        </p>
+        <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
+          🎮 <strong>Features:</strong> 5 difficulty levels · 6+ game modes · Daily challenges · Anime search & character lookup · Personalized watchlist · Birthday calendar · News feed
+        </p>
+        <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
+          Built with ❤️ by <strong>Mobarak</strong> — anime enthusiast, developer, and content creator. AniNoir is a love letter to the anime community. More features coming soon... Stay tuned!
+        </p>
+        <p style={{fontSize:11,color:T.textMid,lineHeight:1.6}}>
+          Version 1.0 · Made with React + Vite · PWA Enabled
         </p>
       </div>
 
