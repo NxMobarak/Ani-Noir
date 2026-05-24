@@ -95,6 +95,51 @@ const QUOTES = [
 const getDailyQuote = () => { const d = Math.floor(Date.now()/86400000); return QUOTES[d%QUOTES.length]; };
 
 
+// ─── Anime Frames Questions ─────────────────────────────────
+const ANIME_FRAMES_QUESTIONS = [
+  // Level 1
+  { level: 1, text: "A boy with a straw hat stands on the bow of a small ship, grinning at the vast ocean ahead.", options: ["One Piece", "Naruto", "Fairy Tail", "Black Clover"], correct: 0, hint: "Pirates and dreams of becoming king" },
+  { level: 1, text: "A young ninja in an orange jumpsuit sits alone on a swing outside the academy while others celebrate.", options: ["Naruto", "Boruto", "Hunter x Hunter", "Bleach"], correct: 0, hint: "The lonely boy who becomes Hokage" },
+  { level: 1, text: "A spiky-haired warrior powers up with golden aura while the ground beneath him cracks.", options: ["Dragon Ball Z", "One Punch Man", "My Hero Academia", "Fairy Tail"], correct: 0, hint: "Super Saiyan transformation" },
+  { level: 1, text: "A boy writes a name in a black notebook under lamplight, with a shinigami floating behind him.", options: ["Death Note", "Bleach", "Soul Eater", "Blue Exorcist"], correct: 0, hint: "The power to kill with a pen" },
+  { level: 1, text: "Two brothers stand before a massive stone door with alchemical symbols, one missing an arm.", options: ["Fullmetal Alchemist", "Blue Exorcist", "D.Gray-man", "Magi"], correct: 0, hint: "Equivalent exchange" },
+  { level: 1, text: "A pink-haired boy throws a flaming punch while yelling about his guild.", options: ["Fairy Tail", "One Piece", "Black Clover", "Fire Force"], correct: 0, hint: "He's looking for a dragon" },
+  { level: 1, text: "Titans break through a massive wall while terrified citizens flee through narrow streets.", options: ["Attack on Titan", "Kabaneri", "God Eater", "Claymore"], correct: 0, hint: "On that day humanity received a grim reminder" },
+
+  // Level 2
+  { level: 2, text: "A blindfolded man with white hair casually blocks an attack with one finger, smiling.", options: ["Jujutsu Kaisen", "Naruto", "Bleach", "One Punch Man"], correct: 0, hint: "The strongest sorcerer" },
+  { level: 2, text: "A green-haired boy breaks his own fingers while throwing a powerful punch during a tournament.", options: ["My Hero Academia", "Dragon Ball", "Kengan Ashura", "Baki"], correct: 0, hint: "One For All at 100%" },
+  { level: 2, text: "A demon slayer breathes underwater-like patterns as his blade turns blue in moonlight.", options: ["Demon Slayer", "Bleach", "Inuyasha", "Dororo"], correct: 0, hint: "Water breathing first form" },
+  { level: 2, text: "A bald hero defeats a monster with a single punch, looking bored and disappointed.", options: ["One Punch Man", "Mob Psycho 100", "Dragon Ball", "My Hero Academia"], correct: 0, hint: "He trained so hard he lost his hair" },
+  { level: 2, text: "A boy with silver hair pulls his hand out of a man's chest, electricity crackling around it.", options: ["Hunter x Hunter", "Naruto", "Jujutsu Kaisen", "Bleach"], correct: 0, hint: "Assassin family's youngest son" },
+  { level: 2, text: "A maid with blue hair smiles gently in a mansion while snow falls outside the window.", options: ["Re:Zero", "The Quintessential Quintuplets", "Violet Evergarden", "Miss Kobayashi's Dragon Maid"], correct: 0, hint: "Who's Rem?" },
+  { level: 2, text: "Red and blue ice and fire clash as a half-white half-red haired boy unleashes both powers.", options: ["My Hero Academia", "Fairy Tail", "Fire Force", "Blue Exorcist"], correct: 0, hint: "Endeavor's masterpiece" },
+
+  // Level 3
+  { level: 3, text: "A man in a black cloak with red clouds stands in the rain, tears mixing with raindrops.", options: ["Naruto", "Bleach", "One Piece", "Jujutsu Kaisen"], correct: 0, hint: "He massacred his own clan for peace" },
+  { level: 3, text: "A girl plays violin on a sunlit stage while colorful lights fill the scene like a dream.", options: ["Your Lie in April", "Sound! Euphonium", "K-On!", "Nodame Cantabile"], correct: 0, hint: "She brought color to his black and white world" },
+  { level: 3, text: "A short soldier spins mid-air, dual-wielding blades, slicing through a giant humanoid neck.", options: ["Attack on Titan", "Claymore", "God Eater", "Kabaneri"], correct: 0, hint: "Humanity's strongest soldier" },
+  { level: 3, text: "Two people swap bodies and frantically write on their hands to remember each other.", options: ["Your Name", "Weathering With You", "A Silent Voice", "5 Centimeters Per Second"], correct: 0, hint: "Makoto Shinkai's masterpiece about a comet" },
+  { level: 3, text: "A man sits in a dark room surrounded by screens, typing rapidly while eating potato chips dramatically.", options: ["Death Note", "Steins;Gate", "Serial Experiments Lain", "Psycho-Pass"], correct: 0, hint: "I'll take a potato chip... and eat it!" },
+  { level: 3, text: "A boy claps his hands together and transmutes a spear from the ground in a crumbling city.", options: ["Fullmetal Alchemist", "Magi", "Fire Force", "Black Clover"], correct: 0, hint: "No circle needed" },
+
+  // Level 4
+  { level: 4, text: "A man in a lab coat sends a text message that changes the world line, microwave in the background.", options: ["Steins;Gate", "Death Note", "Psycho-Pass", "Erased"], correct: 0, hint: "El Psy Kongroo" },
+  { level: 4, text: "A girl with prosthetic metal arms types letters at a desk, a single tear falling on paper.", options: ["Violet Evergarden", "Fullmetal Alchemist", "Ghost in the Shell", "Psycho-Pass"], correct: 0, hint: "An auto memory doll learning about love" },
+  { level: 4, text: "A crew of cowboys drifts through space in a beat-up ship while jazz music plays.", options: ["Cowboy Bebop", "Space Dandy", "Outlaw Star", "Trigun"], correct: 0, hint: "See you space cowboy..." },
+  { level: 4, text: "A boy lies in a hospital bed connected to a giant mecha while an angel attacks the city outside.", options: ["Neon Genesis Evangelion", "Darling in the Franxx", "Eureka Seven", "Gundam"], correct: 0, hint: "Get in the robot, Shinji" },
+  { level: 4, text: "A classroom of students must kill their yellow octopus teacher before graduation or Earth explodes.", options: ["Assassination Classroom", "Great Teacher Onizuka", "Ansatsu Kyoushitsu", "My Hero Academia"], correct: 0, hint: "Mach 20 teacher with a smiley face" },
+  { level: 4, text: "A swordsman with three swords in his mouth and hands cuts through a building diagonally.", options: ["One Piece", "Bleach", "Samurai Champloo", "Rurouni Kenshin"], correct: 0, hint: "Three-sword style" },
+
+  // Level 5
+  { level: 5, text: "A boy touches a red stone and sees visions of an ancient civilization in a vast desert.", options: ["Magi", "Fullmetal Alchemist", "JoJo's Bizarre Adventure", "Hunter x Hunter"], correct: 0, hint: "Dungeons and djinn" },
+  { level: 5, text: "A humanoid cat-bus flies through the night sky with children hanging onto its fur.", options: ["My Neighbor Totoro", "Spirited Away", "Howl's Moving Castle", "Kiki's Delivery Service"], correct: 0, hint: "Studio Ghibli countryside magic" },
+  { level: 5, text: "A girl walks through a tunnel and enters a spirit world where her parents have turned into pigs.", options: ["Spirited Away", "My Neighbor Totoro", "Howl's Moving Castle", "Princess Mononoke"], correct: 0, hint: "Chihiro's journey in the bathhouse" },
+  { level: 5, text: "A pink-haired girl in a mech suit fights alongside her partner with the words 'darling' repeated.", options: ["Darling in the Franxx", "Evangelion", "Eureka Seven", "Gurren Lagann"], correct: 0, hint: "Zero Two" },
+  { level: 5, text: "A gambler girl with red eyes bets everything on a single card game with a crazed expression.", options: ["Kakegurui", "No Game No Life", "Kaiji", "Death Parade"], correct: 0, hint: "The thrill of risking it all in an elite school" },
+  { level: 5, text: "Warriors stand on floating platforms in a martial arts tournament between multiple universes.", options: ["Dragon Ball Super", "Dragon Ball Z", "Kengan Ashura", "Baki"], correct: 0, hint: "Tournament of Power" },
+];
+
 // ─── Character Birthdays ────────────────────────────────────
 const CHARACTER_BIRTHDAYS = [
   { name: "Naruto Uzumaki", anime: "Naruto", month: 10, day: 10 },
@@ -127,6 +172,28 @@ const CHARACTER_BIRTHDAYS = [
   { name: "Sanji", anime: "One Piece", month: 3, day: 2 },
   { name: "Robin", anime: "One Piece", month: 2, day: 6 },
   { name: "Rem", anime: "Re:Zero", month: 2, day: 2 },
+  { name: "Roronoa Zoro", anime: "One Piece", month: 11, day: 11 },
+  { name: "Erza Scarlet", anime: "Fairy Tail", month: 5, day: 15 },
+  { name: "Natsu Dragneel", anime: "Fairy Tail", month: 7, day: 7 },
+  { name: "Spike Spiegel", anime: "Cowboy Bebop", month: 6, day: 26 },
+  { name: "Lelouch Lamperouge", anime: "Code Geass", month: 12, day: 5 },
+  { name: "Saitama", anime: "One Punch Man", month: 3, day: 19 },
+  { name: "Genos", anime: "One Punch Man", month: 7, day: 4 },
+  { name: "Ochaco Uraraka", anime: "My Hero Academia", month: 12, day: 27 },
+  { name: "Bakugo Katsuki", anime: "My Hero Academia", month: 4, day: 20 },
+  { name: "Megumi Fushiguro", anime: "Jujutsu Kaisen", month: 12, day: 22 },
+  { name: "Sukuna", anime: "Jujutsu Kaisen", month: 1, day: 1 },
+  { name: "Senku Ishigami", anime: "Dr. Stone", month: 1, day: 4 },
+  { name: "Emilia", anime: "Re:Zero", month: 9, day: 23 },
+  { name: "Licht", anime: "Plunderer", month: 2, day: 14 },
+  { name: "Shinji Ikari", anime: "Evangelion", month: 6, day: 6 },
+  { name: "Asuka Langley", anime: "Evangelion", month: 12, day: 4 },
+  { name: "Rei Ayanami", anime: "Evangelion", month: 3, day: 30 },
+  { name: "Sailor Moon (Usagi)", anime: "Sailor Moon", month: 6, day: 30 },
+  { name: "Inuyasha", anime: "Inuyasha", month: 5, day: 27 },
+  { name: "Kaneki Ken", anime: "Tokyo Ghoul", month: 12, day: 20 },
+  { name: "Misa Amane", anime: "Death Note", month: 12, day: 25 },
+  { name: "Gaara", anime: "Naruto", month: 1, day: 19 },
 ];
 
 
@@ -156,8 +223,10 @@ const NAV = [
   { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
   { id: 'anagram', icon: '🔤', label: 'Anime Scrambler' },
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
+  { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
+  { id: 'charsearch', icon: '👤', label: 'Character Search' },
   { id: 'watchlist', icon: '📋', label: 'Watchlist' },
   { id: 'news', icon: '📰', label: 'News' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
@@ -454,6 +523,7 @@ function SpadesModal({ onClose }) {
 function SidebarContent({ page, navigate, spades, onSpadesClick }) {
   const SHADOW_COST = 200;
   const EMOJI_COST = 200;
+  const FRAMES_COST = 200;
   return (
     <>
       <div className="sidebar-header">
@@ -465,9 +535,10 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
         {NAV.map(n => {
           const isShadow = n.id === 'shadow';
           const isEmoji = n.id === 'emoji';
-          const showLock = isShadow || isEmoji;
-          const cost = isShadow ? SHADOW_COST : EMOJI_COST;
-          const unlockKey = isShadow ? 'ani_shadow_unlocked' : 'ani_emoji_unlocked';
+          const isFrames = n.id === 'frames';
+          const showLock = isShadow || isEmoji || isFrames;
+          const cost = isShadow ? SHADOW_COST : isFrames ? FRAMES_COST : EMOJI_COST;
+          const unlockKey = isShadow ? 'ani_shadow_unlocked' : isFrames ? 'ani_frames_unlocked' : 'ani_emoji_unlocked';
           const isUnlocked = localStorage.getItem(unlockKey) === '1';
           return (
             <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => navigate(n.id)}>
@@ -556,8 +627,10 @@ export default function App() {
               {page === 'emoji' && <EmojiQuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} unlockCost={EMOJI_COST} />}
               {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
               {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={SHADOW_COST} />}
+              {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
               {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'search' && <SearchPage showFeedback={showFeedback} />}
+              {page === 'charsearch' && <CharacterSearchPage showFeedback={showFeedback} />}
               {page === 'watchlist' && <WatchlistPage showFeedback={showFeedback} />}
               {page === 'news' && <NewsPage />}
               {page === 'birthdays' && <BirthdaysPage />}
@@ -643,7 +716,7 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
       <div className="card">
         <div className="card-title" style={{ color: T.teal }}>⚡ QUICK PLAY</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
+          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['frames','🖼️','Frames'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
             <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
               <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
             </button>
@@ -1786,7 +1859,7 @@ function NewsPage() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://myanimelist.net/rss/news.xml');
+      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.animenewsnetwork.com/all/rss.xml');
       const data = await res.json();
       if (data.items?.length) {
         setNews(data.items.slice(0,15).map(item => ({
@@ -1956,7 +2029,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
 function ProfilePage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
-  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : '🕵️ Shadow';
+  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : k.startsWith('frames') ? '🖼️ Frames' : '🕵️ Shadow';
   const levelLabel = (k) => { const i = parseInt(k.split('_').pop()); return levels[i]?.name || `L${i+1}`; };
 
   return (
@@ -1976,6 +2049,7 @@ function ProfilePage({ spades, badges }) {
         <div className="stat-row"><span className="stat-label">📅 Daily Streak</span><span className="stat-value">{localStorage.getItem('ani_daily')===new Date().toDateString()?'🔥 Active':'—'}</span></div>
         <div className="stat-row"><span className="stat-label">🕵️ Shadow Quiz</span><span className="stat-value">{localStorage.getItem('ani_shadow_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
         <div className="stat-row"><span className="stat-label">🎯 Emoji Quiz</span><span className="stat-value">{localStorage.getItem('ani_emoji_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
+        <div className="stat-row"><span className="stat-label">🖼️ Anime Frames</span><span className="stat-value">{localStorage.getItem('ani_frames_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
         <div className="stat-row"><span className="stat-label">📋 Watchlist</span><span className="stat-value">{getWatchlist().length} anime</span></div>
       </div>
 
@@ -2008,32 +2082,366 @@ function ProfilePage({ spades, badges }) {
       <div className="card" style={{ background:'linear-gradient(135deg,rgba(244,63,94,0.12),rgba(139,92,246,0.15))', border:'1px solid rgba(244,63,94,0.25)' }}>
         <div className="card-title" style={{color:T.rose}}>ℹ️ ABOUT</div>
         <p style={{fontSize:13,color:T.text,lineHeight:1.8}}>
-          Hey! I'm an anime lover who built this app for the community 🔥 I eat, sleep, and breathe anime.
-          AniNoir is my love letter to all otakus out there. More features coming soon — stay tuned!
-          Follow me for updates.
+          Hey! I'm an anime lover who built this app for the community 🔥 I eat, sleep, and breathe anime. AniNoir is my love letter to all otakus out there. More features coming soon... Stay tuned! Follow me for updates.
         </p>
       </div>
 
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ textDecoration:'none', color:'white' }}>
+      <div style={{ display:'flex', flexDirection:'row', gap:10 }}>
+        <a href="https://youtube.com/@animetmtalks" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card yt" style={{ textDecoration:'none', color:'white', flex:1 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ fontSize:24 }}>▶</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             <div>
-              <div className="sidebar-footer-card-title">AnimeTMTalks on YouTube</div>
-              <div className="sidebar-footer-card-sub">Watch anime reviews, discussions & more</div>
+              <div className="sidebar-footer-card-title">AnimeTMTalks</div>
+              <div className="sidebar-footer-card-sub">YouTube</div>
             </div>
           </div>
         </a>
-        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ textDecoration:'none', color:'white' }}>
+        <a href="https://www.instagram.com/mobarak_sekh_" target="_blank" rel="noopener noreferrer" className="sidebar-footer-card ig" style={{ textDecoration:'none', color:'white', flex:1 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ fontSize:24 }}>📷</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
             <div>
-              <div className="sidebar-footer-card-title">@AniNoir on Instagram</div>
-              <div className="sidebar-footer-card-sub">Daily anime posts, memes & community</div>
+              <div className="sidebar-footer-card-title">@AniNoir</div>
+              <div className="sidebar-footer-card-sub">Instagram</div>
             </div>
           </div>
         </a>
       </div>
+    </div>
+  );
+}
+
+
+
+// ─── Anime Frames Page (NEW) ────────────────────────────────
+function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_frames_unlocked') === '1');
+  const [phase, setPhase] = useState('levels');
+  const [currentLevel, setCurrentLevel] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [maxTime, setMaxTime] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
+  const [hintRevealed, setHintRevealed] = useState(false);
+  const [skipUsed, setSkipUsed] = useState(false);
+  const [answered, setAnswered] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [correctOption, setCorrectOption] = useState(null);
+  const [finalScore, setFinalScore] = useState(0);
+  const timerRef = useRef(null);
+  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
+
+  const unlock = () => {
+    if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Anime Frames!`); return; }
+    setSpades(s => s - unlockCost);
+    setUnlocked(true);
+    localStorage.setItem('ani_frames_unlocked', '1');
+    showFeedback('🖼️ Anime Frames unlocked!');
+  };
+
+  useEffect(() => {
+    if (timerActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
+      return () => clearInterval(timerRef.current);
+    }
+    if (timerActive && timeLeft === 0) handleTimeout();
+  }, [timerActive, timeLeft]);
+
+  const getFramesPool = (levelNum) => {
+    const pool = ANIME_FRAMES_QUESTIONS.filter(q => q.level === levelNum);
+    return shuffle(pool).slice(0, 5);
+  };
+
+  const startLevel = (idx) => {
+    const qs = getFramesPool(idx + 1);
+    if (!qs.length) { showFeedback('No frame questions for this level!'); return; }
+    setCurrentLevel(idx);
+    setQuestions(qs);
+    setQIndex(0);
+    setScore(0);
+    setStreak(0);
+    setCombo(0);
+    setHintRevealed(false);
+    setSkipUsed(false);
+    setAnswered(false);
+    setSelectedOption(null);
+    setCorrectOption(null);
+    const t = levels[idx].timeSeconds;
+    setTimeLeft(t);
+    setMaxTime(t);
+    setTimerActive(true);
+    setPhase('playing');
+  };
+
+  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
+
+  const handleTimeout = () => {
+    clearTimer();
+    setAnswered(true);
+    const q = questions[qIndex];
+    setCorrectOption(q.correct);
+    playWrong();
+    showFeedback('⏰ Time\'s up!');
+    setTimeout(() => advance(false, score), 1200);
+  };
+
+  const advance = (wasCorrect, currentScore) => {
+    const nextIdx = qIndex + 1;
+    if (nextIdx < questions.length) {
+      setQIndex(nextIdx);
+      setHintRevealed(false);
+      setSkipUsed(false);
+      setAnswered(false);
+      setSelectedOption(null);
+      setCorrectOption(null);
+      const t = levels[currentLevel].timeSeconds;
+      setTimeLeft(t);
+      setMaxTime(t);
+      setTimerActive(true);
+    } else {
+      const fs = wasCorrect ? currentScore + 1 : currentScore;
+      const passed = fs >= levels[currentLevel].minCorrect;
+      if (passed) {
+        const reward = levels[currentLevel].reward;
+        setSpades(s => s + reward);
+      }
+      updateBestScore('frames', currentLevel, fs, questions.length);
+      setFinalScore(fs);
+      clearTimer();
+      setPhase('result');
+    }
+  };
+
+  const submitMCQ = (optIdx) => {
+    if (answered) return;
+    clearTimer();
+    const q = questions[qIndex];
+    const isCorrect = optIdx === q.correct;
+    setSelectedOption(optIdx);
+    setCorrectOption(q.correct);
+    setAnswered(true);
+    if (isCorrect) {
+      const newCombo = combo + 1;
+      setScore(s => s + 1);
+      setStreak(streak + 1);
+      setCombo(newCombo);
+      playCorrect();
+      if (newCombo >= 3) {
+        const bonus = Math.floor(newCombo / 3) * 5;
+        setSpades(s => s + bonus);
+        playCombo();
+        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
+      } else {
+        showFeedback('✅ Correct!');
+      }
+      setTimeout(() => advance(true, score + 1), 1000);
+    } else {
+      setStreak(0);
+      setCombo(0);
+      playWrong();
+      showFeedback('❌ Wrong!');
+      setTimeout(() => advance(false, score), 1000);
+    }
+  };
+
+  const doHint = () => {
+    if (spades < 30 || hintRevealed || answered) return;
+    setSpades(s => s - 30);
+    setHintRevealed(true);
+    showFeedback('💡 Hint revealed! -30♠');
+  };
+
+  const doSkip = () => {
+    if (spades < 50 || skipUsed || answered) return;
+    setSpades(s => s - 50);
+    setSkipUsed(true);
+    clearTimer();
+    setAnswered(true);
+    showFeedback('⏭️ Skipped! -50♠');
+    setTimeout(() => advance(false, score), 800);
+  };
+
+  if (!unlocked) return (
+    <div className="shadow-lock">
+      <div className="shadow-silhouette">🖼️</div>
+      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Anime Frames</div>
+      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+        Guess the anime from a scene description!<br />Test your knowledge of iconic anime moments.
+      </div>
+      <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
+        <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
+        <div style={{ fontSize: 12, color: T.textMid }}>One-time unlock · You have {spades}♠</div>
+      </div>
+      <button className="btn btn-primary" onClick={unlock} disabled={spades < unlockCost} style={{ width: '100%' }}>
+        {spades >= unlockCost ? '🖼️ Unlock Anime Frames' : `Need ${unlockCost - spades} more ♠`}
+      </button>
+    </div>
+  );
+
+  if (phase === 'levels') {
+    const lb = getLeaderboard();
+    return (
+      <div>
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title" style={{ color: T.violet }}>🖼️ ANIME FRAMES</div>
+          <p style={{ fontSize: 13, color: T.textMid }}>Read the scene description and guess which anime it's from! 5 questions per level.</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
+        </div>
+        {levels.map((lvl, idx) => {
+          const best = lb[`frames_${idx}`];
+          return (
+            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
+              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+              <div className="level-info">
+                <div className="level-name">{lvl.name}</div>
+                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
+              </div>
+              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (phase === 'result') {
+    const passed = finalScore >= levels[currentLevel].minCorrect;
+    return (
+      <div className="result-screen">
+        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
+        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
+        <div className="result-sub">You scored {finalScore}/{questions.length}</div>
+        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
+          {passed && currentLevel < levels.length - 1 && (
+            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const q = questions[qIndex];
+  const progress = (qIndex / questions.length) * 100;
+
+  return (
+    <div>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="quiz-header">
+        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13 }}>✅ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+        </div>
+      </div>
+      <div className="card">
+        <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>🖼️ SCENE DESCRIPTION</div>
+        <div className="question-text" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
+          "{q.text}"
+        </div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={idx} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          </button>
+        )}
+        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
+          ⏭️ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Character Search Page (NEW) ─────────────────────────────
+function CharacterSearchPage({ showFeedback }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  const search = async () => {
+    const q = query.trim();
+    if (!q) return;
+    setLoading(true); setResults([]); setNotFound(false);
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10`);
+      const data = await res.json();
+      if (!data.data?.length) { setNotFound(true); setLoading(false); return; }
+      setResults(data.data.map(c => ({
+        id: c.mal_id,
+        name: c.name,
+        nameKanji: c.name_kanji,
+        image: c.images?.jpg?.image_url,
+        favorites: c.favorites,
+        about: c.about?.slice(0, 200) || '',
+      })));
+    } catch { showFeedback('Network error. Try again.'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div className="card-title" style={{ color: T.violet }}>👤 CHARACTER SEARCH</div>
+        <p style={{ fontSize: 13, color: T.textMid }}>Search for anime characters using the Jikan API (MyAnimeList).</p>
+      </div>
+      <div className="search-input-wrap">
+        <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&search()} placeholder="Search character name..." autoComplete="off" />
+        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'…':'🔍'}</button>
+      </div>
+
+      {loading && <div className="card"><div className="skeleton" style={{height:20,width:'60%',marginBottom:8}}/><div className="skeleton" style={{height:14,width:'90%',marginBottom:6}}/><div className="skeleton" style={{height:14,width:'70%'}}/></div>}
+
+      {notFound && !loading && (
+        <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
+          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
+          <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Character Not Found</div>
+          <div style={{fontSize:13,color:T.textMid}}>No characters matched your search. Try a different name.</div>
+        </div>
+      )}
+
+      {!loading && results.map((char) => (
+        <div key={char.id} className="card" style={{ marginBottom: 10 }}>
+          <div className="anime-result">
+            {char.image && <img src={char.image} alt={char.name} className="anime-poster" style={{ width: 64, height: 90, borderRadius: 10 }} onError={e=>e.target.style.display='none'} />}
+            <div className="anime-info">
+              <div className="anime-title">{char.name}</div>
+              {char.nameKanji && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{char.nameKanji}</div>}
+              <div className="anime-meta">
+                {char.favorites > 0 && <span className="meta-badge">❤️ {char.favorites.toLocaleString()} favorites</span>}
+              </div>
+              {char.about && <p className="anime-synopsis" style={{ marginTop: 6 }}>{char.about}{char.about.length >= 200 ? '...' : ''}</p>}
+            </div>
+          </div>
+          <a href={`https://myanimelist.net/character/${char.id}`} target="_blank" rel="noopener noreferrer"
+            style={{ display:'block', textAlign:'center', fontSize:12, color:T.teal, marginTop:10, textDecoration:'none' }}>
+            View full profile on MAL →
+          </a>
+        </div>
+      ))}
     </div>
   );
 }
