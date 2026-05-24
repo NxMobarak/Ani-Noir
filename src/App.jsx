@@ -1536,7 +1536,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 
 
 // ─── Shadow Quiz Page ────────────────────────────────────────
-const SHADOW_QUESTIONS = [
+const ALL_SHADOW_QUESTIONS = [
   ...level1Shadow,
   ...level2Shadow,
   ...level3Shadow,
@@ -1549,11 +1549,20 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
   const [questions, setQuestions] = useState([]);
-  const [qIdx, setQIdx] = useState(0);
-  const [hintsRevealed, setHintsRevealed] = useState(0);
-  const [input, setInput] = useState('');
-  const [answered, setAnswered] = useState(false);
+  const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [maxTime, setMaxTime] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
+  const [hintRevealed, setHintRevealed] = useState(false);
+  const [answered, setAnswered] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [correctOption, setCorrectOption] = useState(null);
+  const [finalScore, setFinalScore] = useState(0);
+  const [imageRevealed, setImageRevealed] = useState(false);
+  const timerRef = useRef(null);
   const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
 
   const unlock = () => {
@@ -1564,18 +1573,118 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
     showFeedback('🕵️ Shadow Quiz unlocked!');
   };
 
+  useEffect(() => {
+    if (timerActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
+      return () => clearInterval(timerRef.current);
+    }
+    if (timerActive && timeLeft === 0) handleTimeout();
+  }, [timerActive, timeLeft]);
+
+  const getShadowPool = (levelNum) => {
+    const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
+    return shuffle(pool).slice(0, 5);
+  };
+
   const startLevel = (idx) => {
-    const pool = SHADOW_QUESTIONS.filter(q => q.level === idx + 1);
-    const qs = shuffle(pool).slice(0, 5);
+    const qs = getShadowPool(idx + 1);
     if (!qs.length) { showFeedback('No shadow questions for this level!'); return; }
     setCurrentLevel(idx);
     setQuestions(qs);
-    setQIdx(0);
+    setQIndex(0);
     setScore(0);
-    setHintsRevealed(0);
+    setStreak(0);
+    setCombo(0);
+    setHintRevealed(false);
     setAnswered(false);
-    setInput('');
+    setSelectedOption(null);
+    setCorrectOption(null);
+    setImageRevealed(false);
+    const t = levels[idx].timeSeconds;
+    setTimeLeft(t);
+    setMaxTime(t);
+    setTimerActive(true);
     setPhase('playing');
+  };
+
+  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
+
+  const handleTimeout = () => {
+    clearTimer();
+    setAnswered(true);
+    setImageRevealed(true);
+    const q = questions[qIndex];
+    setCorrectOption(q.correct);
+    playWrong();
+    showFeedback('⏰ Time\'s up!');
+    setTimeout(() => advance(false, score), 1200);
+  };
+
+  const advance = (wasCorrect, currentScore) => {
+    const nextIdx = qIndex + 1;
+    if (nextIdx < questions.length) {
+      setQIndex(nextIdx);
+      setHintRevealed(false);
+      setAnswered(false);
+      setSelectedOption(null);
+      setCorrectOption(null);
+      setImageRevealed(false);
+      const t = levels[currentLevel].timeSeconds;
+      setTimeLeft(t);
+      setMaxTime(t);
+      setTimerActive(true);
+    } else {
+      const fs = currentScore;
+      const passed = fs >= levels[currentLevel].minCorrect;
+      if (passed) {
+        const reward = levels[currentLevel].reward;
+        setSpades(s => s + reward);
+      }
+      updateBestScore('shadow', currentLevel, fs, questions.length);
+      setFinalScore(fs);
+      clearTimer();
+      setPhase('result');
+    }
+  };
+
+  const submitAnswer = (optIdx) => {
+    if (answered) return;
+    clearTimer();
+    const q = questions[qIndex];
+    const isCorrect = optIdx === q.correct;
+    setSelectedOption(optIdx);
+    setCorrectOption(q.correct);
+    setAnswered(true);
+    setImageRevealed(true);
+    if (isCorrect) {
+      const newCombo = combo + 1;
+      setScore(s => s + 1);
+      setStreak(streak + 1);
+      setCombo(newCombo);
+      playCorrect();
+      if (newCombo >= 3) {
+        const bonus = Math.floor(newCombo / 3) * 5;
+        setSpades(s => s + bonus);
+        playCombo();
+        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
+      } else {
+        showFeedback('✅ Correct!');
+      }
+      setTimeout(() => advance(true, score + 1), 1200);
+    } else {
+      setStreak(0);
+      setCombo(0);
+      playWrong();
+      showFeedback('❌ Wrong!');
+      setTimeout(() => advance(false, score), 1200);
+    }
+  };
+
+  const doHint = () => {
+    if (spades < 30 || hintRevealed || answered) return;
+    setSpades(s => s - 30);
+    setHintRevealed(true);
+    showFeedback('💡 Hint revealed! -30♠');
   };
 
   if (!unlocked) return (
@@ -1583,7 +1692,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
       <div className="shadow-silhouette">🕵️</div>
       <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Shadow Quiz</div>
       <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
-        Identify anime characters from silhouettes and clues.<br />A true fan's ultimate test.
+        Identify anime characters from their shadowed images!<br />A true fan's ultimate test.
       </div>
       <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
         <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
@@ -1601,7 +1710,8 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
       <div>
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-title" style={{ color: T.violet }}>🕵️ SHADOW QUIZ</div>
-          <p style={{ fontSize: 13, color: T.textMid }}>Identify anime characters from emoji silhouettes and hints! 5 characters per level.</p>
+          <p style={{ fontSize: 13, color: T.textMid }}>Guess the anime character from their shadowed image! 4 options, 5 questions per level.</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
         </div>
         {levels.map((lvl, idx) => {
           const best = lb[`shadow_${idx}`];
@@ -1610,7 +1720,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
               <span className="level-icon">{LEVEL_ICONS[idx]}</span>
               <div className="level-info">
                 <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">5 characters · +{lvl.reward}♠</div>
+                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
                 {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
@@ -1622,20 +1732,15 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   }
 
   if (phase === 'result') {
-    const passed = score >= levels[currentLevel].minCorrect;
-    if (passed) {
-      const reward = levels[currentLevel].reward;
-      // reward is given once on result render
-    }
-    updateBestScore('shadow', currentLevel, score, questions.length);
+    const passed = finalScore >= levels[currentLevel].minCorrect;
     return (
       <div className="result-screen">
         <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
         <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">You identified {score}/{questions.length} characters</div>
+        <div className="result-sub">You identified {finalScore}/{questions.length} characters</div>
         {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
         <button className="share-btn" onClick={() => {
-          const text = `I identified ${score}/${questions.length} shadow characters on ${levels[currentLevel].name}! 🕵️ #AniNoir`;
+          const text = `I identified ${finalScore}/${questions.length} shadow characters on ${levels[currentLevel].name}! 🕵️ #AniNoir`;
           if (navigator.share) navigator.share({ title: 'AniNoir Shadow Quiz', text }).catch(()=>{});
           else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
         }}>📤 Share Result</button>
@@ -1649,77 +1754,59 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
     );
   }
 
-  const q = questions[qIdx];
+  const q = questions[qIndex];
   if (!q) return null;
-
-  const submit = () => {
-    if (!input.trim() || answered) return;
-    const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
-    const isCorrect = norm(input) === norm(q.answer) || norm(q.answer).includes(norm(input));
-    setAnswered(true);
-    if (isCorrect) { setScore(s => s+1); playCorrect(); showFeedback('✅ Identified!'); }
-    else { playWrong(); showFeedback(`❌ It was ${q.answer}!`); }
-  };
-
-  const revealHint = () => {
-    if (hintsRevealed >= q.hints.length) return;
-    setHintsRevealed(h => h+1);
-    showFeedback('💡 Hint revealed!');
-  };
-
-  const next = () => {
-    const nextIdx = qIdx + 1;
-    if (nextIdx >= questions.length) {
-      // Give reward if passed
-      const passed = (score + (answered ? 0 : 0)) >= levels[currentLevel].minCorrect;
-      if (passed) setSpades(s => s + levels[currentLevel].reward);
-      setPhase('result');
-      return;
-    }
-    setQIdx(nextIdx);
-    setAnswered(false);
-    setInput('');
-    setHintsRevealed(0);
-  };
+  const progress = (qIndex / questions.length) * 100;
 
   return (
     <div>
-      <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx/questions.length)*100}%` }} /></div>
-      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:12, fontSize:13, color:T.textMid }}>
-        <span>{levels[currentLevel].name} · {qIdx+1}/{questions.length}</span>
-        <span>✅ {score} identified</span>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="quiz-header">
+        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13 }}>✅ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+        </div>
       </div>
-      <div className="card" style={{ textAlign:'center' }}>
-        <div className="card-title" style={{ color:T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
-        <div style={{ fontSize:96, margin:'16px 0', filter:answered?'none':'brightness(0)', transition:'filter 0.5s' }}>{q.silhouette}</div>
-        <div style={{ fontSize:13, color:T.textMid, marginBottom:12 }}>Anime: <span style={{ color:answered?T.teal:T.textDim }}>{answered?q.anime:'???'}</span></div>
-        {hintsRevealed > 0 && (
-          <div style={{ background:T.surface, borderRadius:12, padding:'10px 14px', marginBottom:12 }}>
-            {q.hints.slice(0, hintsRevealed).map((h,i) => (
-              <div key={i} style={{ fontSize:13, color:T.gold, marginBottom:4 }}>💡 {h}</div>
-            ))}
-          </div>
-        )}
-        {answered ? (
-          <div>
-            <div style={{ fontSize:18, fontWeight:800, color:T.success, marginBottom:12 }}>{q.answer}</div>
-            <button className="btn btn-primary btn-full" onClick={next}>
-              {qIdx+1 >= questions.length ? 'See Results' : 'Next Character →'}
-            </button>
-          </div>
-        ) : (
-          <div>
-            <input className="search-input" style={{ width:'100%', marginBottom:10 }} value={input}
-              onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="Character name..." />
-            <div style={{ display:'flex', gap:8 }}>
-              <button className="btn btn-secondary" onClick={revealHint} disabled={hintsRevealed>=q.hints.length} style={{ flex:1 }}>
-                💡 Hint ({q.hints.length - hintsRevealed} left)
-              </button>
-              <button className="btn btn-primary" onClick={submit} disabled={!input.trim()} style={{ flex:1 }}>
-                Submit
-              </button>
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div className="card-title" style={{ color: T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
+        <div style={{ margin: '16px auto', width: 150, height: 150, borderRadius: 16, overflow: 'hidden', border: `2px solid ${T.border}`, position: 'relative', background: T.surface }}>
+          <img
+            src={q.image}
+            alt="shadow character"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              filter: imageRevealed ? 'none' : 'brightness(0)',
+              transition: 'filter 0.6s ease'
+            }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          {!imageRevealed && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
+              🕵️
             </div>
-          </div>
+          )}
+        </div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>💡 {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          </button>
         )}
       </div>
     </div>
