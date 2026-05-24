@@ -1551,9 +1551,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   const [questions, setQuestions] = useState([]);
   const [qIdx, setQIdx] = useState(0);
   const [hintsRevealed, setHintsRevealed] = useState(0);
-  const [input, setInput] = useState('');
   const [answered, setAnswered] = useState(false);
   const [score, setScore] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
   const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
 
   const unlock = () => {
@@ -1574,7 +1574,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
     setScore(0);
     setHintsRevealed(0);
     setAnswered(false);
-    setInput('');
+    setSelectedOption(null);
     setPhase('playing');
   };
 
@@ -1652,34 +1652,32 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   const q = questions[qIdx];
   if (!q) return null;
 
-  const submit = () => {
-    if (!input.trim() || answered) return;
-    const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
-    const isCorrect = norm(input) === norm(q.answer) || norm(q.answer).includes(norm(input));
+  const submitAnswer = (optIdx) => {
+    if (answered) return;
+    const isCorrect = optIdx === q.correct;
+    setSelectedOption(optIdx);
     setAnswered(true);
-    if (isCorrect) { setScore(s => s+1); playCorrect(); showFeedback('✅ Identified!'); }
+    if (isCorrect) { setScore(s => s+1); playCorrect(); showFeedback('✅ Correct!'); }
     else { playWrong(); showFeedback(`❌ It was ${q.answer}!`); }
+    setTimeout(() => {
+      const nextIdx = qIdx + 1;
+      if (nextIdx >= questions.length) {
+        const passed = (score + (isCorrect ? 1 : 0)) >= levels[currentLevel].minCorrect;
+        if (passed) setSpades(s => s + levels[currentLevel].reward);
+        setPhase('result');
+      } else {
+        setQIdx(nextIdx);
+        setAnswered(false);
+        setSelectedOption(null);
+        setHintsRevealed(0);
+      }
+    }, 1200);
   };
 
   const revealHint = () => {
-    if (hintsRevealed >= q.hints.length) return;
+    if (hintsRevealed >= q.hints.length || answered) return;
     setHintsRevealed(h => h+1);
     showFeedback('💡 Hint revealed!');
-  };
-
-  const next = () => {
-    const nextIdx = qIdx + 1;
-    if (nextIdx >= questions.length) {
-      // Give reward if passed
-      const passed = (score + (answered ? 0 : 0)) >= levels[currentLevel].minCorrect;
-      if (passed) setSpades(s => s + levels[currentLevel].reward);
-      setPhase('result');
-      return;
-    }
-    setQIdx(nextIdx);
-    setAnswered(false);
-    setInput('');
-    setHintsRevealed(0);
   };
 
   return (
@@ -1691,35 +1689,37 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
       </div>
       <div className="card" style={{ textAlign:'center' }}>
         <div className="card-title" style={{ color:T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
-        <div style={{ fontSize:96, margin:'16px 0', filter:answered?'none':'brightness(0)', transition:'filter 0.5s' }}>{q.silhouette}</div>
+        {q.image ? (
+          <div style={{ margin:'16px auto', width:140, height:140, borderRadius:16, overflow:'hidden', border:`2px solid ${T.border}` }}>
+            <img src={q.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:answered?'none':'brightness(0.08) blur(1px)', transition:'filter 0.5s' }} onError={e=>{e.target.style.display='none';}} />
+          </div>
+        ) : (
+          <div style={{ fontSize:96, margin:'16px 0', filter:answered?'none':'brightness(0)', transition:'filter 0.5s' }}>{q.silhouette || '❓'}</div>
+        )}
         <div style={{ fontSize:13, color:T.textMid, marginBottom:12 }}>Anime: <span style={{ color:answered?T.teal:T.textDim }}>{answered?q.anime:'???'}</span></div>
         {hintsRevealed > 0 && (
-          <div style={{ background:T.surface, borderRadius:12, padding:'10px 14px', marginBottom:12 }}>
+          <div style={{ background:T.surface, borderRadius:12, padding:'10px 14px', marginBottom:12, textAlign:'left' }}>
             {q.hints.slice(0, hintsRevealed).map((h,i) => (
               <div key={i} style={{ fontSize:13, color:T.gold, marginBottom:4 }}>💡 {h}</div>
             ))}
           </div>
         )}
-        {answered ? (
-          <div>
-            <div style={{ fontSize:18, fontWeight:800, color:T.success, marginBottom:12 }}>{q.answer}</div>
-            <button className="btn btn-primary btn-full" onClick={next}>
-              {qIdx+1 >= questions.length ? 'See Results' : 'Next Character →'}
-            </button>
-          </div>
-        ) : (
-          <div>
-            <input className="search-input" style={{ width:'100%', marginBottom:10 }} value={input}
-              onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="Character name..." />
-            <div style={{ display:'flex', gap:8 }}>
-              <button className="btn btn-secondary" onClick={revealHint} disabled={hintsRevealed>=q.hints.length} style={{ flex:1 }}>
-                💡 Hint ({q.hints.length - hintsRevealed} left)
-              </button>
-              <button className="btn btn-primary" onClick={submit} disabled={!input.trim()} style={{ flex:1 }}>
-                Submit
-              </button>
-            </div>
-          </div>
+        <div style={{ textAlign:'left' }}>
+          {q.options.map((opt, idx) => {
+            let cls = 'option-btn';
+            if (answered) {
+              if (idx === q.correct) cls += ' correct';
+              else if (idx === selectedOption) cls += ' wrong';
+            }
+            return (
+              <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
+            );
+          })}
+        </div>
+        {!answered && (
+          <button className="btn btn-secondary btn-full" style={{ marginTop:8 }} onClick={revealHint} disabled={hintsRevealed>=q.hints.length}>
+            💡 Hint ({q.hints.length - hintsRevealed} left)
+          </button>
         )}
       </div>
     </div>
