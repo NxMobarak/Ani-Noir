@@ -15,6 +15,7 @@ import level2Emoji from './questions/level2_emoji';
 import level3Emoji from './questions/level3_emoji';
 import level4Emoji from './questions/level4_emoji';
 import level5Emoji from './questions/level5_emoji';
+import CHARACTER_BIRTHDAYS from './birthdays_data';
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -128,61 +129,7 @@ const ALL_EMOJI_QUESTIONS = [
   ...level5Emoji,
 ];
 
-// ─── Character Birthdays ────────────────────────────────────
-const CHARACTER_BIRTHDAYS = [
-  { name: "Naruto Uzumaki", anime: "Naruto", month: 10, day: 10 },
-  { name: "Luffy", anime: "One Piece", month: 5, day: 5 },
-  { name: "Goku", anime: "Dragon Ball", month: 4, day: 16 },
-  { name: "Ichigo Kurosaki", anime: "Bleach", month: 7, day: 15 },
-  { name: "Sakura Haruno", anime: "Naruto", month: 3, day: 28 },
-  { name: "Sasuke Uchiha", anime: "Naruto", month: 7, day: 23 },
-  { name: "Hinata Hyuga", anime: "Naruto", month: 12, day: 27 },
-  { name: "Zoro", anime: "One Piece", month: 11, day: 11 },
-  { name: "Nami", anime: "One Piece", month: 7, day: 3 },
-  { name: "Tanjiro Kamado", anime: "Demon Slayer", month: 7, day: 14 },
-  { name: "Nezuko Kamado", anime: "Demon Slayer", month: 12, day: 28 },
-  { name: "Levi Ackerman", anime: "Attack on Titan", month: 12, day: 25 },
-  { name: "Eren Yeager", anime: "Attack on Titan", month: 3, day: 30 },
-  { name: "Mikasa Ackerman", anime: "Attack on Titan", month: 2, day: 10 },
-  { name: "Light Yagami", anime: "Death Note", month: 2, day: 28 },
-  { name: "Edward Elric", anime: "Fullmetal Alchemist", month: 2, day: 3 },
-  { name: "Itachi Uchiha", anime: "Naruto", month: 6, day: 9 },
-  { name: "Kakashi Hatake", anime: "Naruto", month: 9, day: 15 },
-  { name: "Vegeta", anime: "Dragon Ball", month: 8, day: 15 },
-  { name: "Gojo Satoru", anime: "Jujutsu Kaisen", month: 12, day: 7 },
-  { name: "Yuji Itadori", anime: "Jujutsu Kaisen", month: 3, day: 20 },
-  { name: "Deku (Izuku Midoriya)", anime: "My Hero Academia", month: 7, day: 15 },
-  { name: "Todoroki Shoto", anime: "My Hero Academia", month: 1, day: 11 },
-  { name: "Killua Zoldyck", anime: "Hunter x Hunter", month: 7, day: 7 },
-  { name: "Gon Freecss", anime: "Hunter x Hunter", month: 5, day: 5 },
-  { name: "Asta", anime: "Black Clover", month: 10, day: 4 },
-  { name: "Zenitsu Agatsuma", anime: "Demon Slayer", month: 9, day: 3 },
-  { name: "Sanji", anime: "One Piece", month: 3, day: 2 },
-  { name: "Robin", anime: "One Piece", month: 2, day: 6 },
-  { name: "Rem", anime: "Re:Zero", month: 2, day: 2 },
-  { name: "Roronoa Zoro", anime: "One Piece", month: 11, day: 11 },
-  { name: "Erza Scarlet", anime: "Fairy Tail", month: 5, day: 15 },
-  { name: "Natsu Dragneel", anime: "Fairy Tail", month: 7, day: 7 },
-  { name: "Spike Spiegel", anime: "Cowboy Bebop", month: 6, day: 26 },
-  { name: "Lelouch Lamperouge", anime: "Code Geass", month: 12, day: 5 },
-  { name: "Saitama", anime: "One Punch Man", month: 3, day: 19 },
-  { name: "Genos", anime: "One Punch Man", month: 7, day: 4 },
-  { name: "Ochaco Uraraka", anime: "My Hero Academia", month: 12, day: 27 },
-  { name: "Bakugo Katsuki", anime: "My Hero Academia", month: 4, day: 20 },
-  { name: "Megumi Fushiguro", anime: "Jujutsu Kaisen", month: 12, day: 22 },
-  { name: "Sukuna", anime: "Jujutsu Kaisen", month: 1, day: 1 },
-  { name: "Senku Ishigami", anime: "Dr. Stone", month: 1, day: 4 },
-  { name: "Emilia", anime: "Re:Zero", month: 9, day: 23 },
-  { name: "Licht", anime: "Plunderer", month: 2, day: 14 },
-  { name: "Shinji Ikari", anime: "Evangelion", month: 6, day: 6 },
-  { name: "Asuka Langley", anime: "Evangelion", month: 12, day: 4 },
-  { name: "Rei Ayanami", anime: "Evangelion", month: 3, day: 30 },
-  { name: "Sailor Moon (Usagi)", anime: "Sailor Moon", month: 6, day: 30 },
-  { name: "Inuyasha", anime: "Inuyasha", month: 5, day: 27 },
-  { name: "Kaneki Ken", anime: "Tokyo Ghoul", month: 12, day: 20 },
-  { name: "Misa Amane", anime: "Death Note", month: 12, day: 25 },
-  { name: "Gaara", anime: "Naruto", month: 1, day: 19 },
-];
+// ─── Character Birthdays are imported from ./birthdays_data ─
 
 
 // ─── Leaderboard helpers ────────────────────────────────────
@@ -2040,35 +1987,135 @@ function NewsPage() {
 }
 
 
-// ─── Birthdays Page (NEW) ────────────────────────────────────
+// ─── Birthdays Page (Week View) ──────────────────────────────
 function BirthdaysPage() {
-  const currentMonth = new Date().getMonth() + 1;
-  const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
-  const thisMonthBirthdays = CHARACTER_BIRTHDAYS.filter(c => c.month === currentMonth)
-    .sort((a,b) => a.day - b.day);
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  // Get the start of the current week (Monday)
+  const getWeekStart = (offset = 0) => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+    const monday = new Date(now.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() + offset * 7);
+    return monday;
+  };
+
+  const weekStart = getWeekStart(weekOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const formatDate = (d) => `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
+  const weekLabel = `${formatDate(weekStart)} – ${formatDate(weekEnd)}`;
+
+  // Filter birthdays for this week
+  const thisWeekBirthdays = CHARACTER_BIRTHDAYS.filter(c => {
+    // Create a date for this character's birthday in the current context year
+    const bday = new Date(weekStart.getFullYear(), c.month - 1, c.day);
+    return bday >= weekStart && bday <= weekEnd;
+  }).sort((a, b) => {
+    if (a.month !== b.month) return a.month - b.month;
+    return a.day - b.day;
+  });
+
+  // Check if today is someone's birthday
+  const today = new Date();
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
+  const todayBirthdays = CHARACTER_BIRTHDAYS.filter(c => c.month === todayMonth && c.day === todayDay);
+
+  const getDayName = (month, day) => {
+    const d = new Date(weekStart.getFullYear(), month - 1, day);
+    return DAYS_SHORT[d.getDay() === 0 ? 6 : d.getDay() - 1];
+  };
 
   return (
-    <div>
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div className="card-title" style={{ color: T.rose }}>🎂 ANIME BIRTHDAYS — {MONTHS[currentMonth].toUpperCase()}</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Popular anime character birthdays this month!</p>
+    <div className="page-enter">
+      {/* Today's birthdays banner */}
+      {weekOffset === 0 && todayBirthdays.length > 0 && (
+        <div className="card" style={{ background: 'linear-gradient(135deg,rgba(244,63,94,0.15),rgba(245,158,11,0.15))', border: `1px solid rgba(244,63,94,0.3)`, marginBottom: 14 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: T.rose, marginBottom: 8 }}>🎉 TODAY'S BIRTHDAYS!</div>
+          {todayBirthdays.map((c, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 18 }}>🎂</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
+              <span style={{ fontSize: 11, color: T.textMid }}>({c.anime})</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Week navigation */}
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div className="card-title" style={{ color: T.rose, marginBottom: 8 }}>🎂 ANIME BIRTHDAYS</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w - 1)}>← Prev</button>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{weekLabel}</div>
+            <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>
+              {weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : weekOffset === -1 ? 'Last Week' : `${Math.abs(weekOffset)} weeks ${weekOffset > 0 ? 'ahead' : 'ago'}`}
+            </div>
+          </div>
+          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w + 1)}>Next →</button>
+        </div>
+        {weekOffset !== 0 && (
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: 10, padding: '8px', fontSize: 12 }} onClick={() => setWeekOffset(0)}>Back to This Week</button>
+        )}
       </div>
-      {thisMonthBirthdays.length === 0 ? (
+
+      {/* Stats */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: T.rose }}>{thisWeekBirthdays.length}</div>
+          <div style={{ fontSize: 11, color: T.textMid }}>This Week</div>
+        </div>
+        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: T.gold }}>{CHARACTER_BIRTHDAYS.length}</div>
+          <div style={{ fontSize: 11, color: T.textMid }}>Total Characters</div>
+        </div>
+      </div>
+
+      {/* Birthday list */}
+      {thisWeekBirthdays.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '30px 20px' }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎂</div>
-          <div style={{ fontSize: 14, color: T.textMid }}>No birthdays this month! Check back next month.</div>
+          <div style={{ fontSize: 14, color: T.textMid }}>No birthdays this week!</div>
+          <div style={{ fontSize: 12, color: T.textDim, marginTop: 4 }}>Try checking another week.</div>
         </div>
       ) : (
-        thisMonthBirthdays.map((char, i) => (
-          <div key={i} className="card" style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px' }}>
-            <div style={{ fontSize:28, width:44, textAlign:'center', background:T.roseGlow, borderRadius:12, padding:'8px 0' }}>🎂</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:700 }}>{char.name}</div>
-              <div style={{ fontSize:12, color:T.textMid }}>{char.anime}</div>
+        thisWeekBirthdays.map((char, i) => {
+          const isToday = char.month === todayMonth && char.day === todayDay;
+          return (
+            <div key={i} className="card" style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+              border: isToday ? `1.5px solid ${T.rose}` : undefined,
+              background: isToday ? 'rgba(244,63,94,0.06)' : undefined,
+            }}>
+              <div style={{
+                fontSize: 28, width: 44, textAlign: 'center',
+                background: isToday ? T.roseGlow : T.goldGlow,
+                borderRadius: 12, padding: '8px 0'
+              }}>
+                {isToday ? '🎉' : '🎂'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>
+                  {char.name}
+                  {isToday && <span style={{ marginLeft: 6, fontSize: 10, color: T.rose, fontWeight: 800 }}>TODAY!</span>}
+                </div>
+                <div style={{ fontSize: 12, color: T.textMid }}>{char.anime}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: T.gold }}>{MONTHS_SHORT[char.month - 1]} {char.day}</div>
+                <div style={{ fontSize: 10, color: T.textDim }}>{getDayName(char.month, char.day)}</div>
+              </div>
             </div>
-            <div style={{ fontSize:13, fontWeight:700, color:T.gold }}>{MONTHS[char.month]} {char.day}</div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
