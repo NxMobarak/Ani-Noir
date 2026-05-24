@@ -154,7 +154,7 @@ const NAV = [
   { id: 'home', icon: '🏠', label: 'Home' },
   { id: 'quiz', icon: '🧠', label: 'Quiz' },
   { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
-  { id: 'anagram', icon: '🔤', label: 'Anagram' },
+  { id: 'anagram', icon: '🔤', label: 'Anime Scrambler' },
   { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
@@ -643,7 +643,7 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
       <div className="card">
         <div className="card-title" style={{ color: T.teal }}>⚡ QUICK PLAY</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Anagram'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
+          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
             <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
               <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
             </button>
@@ -953,10 +953,10 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
       <div>
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-title" style={{ color: mcqOnly ? T.rose : T.violet }}>
-            {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANAGRAM CHALLENGE'}
+            {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANIME SCRAMBLER'}
           </div>
           <p style={{ fontSize: 13, color: T.textMid }}>
-            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Tap tiles to build the anime name!'}
+            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Unscramble anime titles! Tap tiles to build the name.'}
           </p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
         </div>
@@ -1015,7 +1015,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
       <div className="card">
         <div className="question-text">
-          {q.type === 'mcq' ? q.text : '🔤 UNTANGLE THE ANAGRAM'}
+          {q.type === 'mcq' ? q.text : '🔤 UNSCRAMBLE THE ANIME'}
         </div>
         {q.type === 'anagram' ? (
           <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
@@ -1956,7 +1956,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
 function ProfilePage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
-  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Anagram' : k.startsWith('emoji') ? '🎯 Emoji' : '🕵️ Shadow';
+  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : '🕵️ Shadow';
   const levelLabel = (k) => { const i = parseInt(k.split('_').pop()); return levels[i]?.name || `L${i+1}`; };
 
   return (
