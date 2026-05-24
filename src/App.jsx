@@ -1151,7 +1151,11 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
 
   const getEmojiPool = (levelNum) => {
     const pool = ALL_EMOJI_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5);
+    return shuffle(pool).slice(0, 5).map(q => {
+      const correctAnswer = q.options[q.correct];
+      const shuffledOptions = shuffle([...q.options]);
+      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
+    });
   };
 
   const startLevel = (idx) => {
@@ -1583,7 +1587,11 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
 
   const getShadowPool = (levelNum) => {
     const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5);
+    return shuffle(pool).slice(0, 5).map(q => {
+      const correctAnswer = q.options[q.correct];
+      const shuffledOptions = shuffle([...q.options]);
+      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
+    });
   };
 
   const startLevel = (idx) => {
@@ -2284,7 +2292,11 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
 
   const getFramesPool = (levelNum) => {
     const pool = ANIME_FRAMES_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5);
+    return shuffle(pool).slice(0, 5).map(q => {
+      const correctAnswer = q.options[q.correct];
+      const shuffledOptions = shuffle([...q.options]);
+      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
+    });
   };
 
   const startLevel = (idx) => {
