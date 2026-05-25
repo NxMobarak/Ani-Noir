@@ -2008,7 +2008,9 @@ const STREAMING_MAP = { 'Crunchyroll':'Crunchyroll','Netflix':'Netflix','Funimat
 
 function SearchPage({ showFeedback }) {
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState(null);
+  const [results, setResults] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [streaming, setStreaming] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [watchlist, setWatchlist] = useState(getWatchlist);
@@ -2016,43 +2018,46 @@ function SearchPage({ showFeedback }) {
   const search = async () => {
     const q = query.trim();
     if (!q) return;
-    setLoading(true); setResult(null); setNotFound(false);
+    setLoading(true); setResults([]); setSelected(null); setStreaming([]); setNotFound(false);
     try {
-      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1&sfw=true`);
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=5&sfw=true`);
       const data = await res.json();
       if (!data.data?.length) { setNotFound(true); setLoading(false); return; }
-      const a = data.data[0];
-      const tl = (a.title||'').toLowerCase(), tel = (a.title_english||'').toLowerCase(), ql = q.toLowerCase();
-      const sim = (s,t) => s.includes(t)||t.includes(s)||(t.split(' ').filter(w=>w.length>2).some(w=>s.includes(w)));
-      if (!sim(tl,ql) && !sim(tel,ql)) { setNotFound(true); setLoading(false); return; }
-      const streamRes = await fetch(`https://api.jikan.moe/v4/anime/${a.mal_id}/streaming`);
-      let streamLinks = [];
-      try { const sd = await streamRes.json(); streamLinks = (sd.data||[]).map(s=>s.name).slice(0,6); } catch {}
-      setResult({
+      setResults(data.data.map(a => ({
         title: a.title, titleEn: a.title_english,
         image: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url,
         synopsis: a.synopsis, score: a.score, episodes: a.episodes,
         status: a.status, year: a.year,
         studios: a.studios?.map(s=>s.name).join(', ')||'Unknown',
         genres: a.genres?.map(g=>g.name).join(', ')||'—',
-        rating: a.rating, streaming: streamLinks, malId: a.mal_id,
-      });
+        rating: a.rating, malId: a.mal_id,
+      })));
     } catch { showFeedback('Network error. Try again.'); }
     finally { setLoading(false); }
   };
 
-  const addToWatchlist = () => {
-    if (!result) return;
+  const selectResult = async (item) => {
+    setSelected(item);
+    setStreaming([]);
+    try {
+      const streamRes = await fetch(`https://api.jikan.moe/v4/anime/${item.malId}/streaming`);
+      const sd = await streamRes.json();
+      setStreaming((sd.data||[]).map(s=>s.name).slice(0,6));
+    } catch {}
+  };
+
+  const addToWatchlist = (item) => {
+    if (!item) return;
     const wl = getWatchlist();
-    if (wl.find(x => x.malId === result.malId)) { showFeedback('Already in watchlist!'); return; }
-    const item = { malId: result.malId, title: result.titleEn||result.title, image: result.image, genres: result.genres, score: result.score };
-    const updated = [item, ...wl];
+    if (wl.find(x => x.malId === item.malId)) { showFeedback('Already in watchlist!'); return; }
+    const entry = { malId: item.malId, title: item.titleEn||item.title, image: item.image, genres: item.genres, score: item.score };
+    const updated = [entry, ...wl];
     saveWatchlist(updated);
     setWatchlist(updated);
     showFeedback('Added to Watchlist!');
   };
 
-  const inWatchlist = result && watchlist.find(x => x.malId === result.malId);
+  const isInWatchlist = (malId) => watchlist.find(x => x.malId === malId);
 
 
   return (
@@ -2069,54 +2074,83 @@ function SearchPage({ showFeedback }) {
         <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
           <div style={{fontSize:40,marginBottom:12}}>🔎</div>
           <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Anime Not Found</div>
-          <div style={{fontSize:13,color:T.textMid}}>Incorrect anime name. Please type correctly and try again.</div>
+          <div style={{fontSize:13,color:T.textMid}}>No results found. Try a different search term.</div>
         </div>
       )}
 
-      {result && !loading && (
+      {/* Selected anime detail view */}
+      {selected && !loading && (
         <>
+          <button className="btn btn-secondary" style={{ marginBottom: 12, fontSize: 13 }} onClick={() => setSelected(null)}>
+            ← Back to Results
+          </button>
           <div className="card">
             <div className="anime-result">
-              {result.image && <img src={result.image} alt={result.title} className="anime-poster" onError={e=>e.target.style.display='none'} />}
+              {selected.image && <img src={selected.image} alt={selected.title} className="anime-poster" onError={e=>e.target.style.display='none'} />}
               <div className="anime-info">
-                <div className="anime-title">{result.titleEn||result.title}</div>
-                {result.titleEn && result.title!==result.titleEn && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{result.title}</div>}
+                <div className="anime-title">{selected.titleEn||selected.title}</div>
+                {selected.titleEn && selected.title!==selected.titleEn && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{selected.title}</div>}
                 <div className="anime-meta">
-                  {result.score && <span className="meta-badge">⭐ {result.score}</span>}
-                  {result.episodes && <span className="meta-badge">📺 {result.episodes} eps</span>}
-                  {result.year && <span className="meta-badge">📅 {result.year}</span>}
+                  {selected.score && <span className="meta-badge">⭐ {selected.score}</span>}
+                  {selected.episodes && <span className="meta-badge">📺 {selected.episodes} eps</span>}
+                  {selected.year && <span className="meta-badge">📅 {selected.year}</span>}
                 </div>
-                <div style={{fontSize:12,color:T.textMid}}>{result.status}</div>
+                <div style={{fontSize:12,color:T.textMid}}>{selected.status}</div>
               </div>
             </div>
-            {result.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>🎭 {result.genres}</div>}
-            {result.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>🎬 {result.studios}</div>}
-            <button className="btn btn-secondary btn-full" style={{ marginTop: 12 }} onClick={addToWatchlist} disabled={!!inWatchlist}>
-              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+            {selected.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>🎭 {selected.genres}</div>}
+            {selected.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>🎬 {selected.studios}</div>}
+            <button className="btn btn-secondary btn-full" style={{ marginTop: 12 }} onClick={() => addToWatchlist(selected)} disabled={!!isInWatchlist(selected.malId)}>
+              {isInWatchlist(selected.malId) ? 'In Watchlist' : 'Add to Watchlist'}
             </button>
           </div>
 
-          {result.synopsis && (
+          {selected.synopsis && (
             <div className="card">
               <div className="card-title" style={{color:T.violet}}>SYNOPSIS</div>
-              <p className="anime-synopsis">{result.synopsis.slice(0,300)}{result.synopsis.length>300?'...':''}</p>
+              <p className="anime-synopsis">{selected.synopsis.slice(0,300)}{selected.synopsis.length>300?'...':''}</p>
             </div>
           )}
 
           <div className="card">
             <div className="card-title" style={{color:T.teal}}>WHERE TO WATCH</div>
-            {result.streaming?.length ? (
-              <div>{result.streaming.map((s,i)=><span key={i} className="streaming-tag">{STREAMING_MAP[s]||s}</span>)}</div>
+            {streaming.length ? (
+              <div>{streaming.map((s,i)=><span key={i} className="streaming-tag">{STREAMING_MAP[s]||s}</span>)}</div>
             ) : (
               <div style={{fontSize:13,color:T.textMid}}>
-                Check <a href={`https://www.crunchyroll.com/search?q=${encodeURIComponent(result.title)}`} target="_blank" rel="noopener noreferrer" style={{color:T.teal}}>Crunchyroll</a> or <a href={`https://www.netflix.com/search?q=${encodeURIComponent(result.title)}`} target="_blank" rel="noopener noreferrer" style={{color:T.rose}}>Netflix</a>.
+                Check <a href={`https://www.crunchyroll.com/search?q=${encodeURIComponent(selected.title)}`} target="_blank" rel="noopener noreferrer" style={{color:T.teal}}>Crunchyroll</a> or <a href={`https://www.netflix.com/search?q=${encodeURIComponent(selected.title)}`} target="_blank" rel="noopener noreferrer" style={{color:T.rose}}>Netflix</a>.
               </div>
             )}
           </div>
 
-          <a href={`https://myanimelist.net/anime/${result.malId}`} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
+          <a href={`https://myanimelist.net/anime/${selected.malId}`} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
             <div className="card" style={{textAlign:'center',color:T.textMid,fontSize:13}}>View full details on MyAnimeList</div>
           </a>
+        </>
+      )}
+
+      {/* Results list */}
+      {!selected && results.length > 0 && !loading && (
+        <>
+          <div style={{ fontSize: 12, color: T.textMid, marginBottom: 10 }}>{results.length} results found — tap to view details</div>
+          {results.map((item, i) => (
+            <div key={item.malId} className="card" style={{ cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => selectResult(item)}>
+              <div className="anime-result">
+                {item.image && <img src={item.image} alt={item.title} className="anime-poster" style={{ width: 60, height: 85 }} onError={e=>e.target.style.display='none'} />}
+                <div className="anime-info">
+                  <div className="anime-title">{item.titleEn||item.title}</div>
+                  {item.titleEn && item.title!==item.titleEn && <div style={{fontSize:11,color:T.textDim,marginBottom:3}}>{item.title}</div>}
+                  <div className="anime-meta">
+                    {item.score && <span className="meta-badge">⭐ {item.score}</span>}
+                    {item.episodes && <span className="meta-badge">📺 {item.episodes} eps</span>}
+                    {item.year && <span className="meta-badge">📅 {item.year}</span>}
+                  </div>
+                  <div style={{fontSize:11,color:T.textDim,marginTop:3}}>{item.genres?.split(',').slice(0,3).join(', ')}</div>
+                </div>
+                <span style={{ color: T.textDim, fontSize: 20, flexShrink: 0 }}>›</span>
+              </div>
+            </div>
+          ))}
         </>
       )}
     </div>
