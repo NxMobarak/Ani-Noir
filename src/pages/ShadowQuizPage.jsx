@@ -30,14 +30,6 @@ const HeartIcon = () => (
   </svg>
 );
 
-const MenuIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <line x1="3" y1="12" x2="21" y2="12"/>
-    <line x1="3" y1="18" x2="21" y2="18"/>
-  </svg>
-);
-
 const BackspaceIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
     <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
@@ -59,6 +51,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [revealed, setRevealed] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(null);
   const [guess, setGuess] = useState('');
+  const [hintLetters, setHintLetters] = useState([]);
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
 
@@ -74,6 +67,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setRevealed(false);
     setWasCorrect(null);
     setGuess('');
+    setHintLetters([]);
     setPhase('playing');
   }, []);
 
@@ -121,7 +115,30 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setRevealed(false);
     setWasCorrect(null);
     setGuess('');
+    setHintLetters([]);
   };
+
+  const handleHint = useCallback(() => {
+    if (revealed || !currentChar) return;
+    if (spades < 10) {
+      showFeedback('Not enough ♠ for hint!');
+      return;
+    }
+    const name = currentChar.name;
+    // Find unrevealed letter positions (skip spaces and already hinted)
+    const available = [];
+    for (let i = 0; i < name.length; i++) {
+      if (name[i] !== ' ' && !hintLetters.includes(i)) {
+        available.push(i);
+      }
+    }
+    if (available.length === 0) return;
+    // Pick a random unrevealed position
+    const randomIdx = available[Math.floor(Math.random() * available.length)];
+    setHintLetters(prev => [...prev, randomIdx]);
+    setSpades(s => s - 10);
+    showFeedback(`💡 Hint: letter "${name[randomIdx].toUpperCase()}" revealed! -10 ♠`);
+  }, [revealed, currentChar, spades, hintLetters]);
 
   const handleSubmit = useCallback(() => {
     if (revealed || !currentChar || !guess.trim()) return;
@@ -251,23 +268,12 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   return (
     <section className="shadow-game" aria-label="Shadow Quiz Game">
       
-      {/* ─── Top Header ───────────────────────────────────────── */}
+      {/* ─── Clean Title Header ───────────────────────────────── */}
       <div className="sg-header">
-        <div className="sg-header-menu" aria-label="Menu">
-          <MenuIcon />
-        </div>
-        
+        <BackButton />
         <div className="sg-header-title">
           <span className="guess">GUESS</span>{' '}
           <span className="shadow">SHADOW</span>
-        </div>
-        
-        <div className="sg-header-right">
-          <div className="sg-header-stat">
-            <span className="icon">♠</span>
-            <span>{spades}</span>
-          </div>
-          <div className="sg-avatar">👤</div>
         </div>
       </div>
 
@@ -328,12 +334,23 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
 
         {/* Hint button */}
         {!revealed && (
-          <button className="sg-hint-btn" aria-label="Use hint for 10 diamonds">
+          <button className="sg-hint-btn" onClick={handleHint} aria-label="Use hint for 10 spades">
             <span className="bulb">💡</span>
-            <span className="cost">-10</span>
+            <span className="cost">-10 ♠</span>
           </button>
         )}
       </div>
+
+      {/* ─── Hint Letters Display ─────────────────────────────── */}
+      {hintLetters.length > 0 && !revealed && currentChar && (
+        <div className="sg-hint-display" aria-label="Hint letters">
+          {currentChar.name.split('').map((letter, i) => (
+            <span key={i} className={`sg-hint-letter ${hintLetters.includes(i) ? 'shown' : ''} ${letter === ' ' ? 'space' : ''}`}>
+              {hintLetters.includes(i) ? letter.toUpperCase() : letter === ' ' ? ' ' : '_'}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* ─── Reveal Info ──────────────────────────────────────── */}
       {revealed && (
