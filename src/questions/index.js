@@ -12,18 +12,29 @@ import { emojiQuestions } from './emoji_mcq';
 
 export { emojiQuestions };
 
-// Combine all questions with level and type
+// Deduplicate helper - removes questions with same text
+function dedup(arr) {
+  const seen = new Set();
+  return arr.filter(q => {
+    const key = q.text || q.answer || '';
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// Combine all questions with level and type (deduplicated per level)
 export const questionBank = [
-  ...level1mcq.map(q => ({ ...q, level: 1, type: 'mcq' })),
-  ...level1ana.map(q => ({ ...q, level: 1, type: 'anagram' })),
-  ...level2mcq.map(q => ({ ...q, level: 2, type: 'mcq' })),
-  ...level2ana.map(q => ({ ...q, level: 2, type: 'anagram' })),
-  ...level3mcq.map(q => ({ ...q, level: 3, type: 'mcq' })),
-  ...level3ana.map(q => ({ ...q, level: 3, type: 'anagram' })),
-  ...level4mcq.map(q => ({ ...q, level: 4, type: 'mcq' })),
-  ...level4ana.map(q => ({ ...q, level: 4, type: 'anagram' })),
-  ...level5mcq.map(q => ({ ...q, level: 5, type: 'mcq' })),
-  ...level5ana.map(q => ({ ...q, level: 5, type: 'anagram' }))
+  ...dedup(level1mcq).map(q => ({ ...q, level: 1, type: 'mcq' })),
+  ...dedup(level1ana).map(q => ({ ...q, level: 1, type: 'anagram' })),
+  ...dedup(level2mcq).map(q => ({ ...q, level: 2, type: 'mcq' })),
+  ...dedup(level2ana).map(q => ({ ...q, level: 2, type: 'anagram' })),
+  ...dedup(level3mcq).map(q => ({ ...q, level: 3, type: 'mcq' })),
+  ...dedup(level3ana).map(q => ({ ...q, level: 3, type: 'anagram' })),
+  ...dedup(level4mcq).map(q => ({ ...q, level: 4, type: 'mcq' })),
+  ...dedup(level4ana).map(q => ({ ...q, level: 4, type: 'anagram' })),
+  ...dedup(level5mcq).map(q => ({ ...q, level: 5, type: 'mcq' })),
+  ...dedup(level5ana).map(q => ({ ...q, level: 5, type: 'anagram' }))
 ];
 
 // ─── New 10-Stage System ─────────────────────────────────────

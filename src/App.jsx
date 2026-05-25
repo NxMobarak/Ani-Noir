@@ -1041,7 +1041,10 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly,
     let pool = questionBank.filter(q => q.level === levelNum);
     if (mcqOnly) pool = pool.filter(q => q.type === 'mcq');
     if (anagramOnly) pool = pool.filter(q => q.type === 'anagram');
-    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE);
+    // Assign fixed questions per stage (no repeats across stages)
+    const start = stageIdx * QUESTIONS_PER_STAGE;
+    const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
+    return shuffle(stageQuestions);
   };
 
   return (
@@ -1062,7 +1065,9 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
   const getQuestionPool = (mainLevelIdx, stageIdx) => {
     const levelNum = mainLevelIdx + 1;
     const pool = ALL_EMOJI_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
+    const start = stageIdx * QUESTIONS_PER_STAGE;
+    const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
+    return shuffle(stageQuestions).map(q => {
       const correctAnswer = q.options[q.correct];
       const shuffledOptions = shuffle([...q.options]);
       return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
@@ -1140,7 +1145,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
   const getQuestionPool = (mainLevelIdx, stageIdx) => {
     const levelNum = mainLevelIdx + 1;
     const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
+    const start = stageIdx * QUESTIONS_PER_STAGE;
+    const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
+    return shuffle(stageQuestions).map(q => {
       const correctAnswer = q.options[q.correct];
       const shuffledOptions = shuffle([...q.options]);
       return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
@@ -1223,7 +1230,9 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
   const getQuestionPool = (mainLevelIdx, stageIdx) => {
     const levelNum = mainLevelIdx + 1;
     const pool = ANIME_FRAMES_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
+    const start = stageIdx * QUESTIONS_PER_STAGE;
+    const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
+    return shuffle(stageQuestions).map(q => {
       const correctAnswer = q.options[q.correct];
       const shuffledOptions = shuffle([...q.options]);
       return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
