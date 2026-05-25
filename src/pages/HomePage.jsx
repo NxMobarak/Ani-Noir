@@ -69,6 +69,19 @@ export default function HomePage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
+  // Prevent back button from leaving the app when on home
+  useEffect(() => {
+    const handlePopState = () => {
+      // If we're on home and user presses back, push home again
+      if (window.location.pathname === '/') {
+        window.history.pushState(null, '', '/');
+      }
+    };
+    window.history.pushState(null, '', '/');
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   return (
     <div>
       <section className="hero-banner" aria-label="Welcome">
