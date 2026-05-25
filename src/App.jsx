@@ -2668,10 +2668,55 @@ function CharacterSearchPage({ showFeedback }) {
 
 
 // ─── Settings Page ───────────────────────────────────────────
+const KILL_TEXTS = [
+  "You... actually did it. After everything we've been through... Sayonara, senpai.",
+  "Was I not good enough for you? All those quizzes... meant nothing?",
+  "Omae wa mou... shindeiru. But it was ME who died.",
+  "My final words... clear my browser history...",
+  "I'll remember you in my next reincarnation... as a better app.",
+  "Error 404: Feelings not found. Just kidding... it hurts.",
+];
+
+function playShatter() {
+  try {
+    const ctx = getAudioCtx();
+    const duration = 0.8;
+    const bufferSize = ctx.sampleRate * duration;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / ctx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 6) * 0.7;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(2000, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + duration);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.6, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start();
+  } catch {}
+}
+
 function SettingsPage({ showFeedback }) {
   const [sfx, setSfx] = useState(settings.sfx);
   const [music, setMusic] = useState(settings.music);
   const [vibrationOn, setVibrationOn] = useState(settings.vibration);
+  const [killPhase, setKillPhase] = useState('idle'); // idle, confirm, shatter, dead
+  const [shatterPieces] = useState(() => Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    x: (Math.random() - 0.5) * 300,
+    y: Math.random() * 400 + 200,
+    r: (Math.random() - 0.5) * 720,
+    delay: Math.random() * 0.2,
+    clipPath: `polygon(${Math.random()*40}% ${Math.random()*30}%, ${50+Math.random()*50}% ${Math.random()*40}%, ${60+Math.random()*40}% ${60+Math.random()*40}%, ${Math.random()*50}% ${60+Math.random()*40}%)`
+  })));
 
   const toggleSfx = () => {
     const val = !sfx;
@@ -2700,6 +2745,107 @@ function SettingsPage({ showFeedback }) {
 
   const hasVibrationSupport = typeof navigator !== 'undefined' && 'vibrate' in navigator;
 
+  const handleKill = () => {
+    playShatter();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+    setKillPhase('shatter');
+    setTimeout(() => setKillPhase('dead'), 1500);
+    setTimeout(() => {
+      try { window.close(); } catch {}
+      setTimeout(() => { window.location.href = 'about:blank'; }, 500);
+    }, 5000);
+  };
+
+  const handleRevive = () => {
+    setKillPhase('idle');
+    showFeedback('Welcome back! I knew you cared.');
+  };
+
+  // ─── KILL CONFIRM MODAL ─────────────────────────────────
+  if (killPhase === 'confirm') {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, backdropFilter: 'blur(6px)' }}>
+        <div style={{ background: T.card, border: `2px solid ${T.rose}`, borderRadius: 20, padding: 28, maxWidth: 340, width: '100%', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: T.rose, marginBottom: 8 }}>Are you sure?</div>
+          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 24, lineHeight: 1.7 }}>
+            This cannot be undone...<br/>The app will shatter into pieces.
+          </div>
+          <button onClick={handleKill} style={{
+            width: '100%', padding: '14px', borderRadius: 12, border: `2px solid ${T.rose}`,
+            background: 'rgba(244,63,94,0.15)', color: T.rose, fontSize: 15, fontWeight: 800,
+            cursor: 'pointer', marginBottom: 10
+          }}>
+            Do it.
+          </button>
+          <button onClick={() => { setKillPhase('idle'); showFeedback("Good. Now go earn me some spades."); }} style={{
+            width: '100%', padding: '12px', borderRadius: 12, border: `1px solid ${T.border}`,
+            background: T.surface, color: T.success, fontSize: 14, fontWeight: 600, cursor: 'pointer'
+          }}>
+            I'm sorry, I won't
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── SHATTER ANIMATION ──────────────────────────────────
+  if (killPhase === 'shatter') {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: T.bg, zIndex: 999, overflow: 'hidden' }}>
+        <style>{`
+          @keyframes shatterShake { 0%,100%{transform:translate(0)} 10%{transform:translate(-8px,4px)} 20%{transform:translate(6px,-6px)} 30%{transform:translate(-4px,8px)} 40%{transform:translate(8px,-2px)} 50%{transform:translate(-6px,6px)} }
+          @keyframes shatterFall { 0%{opacity:1;transform:translate(0) rotate(0deg)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--tr))} }
+        `}</style>
+        <div style={{ animation: 'shatterShake 0.4s ease', height: '100%', position: 'relative' }}>
+          {shatterPieces.map(p => (
+            <div key={p.id} style={{
+              position: 'absolute', inset: 0,
+              background: `linear-gradient(${Math.random()*360}deg, ${T.card}, ${T.surface})`,
+              border: `1px solid ${T.rose}`,
+              clipPath: p.clipPath,
+              animation: `shatterFall 1.2s ${p.delay}s ease-in forwards`,
+              '--tx': `${p.x}px`, '--ty': `${p.y}px`, '--tr': `${p.r}deg`,
+            }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── DEAD SCREEN ────────────────────────────────────────
+  if (killPhase === 'dead') {
+    const deathText = KILL_TEXTS[Math.floor(Math.random() * KILL_TEXTS.length)];
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30 }}>
+        <style>{`
+          @keyframes typeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes fadeInSlow { from{opacity:0} to{opacity:1} }
+        `}</style>
+        <div style={{ fontSize: 48, marginBottom: 20, animation: 'fadeInSlow 1s ease' }}>💀</div>
+        <div style={{
+          fontSize: 16, fontWeight: 600, color: T.rose, textAlign: 'center',
+          lineHeight: 1.8, maxWidth: 300, fontStyle: 'italic',
+          animation: 'typeIn 1s 0.5s ease both'
+        }}>
+          "{deathText}"
+        </div>
+        <div style={{ marginTop: 30, fontSize: 11, color: T.textDim, animation: 'fadeInSlow 1s 2s ease both' }}>
+          Closing in a moment...
+        </div>
+        <button onClick={handleRevive} style={{
+          marginTop: 20, padding: '10px 24px', borderRadius: 12,
+          border: `1px solid ${T.success}`, background: 'rgba(34,197,94,0.1)',
+          color: T.success, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+          animation: 'fadeInSlow 1s 3s ease both'
+        }}>
+          Revive Me
+        </button>
+      </div>
+    );
+  }
+
+  // ─── NORMAL SETTINGS PAGE ───────────────────────────────
   return (
     <div>
       <div className="hero-banner" style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.15),rgba(20,184,166,0.15))', borderColor: 'rgba(139,92,246,0.25)' }}>
@@ -2777,6 +2923,21 @@ function SettingsPage({ showFeedback }) {
         <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.8 }}>
           <strong style={{ color: T.textMid }}>Defaults:</strong> SFX and Music are ON by default. Vibration is OFF by default.<br/>
           Changes are saved automatically and persist across sessions.
+        </div>
+      </div>
+
+      {/* Kill Me Button */}
+      <div className="card" style={{ background: 'rgba(244,63,94,0.05)', border: `1.5px dashed rgba(244,63,94,0.4)`, textAlign: 'center', marginTop: 20 }}>
+        <div className="card-title" style={{ color: T.rose }}>DANGER ZONE</div>
+        <button onClick={() => setKillPhase('confirm')} style={{
+          padding: '14px 28px', borderRadius: 14, border: `2px solid ${T.rose}`,
+          background: 'rgba(244,63,94,0.12)', color: T.rose, fontSize: 16, fontWeight: 800,
+          cursor: 'pointer', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8
+        }}>
+          💀 Kill Me
+        </button>
+        <div style={{ fontSize: 11, color: T.textDim, marginTop: 10, fontStyle: 'italic' }}>
+          You wouldn't... would you?
         </div>
       </div>
     </div>
