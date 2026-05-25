@@ -1396,27 +1396,20 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       <div className="card" style={{ textAlign: 'center', paddingBottom: 20 }}>
         <div className="card-title" style={{ color: T.violet }}>🕵️ GUESS THE CHARACTER</div>
         <div style={{
-          margin: '16px auto', width: 180, height: 180, borderRadius: 16,
+          margin: '16px auto', width: 200, height: 200, borderRadius: 16,
           overflow: 'hidden', border: `2px solid ${revealed ? T.success : T.border}`,
-          position: 'relative', background: '#000',
+          position: 'relative', background: '#f8f8f8',
           transition: 'border-color 0.4s'
         }}>
           <img
             src={`/shadows/${current.file}`}
             alt="mystery character"
             style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              filter: revealed ? 'none' : 'brightness(0)',
-              transition: 'filter 0.8s ease'
+              width: '100%', height: '100%', objectFit: 'contain',
+              filter: revealed ? 'none' : 'drop-shadow(0 0 0 #000)',
+              transition: 'filter 0.5s ease'
             }}
           />
-          {!revealed && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 48, opacity: 0.3
-            }}>?</div>
-          )}
         </div>
 
         {/* Letter Boxes */}
