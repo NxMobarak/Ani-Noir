@@ -2905,21 +2905,151 @@ function SettingsPage({ showFeedback }) {
   if (killPhase === 'dead') {
     const deathText = KILL_TEXTS[Math.floor(Math.random() * KILL_TEXTS.length)];
     return createPortal((
-      <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30 }}>
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: 'radial-gradient(ellipse at center, rgba(244,63,94,0.08) 0%, #000 60%)',
+        zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20, overflow: 'hidden'
+      }}>
         <style>{`
-          @keyframes typeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-          @keyframes fadeInSlow { from{opacity:0} to{opacity:1} }
+          @keyframes deadFadeIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+          @keyframes deadSkullFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+          @keyframes deadSkullPulse { 0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,0.5), inset 0 0 20px 2px rgba(255,255,255,0.1)} 50%{box-shadow:0 0 0 16px rgba(244,63,94,0), inset 0 0 30px 4px rgba(255,255,255,0.15)} }
+          @keyframes deadCardGlow { 0%,100%{box-shadow:0 0 0 1px rgba(244,63,94,0.4),0 0 40px 4px rgba(244,63,94,0.15),inset 0 1px 0 rgba(255,255,255,0.04)} 50%{box-shadow:0 0 0 1px rgba(244,63,94,0.6),0 0 60px 8px rgba(244,63,94,0.3),inset 0 1px 0 rgba(255,255,255,0.07)} }
+          @keyframes deadTypeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes deadFadeSlow { from{opacity:0} to{opacity:1} }
+          @keyframes deadParticleOrbit { from{transform:rotate(0deg) translateX(50px) rotate(0deg)} to{transform:rotate(360deg) translateX(50px) rotate(-360deg)} }
+          @keyframes deadParticleDrift { 0%{opacity:0;transform:translateY(0) scale(0)} 20%{opacity:1;transform:translateY(-20px) scale(1)} 100%{opacity:0;transform:translateY(-120px) scale(0.3)} }
+          @keyframes deadLineScan { 0%{transform:translateY(-100%);opacity:0} 50%{opacity:0.3} 100%{transform:translateY(400%);opacity:0} }
         `}</style>
-        <div style={{ fontSize: 48, marginBottom: 20, animation: 'fadeInSlow 1s ease' }}>💀</div>
+
+        {/* Background floating embers */}
+        {[...Array(8)].map((_, i) => (
+          <div key={`ember-${i}`} style={{
+            position: 'absolute',
+            left: `${10 + Math.random() * 80}%`,
+            bottom: `${Math.random() * 30}%`,
+            width: 4 + Math.random() * 4,
+            height: 4 + Math.random() * 4,
+            borderRadius: '50%',
+            background: T.rose,
+            opacity: 0.4 + Math.random() * 0.3,
+            filter: 'blur(1px)',
+            animation: `deadParticleDrift ${3 + Math.random() * 4}s ${Math.random() * 2}s ease-out infinite`
+          }} />
+        ))}
+
+        {/* Main card */}
         <div style={{
-          fontSize: 16, fontWeight: 600, color: T.rose, textAlign: 'center',
-          lineHeight: 1.8, maxWidth: 300, fontStyle: 'italic',
-          animation: 'typeIn 1s 0.5s ease both'
+          position: 'relative',
+          background: 'linear-gradient(165deg, rgba(20,22,32,0.88), rgba(10,12,18,0.95))',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(244,63,94,0.35)',
+          borderRadius: 24, padding: '60px 28px 32px',
+          maxWidth: 380, width: '100%', textAlign: 'center',
+          animation: 'deadFadeIn 0.6s cubic-bezier(.2,.9,.3,1.1), deadCardGlow 3s ease-in-out infinite 0.6s'
         }}>
-          "{deathText}"
-        </div>
-        <div style={{ marginTop: 30, fontSize: 11, color: T.textDim, animation: 'fadeInSlow 1s 2s ease both' }}>
-          Closing in a moment...
+
+          {/* Floating skull icon with orbiting particles */}
+          <div style={{
+            position: 'absolute', top: -42, left: '50%', marginLeft: -42,
+            width: 84, height: 84,
+            animation: 'deadSkullFloat 3s ease-in-out infinite'
+          }}>
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 28%, #1a1a2e, #0d0d14 70%)',
+              border: '2px solid rgba(244,63,94,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 38,
+              animation: 'deadSkullPulse 2.4s ease-in-out infinite',
+              filter: 'drop-shadow(0 10px 28px rgba(244,63,94,0.5))'
+            }}>
+              💀
+            </div>
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} style={{
+                position: 'absolute', top: '50%', left: '50%',
+                width: 5, height: 5, borderRadius: '50%',
+                background: i % 2 === 0 ? T.rose : 'rgba(255,255,255,0.6)',
+                boxShadow: `0 0 8px 2px ${i % 2 === 0 ? 'rgba(244,63,94,0.7)' : 'rgba(255,255,255,0.4)'}`,
+                marginTop: -2.5, marginLeft: -2.5,
+                animation: `deadParticleOrbit ${2.8 + i * 0.6}s linear infinite`,
+                animationDelay: `${-i * 0.7}s`
+              }} />
+            ))}
+          </div>
+
+          {/* Headline */}
+          <div style={{
+            fontSize: 20, fontWeight: 900, color: '#fff', marginBottom: 6,
+            letterSpacing: '-0.3px',
+            textShadow: '0 0 24px rgba(244,63,94,0.5)',
+            animation: 'deadTypeIn 0.8s 0.3s ease both'
+          }}>
+            It's done.
+          </div>
+          <div style={{
+            fontSize: 12.5, color: T.textDim, marginBottom: 20,
+            animation: 'deadFadeSlow 1s 0.6s ease both'
+          }}>
+            You actually went through with it...
+          </div>
+
+          {/* Quote card */}
+          <div style={{
+            background: 'rgba(244,63,94,0.06)',
+            border: '1px solid rgba(244,63,94,0.2)',
+            borderRadius: 14, padding: '18px 16px',
+            marginBottom: 20, position: 'relative', overflow: 'hidden',
+            animation: 'deadTypeIn 1s 0.8s ease both'
+          }}>
+            {/* Scan line effect */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(transparent, rgba(244,63,94,0.05), transparent)',
+              height: '30%',
+              animation: 'deadLineScan 4s linear infinite'
+            }} />
+            <div style={{ fontSize: 13, marginBottom: 10, opacity: 0.5 }}>💬</div>
+            <div style={{
+              fontSize: 15, fontWeight: 600, color: T.rose, textAlign: 'center',
+              lineHeight: 1.7, fontStyle: 'italic', position: 'relative'
+            }}>
+              "{deathText}"
+            </div>
+          </div>
+
+          {/* Status indicator */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            padding: '12px 16px', borderRadius: 10,
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            animation: 'deadFadeSlow 1s 1.5s ease both'
+          }}>
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: T.rose,
+              boxShadow: '0 0 8px rgba(244,63,94,0.7)',
+              animation: 'deadSkullPulse 1.5s ease-in-out infinite'
+            }} />
+            <span style={{ fontSize: 12, color: T.textMid, fontWeight: 600, letterSpacing: '0.5px' }}>
+              SHUTTING DOWN...
+            </span>
+          </div>
+
+          {/* Bottom divider & farewell */}
+          <div style={{
+            marginTop: 20, paddingTop: 16,
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            fontSize: 11, color: T.textDim,
+            animation: 'deadFadeSlow 1s 2s ease both'
+          }}>
+            <span style={{ fontSize: 12 }}>⚰️</span>
+            <span>Rest in pixels, Ani-Noir.</span>
+          </div>
         </div>
       </div>
     ), document.body);
