@@ -5,11 +5,6 @@ import level2Frames from './questions/level2_frames';
 import level3Frames from './questions/level3_frames';
 import level4Frames from './questions/level4_frames';
 import level5Frames from './questions/level5_frames';
-import level1Shadow from './questions/level1_shadow';
-import level2Shadow from './questions/level2_shadow';
-import level3Shadow from './questions/level3_shadow';
-import level4Shadow from './questions/level4_shadow';
-import level5Shadow from './questions/level5_shadow';
 import level1Emoji from './questions/level1_emoji';
 import level2Emoji from './questions/level2_emoji';
 import level3Emoji from './questions/level3_emoji';
@@ -167,7 +162,7 @@ const NAV = [
   { id: 'quiz', icon: '🧠', label: 'Quiz' },
   { id: 'anagram', icon: '🔤', label: 'Anime Scrambler' },
   { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
-  { id: 'shadow', icon: '🕵️', label: 'Shadow Quiz' },
+  { id: 'shadow', icon: '🕵️', label: 'Guess Shadow' },
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge' },
@@ -1130,96 +1125,394 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
 
 
 
-// ─── Shadow Quiz Page ────────────────────────────────────────
-const ALL_SHADOW_QUESTIONS = [
-  ...level1Shadow,
-  ...level2Shadow,
-  ...level3Shadow,
-  ...level4Shadow,
-  ...level5Shadow,
+// ─── Shadow Game: Guess the Character ───────────────────────
+const SHADOW_CHARACTERS = [
+  { file: 'all-might.webp', name: 'All Might' },
+  { file: 'alucard.webp', name: 'Alucard' },
+  { file: 'anya-forger.webp', name: 'Anya Forger' },
+  { file: 'ash.webp', name: 'Ash' },
+  { file: 'bakugo.webp', name: 'Bakugo' },
+  { file: 'chopper.webp', name: 'Chopper' },
+  { file: 'denji.webp', name: 'Denji' },
+  { file: 'edward.webp', name: 'Edward' },
+  { file: 'emilia.webp', name: 'Emilia' },
+  { file: 'eren.webp', name: 'Eren' },
+  { file: 'frieren.webp', name: 'Frieren' },
+  { file: 'gojo.webp', name: 'Gojo' },
+  { file: 'goku.webp', name: 'Goku' },
+  { file: 'gon.webp', name: 'Gon' },
+  { file: 'hisoka.webp', name: 'Hisoka' },
+  { file: 'ichigo.webp', name: 'Ichigo' },
+  { file: 'inosuke.webp', name: 'Inosuke' },
+  { file: 'itachi.webp', name: 'Itachi' },
+  { file: 'jinwoo.webp', name: 'Jinwoo' },
+  { file: 'jotato.webp', name: 'Jotaro' },
+  { file: 'kakashi.webp', name: 'Kakashi' },
+  { file: 'kaneki.webp', name: 'Kaneki' },
+  { file: 'killua.webp', name: 'Killua' },
+  { file: 'kitagawa.webp', name: 'Kitagawa' },
+  { file: 'l.webp', name: 'L' },
+  { file: 'levi.webp', name: 'Levi' },
+  { file: 'light.webp', name: 'Light' },
+  { file: 'loid-forger.webp', name: 'Loid Forger' },
+  { file: 'luffy.webp', name: 'Luffy' },
+  { file: 'makima.webp', name: 'Makima' },
+  { file: 'midoriya.webp', name: 'Midoriya' },
+  { file: 'mikasa.webp', name: 'Mikasa' },
+  { file: 'nami.webp', name: 'Nami' },
+  { file: 'naruto.webp', name: 'Naruto' },
+  { file: 'natsu.webp', name: 'Natsu' },
+  { file: 'nezuko.webp', name: 'Nezuko' },
+  { file: 'pikachu.webp', name: 'Pikachu' },
+  { file: 'power.webp', name: 'Power' },
+  { file: 'rem.webp', name: 'Rem' },
+  { file: 'rimuru.webp', name: 'Rimuru' },
+  { file: 'ryuk.webp', name: 'Ryuk' },
+  { file: 'sailor-moon.webp', name: 'Sailor Moon' },
+  { file: 'sanji.webp', name: 'Sanji' },
+  { file: 'sasuke.webp', name: 'Sasuke' },
+  { file: 'tanjiro.webp', name: 'Tanjiro' },
+  { file: 'todoroki.webp', name: 'Todoroki' },
+  { file: 'yor-forger.webp', name: 'Yor Forger' },
+  { file: 'zenitsu.webp', name: 'Zenitsu' },
+  { file: 'zero-two.webp', name: 'Zero Two' },
+  { file: 'zoro.webp', name: 'Zoro' },
 ];
 
-function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
-  const [imageRevealed, setImageRevealed] = useState(false);
+function ShadowQuizPage({ spades, setSpades, showFeedback }) {
+  const [phase, setPhase] = useState('intro'); // intro, playing, revealed, result
+  const [characters, setCharacters] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [revealed, setRevealed] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [answered, setAnswered] = useState(false);
+  const [wasCorrect, setWasCorrect] = useState(false);
+  const timerRef = useRef(null);
 
-  const getQuestionPool = (mainLevelIdx, stageIdx) => {
-    const levelNum = mainLevelIdx + 1;
-    const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
-    const start = stageIdx * QUESTIONS_PER_STAGE;
-    const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
-    return shuffle(stageQuestions).map(q => {
-      const correctAnswer = q.options[q.correct];
-      const shuffledOptions = shuffle([...q.options]);
-      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
-    });
+  // Start game
+  const startGame = () => {
+    const shuffled = shuffle([...SHADOW_CHARACTERS]);
+    setCharacters(shuffled);
+    setCurrentIdx(0);
+    setLives(3);
+    setScore(0);
+    setStreak(0);
+    setTimeLeft(30);
+    setRevealed(false);
+    setInputValue('');
+    setAnswered(false);
+    setWasCorrect(false);
+    setPhase('playing');
   };
 
-  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades, skipUsed }) => (
-    <div>
-      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-      <div className="quiz-header">
-        <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
-        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✓ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+  // Timer effect
+  useEffect(() => {
+    if (phase !== 'playing' || answered) return;
+    if (timeLeft <= 0) {
+      // Time's up - reveal the answer, count as wrong
+      handleTimeUp();
+      return;
+    }
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => t - 1);
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [phase, timeLeft, answered]);
+
+  const handleTimeUp = () => {
+    clearInterval(timerRef.current);
+    setRevealed(true);
+    setAnswered(true);
+    setWasCorrect(false);
+    const newLives = lives - 1;
+    setLives(newLives);
+    setStreak(0);
+    playWrong();
+    showFeedback("Time's up! -1 life");
+    if (newLives <= 0) {
+      setTimeout(() => setPhase('result'), 2000);
+    }
+  };
+
+  const submitGuess = () => {
+    if (answered || !inputValue.trim()) return;
+    clearInterval(timerRef.current);
+    const current = characters[currentIdx];
+    const guess = inputValue.trim().toLowerCase().replace(/[^a-z ]/g, '');
+    const answer = current.name.toLowerCase();
+    const isCorrect = guess === answer;
+
+    setAnswered(true);
+    setRevealed(true);
+    setWasCorrect(isCorrect);
+
+    if (isCorrect) {
+      const newScore = score + 1;
+      const newStreak = streak + 1;
+      setScore(newScore);
+      setStreak(newStreak);
+      playCorrect();
+      if (newScore % 5 === 0) {
+        setSpades(s => s + 100);
+        showFeedback(`Correct! +100 spades! (${newScore} correct)`);
+      } else if (newStreak >= 3) {
+        const bonus = Math.floor(newStreak / 3) * 5;
+        setSpades(s => s + bonus);
+        playCombo();
+        showFeedback(`Correct! ${newStreak}x streak +${bonus} spades`);
+      } else {
+        showFeedback('Correct!');
+      }
+    } else {
+      const newLives = lives - 1;
+      setLives(newLives);
+      setStreak(0);
+      playWrong();
+      showFeedback(`Wrong! The answer was: ${current.name}`);
+      if (newLives <= 0) {
+        setTimeout(() => setPhase('result'), 2000);
+        return;
+      }
+    }
+  };
+
+  const nextCharacter = () => {
+    const nextIdx = currentIdx + 1;
+    if (nextIdx >= characters.length) {
+      setPhase('result');
+      return;
+    }
+    setCurrentIdx(nextIdx);
+    setTimeLeft(30);
+    setRevealed(false);
+    setInputValue('');
+    setAnswered(false);
+    setWasCorrect(false);
+  };
+
+  const handleKeyPress = (letter) => {
+    if (answered) return;
+    const current = characters[currentIdx];
+    const namePattern = current.name;
+    // Calculate max input length (same as name length)
+    if (inputValue.length < namePattern.length) {
+      setInputValue(v => v + letter);
+    }
+  };
+
+  const handleBackspace = () => {
+    if (answered) return;
+    setInputValue(v => v.slice(0, -1));
+  };
+
+  const handleSpace = () => {
+    if (answered) return;
+    const current = characters[currentIdx];
+    if (inputValue.length < current.name.length) {
+      setInputValue(v => v + ' ');
+    }
+  };
+
+  // ─── INTRO SCREEN ─────────────────────────────────────────
+  if (phase === 'intro') {
+    return (
+      <div className="shadow-lock">
+        <div style={{ fontSize: 72, marginBottom: 16 }}>🕵️</div>
+        <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Guess the Character</div>
+        <div style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.7 }}>
+          A blacked-out silhouette will appear.<br/>
+          Guess the character name using the letter boxes!<br/>
+          You have <span style={{ color: T.rose, fontWeight: 700 }}>30 seconds</span> before the answer reveals.<br/>
         </div>
-      </div>
-      <div className="card" style={{ textAlign: 'center' }}>
-        <div className="card-title" style={{ color: T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
-        <div style={{ margin: '16px auto', width: 150, height: 150, borderRadius: 16, overflow: 'hidden', border: `2px solid ${T.border}`, position: 'relative', background: T.surface }}>
-          <img
-            src={q.image}
-            alt="shadow character"
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              filter: answered ? 'none' : 'brightness(0)',
-              transition: 'filter 0.6s ease'
-            }}
-            onError={e => { e.target.style.display = 'none'; }}
-          />
-          {!answered && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
-              🕵️
-            </div>
-          )}
+        <div className="card" style={{ textAlign: 'left', marginBottom: 20 }}>
+          <div className="card-title" style={{ color: T.rose }}>SURVIVAL RULES</div>
+          <div style={{ fontSize: 13, color: T.textMid, lineHeight: 2 }}>
+            <div>❤️ You have <strong style={{ color: T.text }}>3 lives</strong></div>
+            <div>❌ Wrong answer or time up = <strong style={{ color: T.rose }}>-1 life</strong></div>
+            <div>💀 Game over when lives reach 0</div>
+            <div>🏆 Every 5 correct = <strong style={{ color: T.gold }}>+100 spades</strong></div>
+            <div>🔥 3x streak = <strong style={{ color: T.gold }}>bonus spades</strong></div>
+          </div>
         </div>
-        {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>💡 {q.hint}</div>
-        )}
-        {q.options.map((opt, idx) => {
-          let cls = 'option-btn';
-          if (answered) {
-            if (idx === correctOption) cls += ' correct';
-            else if (idx === selectedOption) cls += ' wrong';
-          }
-          return (
-            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
-          );
-        })}
-      </div>
-      <div className="power-btns">
-        {q.hint && (
-          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
-          </button>
-        )}
-        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+        <button className="btn btn-primary btn-full" onClick={startGame}>
+          Start Game
         </button>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // ─── RESULT SCREEN ────────────────────────────────────────
+  if (phase === 'result') {
+    return (
+      <div className="result-screen">
+        <span className="result-emoji">💀</span>
+        <div className="result-title">Game Over!</div>
+        <div className="result-sub">You guessed {score} characters correctly</div>
+        <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>
+          Earned {Math.floor(score / 5) * 100} spades total
+        </div>
+        <button className="share-btn" onClick={() => {
+          const text = `I guessed ${score} anime characters by their shadow in AniNoir! #AniNoir #GuessTheShadow`;
+          if (navigator.share) navigator.share({ title: 'AniNoir Shadow Game', text }).catch(() => {});
+          else { navigator.clipboard?.writeText(text); showFeedback('Copied!'); }
+        }}>📤 Share Result</button>
+        <button className="btn btn-primary btn-full" style={{ marginTop: 8 }} onClick={startGame}>
+          Play Again
+        </button>
+        <button className="btn btn-secondary btn-full" style={{ marginTop: 8 }} onClick={() => setPhase('intro')}>
+          ← Back
+        </button>
+      </div>
+    );
+  }
+
+  // ─── PLAYING SCREEN ───────────────────────────────────────
+  const current = characters[currentIdx];
+  if (!current) return <div className="card"><p>Loading...</p></div>;
+  const nameWords = current.name.split(' ');
+  const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
   return (
-    <StageQuizPage
-      mode="shadow"
-      getQuestionPool={getQuestionPool}
-      spades={spades}
-      setSpades={setSpades}
-      showFeedback={showFeedback}
-      renderQuestion={renderQuestion}
-    />
+    <div>
+      {/* Header: lives, score, streak */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, padding: '0 4px' }}>
+        <div className="survival-lives">
+          {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '\u2764\uFE0F' : '\u{1F5A4}'}</span>)}
+        </div>
+        <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
+        <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
+      </div>
+
+      {/* Timer */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+        <CircularTimer timeLeft={timeLeft} maxTime={30} />
+      </div>
+
+      {/* Shadow Image */}
+      <div className="card" style={{ textAlign: 'center', paddingBottom: 20 }}>
+        <div className="card-title" style={{ color: T.violet }}>🕵️ GUESS THE CHARACTER</div>
+        <div style={{
+          margin: '16px auto', width: 180, height: 180, borderRadius: 16,
+          overflow: 'hidden', border: `2px solid ${revealed ? T.success : T.border}`,
+          position: 'relative', background: '#000',
+          transition: 'border-color 0.4s'
+        }}>
+          <img
+            src={`/shadows/${current.file}`}
+            alt="mystery character"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              filter: revealed ? 'none' : 'brightness(0)',
+              transition: 'filter 0.8s ease'
+            }}
+          />
+          {!revealed && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 48, opacity: 0.3
+            }}>?</div>
+          )}
+        </div>
+
+        {/* Letter Boxes */}
+        <div style={{ marginTop: 16, marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: T.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+            Character Name
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {nameWords.map((word, wIdx) => (
+              <div key={wIdx} style={{ display: 'flex', gap: 4 }}>
+                {word.split('').map((char, cIdx) => {
+                  // Calculate global position
+                  let globalPos = 0;
+                  for (let w = 0; w < wIdx; w++) globalPos += nameWords[w].length + 1; // +1 for space
+                  globalPos += cIdx;
+                  const typedChar = inputValue[globalPos] || '';
+                  const isCorrectChar = revealed && wasCorrect;
+                  const isWrongReveal = revealed && !wasCorrect;
+                  return (
+                    <div key={cIdx} style={{
+                      width: 28, height: 36, borderRadius: 6,
+                      border: `2px solid ${isCorrectChar ? T.success : isWrongReveal ? T.rose : typedChar ? T.violet : T.border}`,
+                      background: isCorrectChar ? 'rgba(34,197,94,0.12)' : isWrongReveal ? 'rgba(244,63,94,0.08)' : T.surface,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 14, fontWeight: 700,
+                      color: isCorrectChar ? T.success : isWrongReveal ? T.rose : T.text,
+                      transition: 'all 0.2s'
+                    }}>
+                      {revealed && !wasCorrect ? char.toUpperCase() : typedChar.toUpperCase()}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Result feedback */}
+        {answered && (
+          <div style={{ marginTop: 12, fontSize: 15, fontWeight: 700, color: wasCorrect ? T.success : T.rose }}>
+            {wasCorrect ? '✓ Correct!' : `✗ Answer: ${current.name}`}
+          </div>
+        )}
+      </div>
+
+      {/* On-screen Keyboard */}
+      {!answered && (
+        <div style={{ marginTop: 12 }}>
+          {KEYBOARD_ROWS.map((row, rIdx) => (
+            <div key={rIdx} style={{ display: 'flex', gap: 4, justifyContent: 'center', marginBottom: 4 }}>
+              {row.split('').map(letter => (
+                <button key={letter} onClick={() => handleKeyPress(letter.toLowerCase())}
+                  style={{
+                    width: 30, height: 38, borderRadius: 6,
+                    border: `1px solid ${T.border}`, background: T.card,
+                    color: T.text, fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.1s'
+                  }}>
+                  {letter}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: 4, justifyContent: 'center', marginTop: 4 }}>
+            <button onClick={handleBackspace}
+              style={{
+                flex: 1, maxWidth: 80, height: 38, borderRadius: 6,
+                border: `1px solid ${T.border}`, background: T.card,
+                color: T.rose, fontSize: 12, fontWeight: 700,
+                cursor: 'pointer'
+              }}>⌫</button>
+            <button onClick={handleSpace}
+              style={{
+                flex: 2, maxWidth: 140, height: 38, borderRadius: 6,
+                border: `1px solid ${T.border}`, background: T.card,
+                color: T.textMid, fontSize: 12, fontWeight: 600,
+                cursor: 'pointer'
+              }}>SPACE</button>
+            <button onClick={submitGuess}
+              style={{
+                flex: 1, maxWidth: 80, height: 38, borderRadius: 6,
+                border: 'none', background: T.rose,
+                color: 'white', fontSize: 12, fontWeight: 700,
+                cursor: 'pointer'
+              }}>GO</button>
+          </div>
+        </div>
+      )}
+
+      {/* Next button after answer */}
+      {answered && lives > 0 && (
+        <button className="btn btn-primary btn-full" style={{ marginTop: 14 }} onClick={nextCharacter}>
+          Next Character →
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -1551,7 +1844,6 @@ export default function App() {
   };
 
   const pageTitle = NAV.find(n => n.id === page)?.label || 'AniNoir';
-  const SHADOW_COST = 200;
   const EMOJI_COST = 200;
 
 
@@ -1584,7 +1876,7 @@ export default function App() {
               {page === 'quiz' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />}
               {page === 'emoji' && <EmojiQuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} unlockCost={EMOJI_COST} />}
               {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
-              {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={SHADOW_COST} />}
+              {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
               {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'search' && <SearchPage showFeedback={showFeedback} />}
