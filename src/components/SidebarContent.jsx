@@ -37,8 +37,6 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
         </button>
       </div>
       <div className="sidebar-nav" role="list">
-        <NavItem path="/" icon="🏠" label="Home" />
-
         <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Explore</div>
         <NavItem path="/search" icon="🔍" label="Anime Search" />
         <NavItem path="/charsearch" icon="👤" label="Character Search" />
