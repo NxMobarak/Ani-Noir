@@ -8,14 +8,24 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleNav = (item) => {
-    if (item.comingSoon) return;
+  const handleNav = (path) => {
     playClick();
-    navigate(item.path);
+    navigate(path);
     if (onCloseSidebar) onCloseSidebar();
   };
 
   const currentPath = location.pathname;
+
+  const NavItem = ({ path, icon, label }) => (
+    <button
+      className={`nav-item ${currentPath === path ? 'active' : ''}`}
+      onClick={() => handleNav(path)}
+      aria-current={currentPath === path ? 'page' : undefined}
+    >
+      <span className="icon" aria-hidden="true">{icon}</span>
+      {label}
+    </button>
+  );
 
   return (
     <>
@@ -27,39 +37,23 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
         </button>
       </div>
       <div className="sidebar-nav" role="list">
-        <button
-          className={`nav-item ${currentPath === '/' ? 'active' : ''}`}
-          onClick={() => handleNav({ path: '/', id: 'home' })}
-          aria-current={currentPath === '/' ? 'page' : undefined}
-        >
-          <span className="icon" aria-hidden="true">🏠</span>
-          Home
-        </button>
+        <NavItem path="/" icon="🏠" label="Home" />
 
-        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Have Fun</div>
-        {NAV.filter(n => ['search','charsearch','watchlist','news','birthdays'].includes(n.id)).map(n => (
-          <button
-            key={n.id}
-            className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
-            onClick={() => handleNav(n)}
-            aria-current={currentPath === n.path ? 'page' : undefined}
-          >
-            <span className="icon" aria-hidden="true">{n.icon}</span>
-            {n.label}
-          </button>
-        ))}
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Explore</div>
+        <NavItem path="/search" icon="🔍" label="Anime Search" />
+        <NavItem path="/charsearch" icon="👤" label="Character Search" />
+        <NavItem path="/watchlist" icon="📋" label="Watchlist" />
+        <NavItem path="/news" icon="📰" label="News" />
+        <NavItem path="/birthdays" icon="🎂" label="Birthdays" />
+
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Community</div>
+        <NavItem path="/news" icon="👥" label="Community" />
+        <NavItem path="/news" icon="💬" label="Discussions" />
+
         <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Account</div>
-        {NAV.filter(n => ['profile','settings','about'].includes(n.id)).map(n => (
-          <button
-            key={n.id}
-            className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
-            onClick={() => handleNav(n)}
-            aria-current={currentPath === n.path ? 'page' : undefined}
-          >
-            <span className="icon" aria-hidden="true">{n.icon}</span>
-            {n.label}
-          </button>
-        ))}
+        <NavItem path="/profile" icon="👤" label="Profile" />
+        <NavItem path="/settings" icon="⚙️" label="Settings" />
+        <NavItem path="/about" icon="ℹ️" label="About" />
         {onRulesClick && (
           <button className="nav-item" onClick={() => { onRulesClick(); if (onCloseSidebar) onCloseSidebar(); }}>
             <span className="icon" aria-hidden="true">📜</span>
