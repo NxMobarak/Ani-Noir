@@ -268,13 +268,9 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   return (
     <section className="shadow-game" aria-label="Shadow Quiz Game">
       
-      {/* ─── Clean Title Header ───────────────────────────────── */}
+      {/* ─── Header with Back ────────────────────────────────── */}
       <div className="sg-header">
         <BackButton />
-        <div className="sg-header-title">
-          <span className="guess">GUESS</span>{' '}
-          <span className="shadow">SHADOW</span>
-        </div>
       </div>
 
       {/* ─── Game Stats Area ──────────────────────────────────── */}
@@ -341,9 +337,9 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         )}
       </div>
 
-      {/* ─── Hint Letters Display ─────────────────────────────── */}
-      {hintLetters.length > 0 && !revealed && currentChar && (
-        <div className="sg-hint-display" aria-label="Hint letters">
+      {/* ─── Letter Blanks Display (always visible) ────────── */}
+      {!revealed && currentChar && (
+        <div className="sg-hint-display" aria-label="Character name letters">
           {currentChar.name.split('').map((letter, i) => (
             <span key={i} className={`sg-hint-letter ${hintLetters.includes(i) ? 'shown' : ''} ${letter === ' ' ? 'space' : ''}`}>
               {hintLetters.includes(i) ? letter.toUpperCase() : letter === ' ' ? ' ' : '_'}
@@ -365,7 +361,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       {/* ─── Input Field ──────────────────────────────────────── */}
       <div className="sg-input-area">
         <div className={`sg-input ${revealed ? (wasCorrect ? 'correct-border' : 'wrong-border') : guess ? 'active' : ''}`}>
-          {guess || <span className="sg-input-placeholder">Type character name...</span>}
+          {guess || ''}
         </div>
       </div>
 
