@@ -46,6 +46,22 @@ function shuffle(arr) {
 
 
 
+// ─── Settings helpers ────────────────────────────────────────
+const getSettings = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem('ani_settings') || '{}');
+    return { sfx: stored.sfx !== false, music: stored.music !== false, vibration: stored.vibration === true };
+  } catch { return { sfx: true, music: true, vibration: false }; }
+};
+const saveSettings = (s) => localStorage.setItem('ani_settings', JSON.stringify(s));
+const settings = getSettings();
+
+// ─── Vibration helper ───────────────────────────────────────
+function vibrate(pattern) {
+  if (!settings.vibration) return;
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
 // ─── Web Audio Sound Effects ────────────────────────────────
 const audioCtx = { ctx: null };
 function getAudioCtx() {
@@ -53,6 +69,7 @@ function getAudioCtx() {
   return audioCtx.ctx;
 }
 function playTone(frequency, type, duration, gain = 0.3, delay = 0) {
+  if (!settings.sfx) return;
   try {
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
@@ -70,16 +87,19 @@ function playCorrect() {
   playTone(523, 'sine', 0.12, 0.25);
   playTone(659, 'sine', 0.12, 0.25, 0.12);
   playTone(784, 'sine', 0.18, 0.25, 0.24);
+  vibrate(50);
 }
 function playWrong() {
   playTone(220, 'sawtooth', 0.2, 0.2);
   playTone(180, 'sawtooth', 0.2, 0.2, 0.15);
+  vibrate([30, 50, 30]);
 }
 function playClick() {
   playTone(880, 'sine', 0.05, 0.1);
 }
 function playCombo() {
   [523,659,784,1046].forEach((f,i) => playTone(f,'sine',0.1,0.3,i*0.07));
+  vibrate([20, 30, 20, 30, 20]);
 }
 
 
@@ -175,6 +195,7 @@ const NAV = [
   { id: 'watchlist', icon: '📋', label: 'Watchlist' },
   { id: 'news', icon: '📰', label: 'News' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays' },
+  { id: 'settings', icon: '⚙️', label: 'Settings' },
   { id: 'about', icon: 'ℹ️', label: 'About' },
 ];
 
@@ -1908,6 +1929,7 @@ export default function App() {
               {page === 'birthdays' && <BirthdaysPage />}
               {page === 'daily' && <DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'about' && <AboutPage spades={spades} badges={badges} />}
+              {page === 'settings' && <SettingsPage showFeedback={showFeedback} />}
             </div>
           </div>
         </div>
@@ -2638,6 +2660,125 @@ function CharacterSearchPage({ showFeedback }) {
           </a>
         </div>
       ))}
+    </div>
+  );
+}
+
+
+
+
+// ─── Settings Page ───────────────────────────────────────────
+function SettingsPage({ showFeedback }) {
+  const [sfx, setSfx] = useState(settings.sfx);
+  const [music, setMusic] = useState(settings.music);
+  const [vibrationOn, setVibrationOn] = useState(settings.vibration);
+
+  const toggleSfx = () => {
+    const val = !sfx;
+    setSfx(val);
+    settings.sfx = val;
+    saveSettings(settings);
+    showFeedback(val ? 'SFX enabled' : 'SFX muted');
+  };
+
+  const toggleMusic = () => {
+    const val = !music;
+    setMusic(val);
+    settings.music = val;
+    saveSettings(settings);
+    showFeedback(val ? 'Music enabled' : 'Music muted');
+  };
+
+  const toggleVibration = () => {
+    const val = !vibrationOn;
+    setVibrationOn(val);
+    settings.vibration = val;
+    saveSettings(settings);
+    if (val && navigator.vibrate) navigator.vibrate(50);
+    showFeedback(val ? 'Vibration enabled' : 'Vibration disabled');
+  };
+
+  const hasVibrationSupport = typeof navigator !== 'undefined' && 'vibrate' in navigator;
+
+  return (
+    <div>
+      <div className="hero-banner" style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.15),rgba(20,184,166,0.15))', borderColor: 'rgba(139,92,246,0.25)' }}>
+        <div style={{ fontSize: 18, fontWeight: 800 }}>Settings</div>
+        <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>Customize your AniNoir experience</div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{ color: T.rose }}>AUDIO & HAPTICS</div>
+
+        {/* SFX Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: `1px solid ${T.border}` }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Sound Effects (SFX)</div>
+            <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>Tones for correct/wrong answers, clicks</div>
+          </div>
+          <button onClick={toggleSfx} style={{
+            width: 50, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer',
+            background: sfx ? T.success : T.border, position: 'relative', transition: 'background 0.3s',
+            flexShrink: 0
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%', background: 'white',
+              position: 'absolute', top: 3,
+              left: sfx ? 25 : 3, transition: 'left 0.3s',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
+            }} />
+          </button>
+        </div>
+
+        {/* Music Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: `1px solid ${T.border}` }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Music</div>
+            <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>Background music for OP/ED challenges</div>
+          </div>
+          <button onClick={toggleMusic} style={{
+            width: 50, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer',
+            background: music ? T.success : T.border, position: 'relative', transition: 'background 0.3s',
+            flexShrink: 0
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%', background: 'white',
+              position: 'absolute', top: 3,
+              left: music ? 25 : 3, transition: 'left 0.3s',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
+            }} />
+          </button>
+        </div>
+
+        {/* Vibration Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0' }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Vibration / Haptics</div>
+            <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
+              {hasVibrationSupport ? 'Vibrate on correct/wrong answers' : 'Not supported on this device'}
+            </div>
+          </div>
+          <button onClick={toggleVibration} disabled={!hasVibrationSupport} style={{
+            width: 50, height: 28, borderRadius: 14, border: 'none', cursor: hasVibrationSupport ? 'pointer' : 'not-allowed',
+            background: vibrationOn ? T.success : T.border, position: 'relative', transition: 'background 0.3s',
+            opacity: hasVibrationSupport ? 1 : 0.4, flexShrink: 0
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%', background: 'white',
+              position: 'absolute', top: 3,
+              left: vibrationOn ? 25 : 3, transition: 'left 0.3s',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
+            }} />
+          </button>
+        </div>
+      </div>
+
+      <div className="card" style={{ background: T.surface }}>
+        <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.8 }}>
+          <strong style={{ color: T.textMid }}>Defaults:</strong> SFX and Music are ON by default. Vibration is OFF by default.<br/>
+          Changes are saved automatically and persist across sessions.
+        </div>
+      </div>
     </div>
   );
 }
