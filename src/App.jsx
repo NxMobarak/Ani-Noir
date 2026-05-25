@@ -1295,6 +1295,15 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setWasCorrect(false);
   };
 
+  // Auto-advance to next character after 5 seconds
+  useEffect(() => {
+    if (!answered || lives <= 0) return;
+    const autoTimer = setTimeout(() => {
+      nextCharacter();
+    }, 5000);
+    return () => clearTimeout(autoTimer);
+  }, [answered, lives, currentIdx]);
+
   const handleInputChange = (e) => {
     if (answered) return;
     const current = characters[currentIdx];
@@ -1302,6 +1311,14 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     const val = e.target.value.replace(/[^a-zA-Z]/g, ''); // only letters, no spaces
     if (val.length <= maxLen) {
       setInputValue(val);
+      // Auto-submit when all boxes filled
+      if (val.length === maxLen) {
+        setTimeout(() => {
+          const guess = val.toLowerCase().replace(/[^a-z]/g, '');
+          const answer = current.name.toLowerCase().replace(/[^a-z]/g, '');
+          if (guess.length === answer.length) submitGuess();
+        }, 200);
+      }
     }
   };
 
@@ -1386,12 +1403,13 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
           transition: 'border-color 0.4s'
         }}>
           <img
+            key={currentIdx}
             src={`/shadows/${current.file}`}
             alt="mystery character"
             style={{
               width: '100%', height: '100%', objectFit: 'contain',
-              filter: revealed ? 'none' : 'brightness(0)',
-              transition: 'filter 0.6s ease'
+              filter: revealed ? 'brightness(1)' : 'brightness(0)',
+              transition: revealed ? 'filter 0.6s ease' : 'none'
             }}
           />
         </div>
@@ -1439,41 +1457,25 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Native Input + Submit */}
+      {/* Hidden input to capture phone keyboard */}
       {!answered && (
-        <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', padding: '0 8px', flexShrink: 0 }}>
-          <input
-            type="text"
-            autoFocus
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
-            placeholder="Type character name..."
-            style={{
-              flex: 1, maxWidth: 240, height: 42, borderRadius: 10,
-              border: `1.5px solid ${T.border}`, background: T.surface,
-              color: T.text, fontSize: 15, fontWeight: 600,
-              padding: '0 14px', outline: 'none',
-              transition: 'border-color 0.2s'
-            }}
-            onFocus={(e) => { e.target.style.borderColor = T.rose; setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300); }}
-            onBlur={(e) => e.target.style.borderColor = T.border}
-          />
-          <button onClick={submitGuess}
-            style={{
-              width: 60, height: 42, borderRadius: 10,
-              border: 'none', background: T.rose,
-              color: 'white', fontSize: 13, fontWeight: 700,
-              cursor: 'pointer'
-            }}>GO</button>
-        </div>
+        <input
+          type="text"
+          autoFocus
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
+          style={{
+            position: 'absolute', left: '-9999px', top: 0, width: 1, height: 1, opacity: 0
+          }}
+        />
       )}
 
-      {/* Next button after answer */}
+      {/* Next button after answer + auto-advance */}
       {answered && lives > 0 && (
         <button className="btn btn-primary btn-full" style={{ marginTop: 14, flexShrink: 0 }} onClick={nextCharacter}>
           Next Character →
