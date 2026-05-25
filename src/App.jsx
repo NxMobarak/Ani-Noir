@@ -1398,7 +1398,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         <div style={{
           margin: '16px auto', width: 200, height: 200, borderRadius: 16,
           overflow: 'hidden', border: `2px solid ${revealed ? T.success : T.border}`,
-          position: 'relative', background: '#f8f8f8',
+          position: 'relative', background: '#ffffff',
           transition: 'border-color 0.4s'
         }}>
           <img
@@ -1406,8 +1406,8 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
             alt="mystery character"
             style={{
               width: '100%', height: '100%', objectFit: 'contain',
-              filter: revealed ? 'none' : 'drop-shadow(0 0 0 #000)',
-              transition: 'filter 0.5s ease'
+              filter: revealed ? 'none' : 'brightness(0)',
+              transition: 'filter 0.6s ease'
             }}
           />
         </div>
