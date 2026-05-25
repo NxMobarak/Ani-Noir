@@ -240,11 +240,11 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   // ═══════════════════════════════════════════════════════════════
   if (phase === 'intro') {
     return (
-      <section className="shadow-game sg-intro" aria-label="Shadow Quiz Introduction">
+      <section className="shadow-game sg-intro" aria-label="Anime Shadow Introduction">
         <BackButton />
         <div className="sg-intro-icon" aria-hidden="true">🕶️</div>
         <div className="sg-intro-title">
-          <span className="guess">GUESS THE</span>
+          <span className="guess">ANIME</span>
           <span className="shadow">SHADOW</span>
         </div>
         <p className="sg-intro-desc">
@@ -257,7 +257,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
           <span>♠️</span> Every 5 correct = +100 spades<br />
           <span>🔥</span> 3x streak = bonus reward
         </div>
-        <button className="sg-start-btn" onClick={startGame} aria-label="Start Shadow Quiz">
+        <button className="sg-start-btn" onClick={startGame} aria-label="Start Anime Shadow">
           ENTER THE SHADOWS
         </button>
       </section>
@@ -289,7 +289,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   // PLAYING SCREEN
   // ═══════════════════════════════════════════════════════════════
   return (
-    <section className="shadow-game" aria-label="Shadow Quiz Game">
+    <section className="shadow-game" aria-label="Anime Shadow Game">
       
       {/* ─── Header with Back ────────────────────────────────── */}
       <div className="sg-header">

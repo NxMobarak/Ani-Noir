@@ -46,7 +46,7 @@ export default function HomePage() {
         <div className="hero-greeting">{greeting}, Otaku!</div>
         <p className="hero-sub">Ready to test your anime knowledge?</p>
         <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10 }} onClick={() => navigate('/quiz')}>
-          Start Quiz
+          Start Anime Quiz
         </button>
       </section>
 
@@ -77,7 +77,7 @@ export default function HomePage() {
       <section className="card" aria-label="Quick Play">
         <h2 className="card-title" style={{ color: T.teal }}>QUICK PLAY</h2>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} role="group" aria-label="Game modes">
-          {[['quiz', '🧠', 'Quiz'], ['/emoji', '🎯', 'Emoji'], ['/anagram', '🔤', 'Scramble'], ['/frames', '🖼️', 'Frames'], ['/shadow', '🕵️', 'Shadow'], ['/survival', '💀', 'Survive'], ['/daily', '📅', 'Daily']].map(([path, ico, lbl]) => (
+          {[['quiz', '🧠', 'Quiz'], ['/emoji', '🎯', 'Emoji Wars'], ['/anagram', '🔤', 'Word Ninja'], ['/frames', '🖼️', 'Moments'], ['/shadow', '🕵️', 'Shadow'], ['/survival', '💀', 'Survival'], ['/daily', '📅', 'Daily']].map(([path, ico, lbl]) => (
             <button key={path} className="btn btn-secondary" style={{ flex: '1 0 28%', flexDirection: 'column', gap: 4, padding: '10px 4px', fontSize: 10 }} onClick={() => navigate(path.startsWith('/') ? path : `/${path}`)}>
               <span style={{ fontSize: 20 }} aria-hidden="true">{ico}</span><span>{lbl}</span>
             </button>

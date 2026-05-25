@@ -45,7 +45,7 @@ export default function RulesModal({ onClose }) {
             <li>+1000&#9824; for mastering all 5 levels</li>
             <li>+5&#9824; bonus per 3x combo streak</li>
             <li>+30&#9824; for daily challenge</li>
-            <li>+100&#9824; per 5 correct in Survival</li>
+            <li>+100&#9824; per 5 correct in Survival Mode</li>
           </ul>
         </div>
 

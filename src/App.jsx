@@ -176,8 +176,8 @@ export default function App() {
                   <Route path="/frames" element={<AnimeFramesPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/opening" element={<ComingSoonPage title="Opening Challenge" icon="🎵" />} />
                   <Route path="/ending" element={<ComingSoonPage title="Ending Challenge" icon="🎶" />} />
-                  <Route path="/sceneguess" element={<ComingSoonPage title="Guess the Scene" icon="🎬" />} />
-                  <Route path="/dialogue" element={<ComingSoonPage title="Dialogue Challenge" icon="💬" />} />
+                  <Route path="/sceneguess" element={<ComingSoonPage title="Frame Guess" icon="🎬" />} />
+                  <Route path="/dialogue" element={<ComingSoonPage title="Dialogue Clash" icon="💬" />} />
                   <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/daily" element={<DailyPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/search" element={<SearchPage showFeedback={showFeedback} />} />

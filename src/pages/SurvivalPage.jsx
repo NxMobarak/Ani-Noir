@@ -121,6 +121,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
       <div style={{ padding: 20, textAlign: 'center' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>⚔️</div>
         <h2 style={{ color: T.text, marginBottom: 8 }}>Survival Mode</h2>
+
         <p style={{ color: T.textMid, marginBottom: 8, fontSize: 14 }}>
           Infinite quiz – how far can you go with 3 lives?
         </p>
