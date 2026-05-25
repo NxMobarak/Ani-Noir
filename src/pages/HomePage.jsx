@@ -32,6 +32,35 @@ const LatestYouTubeCard = memo(function LatestYouTubeCard() {
   );
 });
 
+// Calculate time until midnight IST
+function getTimeUntilMidnightIST() {
+  const now = new Date();
+  // IST is UTC+5:30
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istNow = new Date(now.getTime() + istOffset + now.getTimezoneOffset() * 60000);
+  const midnightIST = new Date(istNow);
+  midnightIST.setHours(24, 0, 0, 0);
+  const diff = midnightIST.getTime() - istNow.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { hours, minutes, seconds };
+}
+
+function DailyTimer() {
+  const [time, setTime] = useState(getTimeUntilMidnightIST);
+  useEffect(() => {
+    const interval = setInterval(() => setTime(getTimeUntilMidnightIST()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    <span style={{ fontSize: 10, color: T.gold, fontWeight: 700 }}>
+      {pad(time.hours)}:{pad(time.minutes)}:{pad(time.seconds)}
+    </span>
+  );
+}
+
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -52,6 +81,49 @@ export default function HomePage() {
 
       <LatestYouTubeCard />
 
+      {/* ALL GAMES - 9 games in 3x3 grid */}
+      <section className="card" aria-label="All Games">
+        <h2 className="card-title" style={{ color: T.teal }}>ALL GAMES</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
+          {[
+            ['/quiz', '🧠', 'Anime Quiz'],
+            ['/anagram', '🔤', 'Word Ninja'],
+            ['/emoji', '🎯', 'Emoji Wars'],
+            ['/shadow', '🕵️', 'Anime Shadow'],
+            ['/frames', '🖼️', 'Anime Moments'],
+            ['/sceneguess', '🎬', 'Frame Guess'],
+            ['/dialogue', '💬', 'Dialogue Clash'],
+            ['/opening', '🎵', 'Opening Challenge'],
+            ['/ending', '🎶', 'Ending Challenge'],
+          ].map(([path, ico, lbl]) => (
+            <button key={path} className="btn btn-secondary" style={{ flexDirection: 'column', gap: 4, padding: '12px 6px', fontSize: 10 }} onClick={() => navigate(path)}>
+              <span style={{ fontSize: 22 }} aria-hidden="true">{ico}</span>
+              <span style={{ lineHeight: 1.2, textAlign: 'center' }}>{lbl}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ULTIMATE CHALLENGE - Survival + Daily */}
+      <section className="card" aria-label="Ultimate Challenge">
+        <h2 className="card-title" style={{ color: T.rose }}>ULTIMATE CHALLENGE</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }} role="group" aria-label="Challenge modes">
+          <button className="btn btn-secondary" style={{ flexDirection: 'column', gap: 6, padding: '14px 8px', fontSize: 11 }} onClick={() => navigate('/survival')}>
+            <span style={{ fontSize: 26 }} aria-hidden="true">💀</span>
+            <span style={{ fontWeight: 700 }}>Survival Mode</span>
+            <span style={{ fontSize: 9, color: T.textDim }}>How far can you go?</span>
+          </button>
+          <button className="btn btn-secondary" style={{ flexDirection: 'column', gap: 6, padding: '14px 8px', fontSize: 11 }} onClick={() => navigate('/daily')}>
+            <span style={{ fontSize: 26 }} aria-hidden="true">📅</span>
+            <span style={{ fontWeight: 700 }}>Daily Challenge</span>
+            <span style={{ fontSize: 9, color: T.textDim, display: 'flex', alignItems: 'center', gap: 4 }}>
+              Resets in <DailyTimer />
+            </span>
+          </button>
+        </div>
+      </section>
+
+      {/* ANIME OF THE DAY */}
       <section style={{ marginBottom: 6 }} aria-label="Anime of the Day">
         <h2 className="card-title" style={{ color: T.rose, padding: '0 2px 8px', fontSize: 11 }}>ANIME OF THE DAY</h2>
         <div className="daily-anime-card">
@@ -72,17 +144,6 @@ export default function HomePage() {
           <p className="quote-text">"{dailyQuote.text}"</p>
           <cite className="quote-attr" style={{ fontStyle: 'normal' }}>— {dailyQuote.char} · {dailyQuote.anime}</cite>
         </blockquote>
-      </section>
-
-      <section className="card" aria-label="Quick Play">
-        <h2 className="card-title" style={{ color: T.teal }}>QUICK PLAY</h2>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} role="group" aria-label="Game modes">
-          {[['quiz', '🧠', 'Quiz'], ['/emoji', '🎯', 'Emoji Wars'], ['/anagram', '🔤', 'Word Ninja'], ['/frames', '🖼️', 'Moments'], ['/shadow', '🕵️', 'Shadow'], ['/survival', '💀', 'Survival'], ['/daily', '📅', 'Daily'], ['/profile', '👤', 'Profile']].map(([path, ico, lbl]) => (
-            <button key={path} className="btn btn-secondary" style={{ flex: '1 0 28%', flexDirection: 'column', gap: 4, padding: '10px 4px', fontSize: 10 }} onClick={() => navigate(path.startsWith('/') ? path : `/${path}`)}>
-              <span style={{ fontSize: 20 }} aria-hidden="true">{ico}</span><span>{lbl}</span>
-            </button>
-          ))}
-        </div>
       </section>
     </div>
   );
