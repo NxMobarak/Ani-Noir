@@ -17,6 +17,7 @@ const NAV = [
   { id: 'watchlist', icon: '📋', label: 'Watchlist', path: '/watchlist' },
   { id: 'news', icon: '📰', label: 'News', path: '/news' },
   { id: 'birthdays', icon: '🎂', label: 'Birthdays', path: '/birthdays' },
+  { id: 'profile', icon: '👤', label: 'Profile', path: '/profile' },
   { id: 'settings', icon: '⚙️', label: 'Settings', path: '/settings' },
   { id: 'about', icon: 'ℹ️', label: 'About', path: '/about' },
 ];

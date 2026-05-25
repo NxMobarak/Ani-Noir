@@ -27,6 +27,7 @@ const NewsPage = lazy(() => import('./pages/NewsPage'));
 const BirthdaysPage = lazy(() => import('./pages/BirthdaysPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 // Loading fallback for lazy-loaded pages
 function PageLoader() {
@@ -152,6 +153,7 @@ export default function App() {
           <button className="menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" aria-expanded={sidebarOpen}>☰</button>
           <h1 className="topbar-title" style={{ fontSize: 16, fontWeight: 700 }}>{pageTitle}</h1>
           <div className="topbar-chips" role="toolbar" aria-label="Quick actions">
+            <button className="chip" onClick={() => navigate('/profile')} aria-label="Profile" style={{ padding: '4px 8px' }}>👤</button>
             <button className="chip" onClick={() => setRulesModal(true)} aria-label="View rules">📜</button>
             <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${spades} spades`}>
               ♠ {spades}
@@ -186,6 +188,7 @@ export default function App() {
                   <Route path="/news" element={<NewsPage />} />
                   <Route path="/birthdays" element={<BirthdaysPage />} />
                   <Route path="/settings" element={<SettingsPage showFeedback={showFeedback} />} />
+                  <Route path="/profile" element={<ProfilePage spades={spades} badges={badges} showFeedback={showFeedback} />} />
                   <Route path="/about" element={<AboutPage spades={spades} badges={badges} />} />
                 </Routes>
               </Suspense>
