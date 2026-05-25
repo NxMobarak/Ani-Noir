@@ -1318,13 +1318,13 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     }
   };
 
-  // Auto-submit when all boxes are filled
+  // Auto-submit 2 seconds after all boxes are filled (or user can press Enter anytime)
   useEffect(() => {
     if (answered || !characters[currentIdx]) return;
     const current = characters[currentIdx];
     const maxLen = current.name.replace(/\s/g, '').length;
     if (inputValue.length === maxLen && inputValue.length > 0) {
-      const timer = setTimeout(() => submitGuess(), 200);
+      const timer = setTimeout(() => submitGuess(), 2000);
       return () => clearTimeout(timer);
     }
   }, [inputValue]);
