@@ -1,14 +1,89 @@
 {
   "short_name": "AniNoir",
-  "name": "AniNoir – Anime Quiz",
-  "description": "Your ultimate anime quiz and discovery app",
-  "icons": [
-    { "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }
-  ],
-  "start_url": ".",
+  "name": "AniNoir – Anime Quiz Universe",
+  "description": "Your ultimate anime quiz, discovery and trivia app. Test your anime knowledge with shadow quizzes, emoji challenges, anagram puzzles and more!",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#07080f",
   "background_color": "#07080f",
-  "categories": ["games", "entertainment"],
-  "gcm_sender_id": "103953800507"
+  "categories": ["games", "entertainment", "education"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "AniNoir Home Screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Anime Quiz",
+      "short_name": "Quiz",
+      "url": "/quiz",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Daily Challenge",
+      "short_name": "Daily",
+      "url": "/daily",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Anime Search",
+      "short_name": "Search",
+      "url": "/search",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "display_override": ["standalone", "window-controls-overlay"]
 }
