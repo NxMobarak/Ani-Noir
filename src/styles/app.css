@@ -411,6 +411,4 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: 0 2px 10px rgba(244, 63, 94, 0.3);
 }
 
-@media (min-width: 769px) {
-  .bottom-nav { display: none; }
-}
+
