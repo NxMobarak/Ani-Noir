@@ -22,13 +22,15 @@ export default function AnimeFramesPage({ spades, setSpades, showFeedback }) {
   const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades: sp, skipUsed }) => (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-      <div className="quiz-header">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, padding: '2px 0' }}>
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
-        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          <span style={{ fontSize: 13, color: '#22c55e' }}>✓ {score}</span>
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
       </div>
       <div className="card" key={qIndex}>
         <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>SCENE DESCRIPTION</div>

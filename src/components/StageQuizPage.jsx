@@ -428,13 +428,15 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   return (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-      <div className="quiz-header">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, padding: '2px 0' }}>
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
-        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          <span style={{ fontSize: 13, color: T.success }}>✓ {score}</span>
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
       </div>
       <div className="card" key={qIndex}>
         <div className="question-text question-enter">

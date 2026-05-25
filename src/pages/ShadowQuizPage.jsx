@@ -213,36 +213,31 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   return (
     <section aria-label="Shadow Quiz Game" className="page-shadow-game" style={{ padding: 12 }}>
       {/* Progress bar */}
-      <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+      <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginBottom: 12 }}>
         <div style={{ height: '100%', width: `${progress}%`, background: T.rose, borderRadius: 2, transition: 'width 0.4s' }} />
       </div>
 
-      {/* Score line */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <div style={{ color: T.success, fontSize: 13, fontWeight: 700 }}>
-          ✓ {score}
-        </div>
-        <div style={{ color: T.error, fontSize: 13, fontWeight: 700 }}>
-          ✗ {(currentIdx - score)}
-        </div>
-      </div>
-
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      {/* Lives and Score row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div className="survival-lives" aria-label={`${lives} lives remaining`}>
           {Array.from({ length: 3 }).map((_, i) => (
             <span key={i} style={{ fontSize: 18, opacity: i < lives ? 1 : 0.2 }} aria-hidden="true">❤️</span>
           ))}
         </div>
-        <CircularTimer timeLeft={timeLeft} maxTime={30} />
-        <div style={{ color: T.gold, fontWeight: 700, fontSize: 14 }} aria-label={`Score: ${score}`}>
-          {score} 🎯
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ color: T.success, fontSize: 13, fontWeight: 700 }}>✓ {score}</span>
+          <span style={{ color: T.error, fontSize: 13, fontWeight: 700 }}>✗ {(currentIdx - score)}</span>
         </div>
+      </div>
+
+      {/* Timer centered */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+        <CircularTimer timeLeft={timeLeft} maxTime={30} />
       </div>
 
       {/* Streak indicator */}
       {streak >= 2 && (
-        <div style={{ textAlign: 'center', color: T.rose, fontSize: 12, marginBottom: 6, fontWeight: 600 }} aria-live="polite">
+        <div style={{ textAlign: 'center', color: T.rose, fontSize: 12, marginBottom: 8, fontWeight: 600 }} aria-live="polite">
           🔥 {streak}x Streak
         </div>
       )}
