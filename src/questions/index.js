@@ -26,6 +26,40 @@ export const questionBank = [
   ...level5ana.map(q => ({ ...q, level: 5, type: 'anagram' }))
 ];
 
+// ─── New 10-Stage System ─────────────────────────────────────
+// 5 Main Levels, each with 10 stages of 5 questions
+// Stars: 2/5 = 1 star, 4/5 = 2 stars, 5/5 = 3 stars
+// Must complete all 10 stages to unlock next main level
+// Rewards: +5 spades per stage, +100 spades per main level completion, +1000 for completing all 5
+
+export const MAIN_LEVELS = [
+  { name: "Genin", tagline: "Even a kid can pass it in one go", timeSeconds: 30, icon: '🟢' },
+  { name: "Chunin", tagline: "60% can pass this", timeSeconds: 28, icon: '🔵' },
+  { name: "Jonin", tagline: "30% can pass it", timeSeconds: 25, icon: '🟠' },
+  { name: "Elite Shinobi", tagline: "10% can pass it", timeSeconds: 20, icon: '🔴' },
+  { name: "Kage", tagline: "1% can pass it", timeSeconds: 15, icon: '⚫' },
+];
+
+export const STAGES_PER_LEVEL = 10;
+export const QUESTIONS_PER_STAGE = 5;
+
+// Star thresholds
+export const getStars = (correct) => {
+  if (correct >= 5) return 3;
+  if (correct >= 4) return 2;
+  if (correct >= 2) return 1;
+  return 0;
+};
+
+// Minimum stars to pass a stage (at least 1 star = 2 correct)
+export const MIN_CORRECT_TO_PASS = 2;
+
+// Rewards
+export const STAGE_REWARD = 5; // spades per stage
+export const MAIN_LEVEL_REWARD = 100; // spades for completing all 10 stages in a main level
+export const ALL_LEVELS_REWARD = 1000; // spades for completing all 5 main levels
+
+// Legacy support
 export const levels = [
   { name: "Genin", minCorrect: 3, timeSeconds: 30, reward: 10 },
   { name: "Chunin", minCorrect: 4, timeSeconds: 30, reward: 20 },

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { questionBank, levels, getRandomQuestions } from './questions/index';
+import { questionBank, levels, getRandomQuestions, MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE, getStars, MIN_CORRECT_TO_PASS, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD } from './questions/index';
 import level1Frames from './questions/level1_frames';
 import level2Frames from './questions/level2_frames';
 import level3Frames from './questions/level3_frames';
@@ -16,6 +16,7 @@ import level3Emoji from './questions/level3_emoji';
 import level4Emoji from './questions/level4_emoji';
 import level5Emoji from './questions/level5_emoji';
 import CHARACTER_BIRTHDAYS from './birthdays_data';
+
 
 // ─── Design tokens ─────────────────────────────────────────
 const T = {
@@ -47,6 +48,7 @@ function shuffle(arr) {
   }
   return a;
 }
+
 
 
 // ─── Web Audio Sound Effects ────────────────────────────────
@@ -86,6 +88,7 @@ function playCombo() {
 }
 
 
+
 // ─── Anime of the Day ───────────────────────────────────────
 const ANIME_OF_DAY_LIST = [
   { title: "Fullmetal Alchemist: Brotherhood", genre: "Action/Fantasy", rating: "9.1", desc: "Two brothers use alchemy to find the Philosopher's Stone after a failed human transmutation costs them dearly.", image: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg" },
@@ -97,6 +100,7 @@ const ANIME_OF_DAY_LIST = [
   { title: "Naruto Shippuden", genre: "Action/Adventure", rating: "8.7", desc: "Naruto Uzumaki continues his journey as a ninja, facing powerful enemies and uncovering dark secrets.", image: "https://cdn.myanimelist.net/images/anime/1565/111305.jpg" },
 ];
 const getDailyAnime = () => { const now = new Date(); const ist = new Date(now.getTime() + (5.5*60*60*1000)); const d = Math.floor(ist.getTime()/86400000); return ANIME_OF_DAY_LIST[d%ANIME_OF_DAY_LIST.length]; };
+
 
 const QUOTES = [
   { text: "It's not the face that makes someone a monster, it's the choices they make with their lives.", char: "Naruto Uzumaki", anime: "Naruto" },
@@ -132,6 +136,7 @@ const ALL_EMOJI_QUESTIONS = [
 // ─── Character Birthdays are imported from ./birthdays_data ─
 
 
+
 // ─── Leaderboard helpers ────────────────────────────────────
 const getLeaderboard = () => { try { return JSON.parse(localStorage.getItem('ani_leaderboard') || '{}'); } catch { return {}; } };
 const saveLeaderboard = (lb) => localStorage.setItem('ani_leaderboard', JSON.stringify(lb));
@@ -144,12 +149,17 @@ const updateBestScore = (mode, levelIdx, score, total) => {
   saveLeaderboard(lb);
 };
 
+// ─── Stage Progress helpers ─────────────────────────────────
+const getStageProgress = (mode) => { try { return JSON.parse(localStorage.getItem(`ani_stages_${mode}`) || '{}'); } catch { return {}; } };
+const saveStageProgress = (mode, data) => localStorage.setItem(`ani_stages_${mode}`, JSON.stringify(data));
+
 // ─── Watchlist helpers ──────────────────────────────────────
 const getWatchlist = () => { try { return JSON.parse(localStorage.getItem('ani_watchlist') || '[]'); } catch { return []; } };
 const saveWatchlist = (list) => localStorage.setItem('ani_watchlist', JSON.stringify(list));
 
 // ─── Emoji detection helper ─────────────────────────────────
 const hasEmoji = (text) => /[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27FF}]|[\u{FE00}-\u{FEFF}]/u.test(text);
+
 
 // ─── NAV ────────────────────────────────────────────────────
 const NAV = [
@@ -170,6 +180,7 @@ const NAV = [
 ];
 
 
+
 // ─── CSS ─────────────────────────────────────────────────────
 const css = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -181,7 +192,6 @@ const css = `
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: ${T.border}; border-radius: 2px; }
 
-  /* RESPONSIVE: Desktop vs Mobile */
   .app-shell { display: flex; height: 100dvh; margin: 0 auto; position: relative; overflow: hidden; }
 
   @media (max-width: 768px) {
@@ -195,15 +205,14 @@ const css = `
     .sidebar-overlay, .sidebar { display: none !important; }
   }
 
-  /* Page entrance animation */
   @keyframes pageIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   .page-enter { animation: pageIn 0.25s ease both; }
 
-  /* Sidebar (mobile) */
   .sidebar-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.3s; }
   .sidebar-overlay.open { opacity:1;pointer-events:all; }
   .sidebar { position:fixed;left:-270px;top:0;bottom:0;width:270px;background:${T.surface};border-right:1px solid ${T.border};z-index:101;transition:left 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:0 0 20px;overflow-y:auto; }
   .sidebar.open { left:0; }
+
 
   .sidebar-header { padding:24px 20px 16px;border-bottom:1px solid ${T.border}; }
   .sidebar-logo { font-size:22px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,${T.rose},${T.violet});-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
@@ -217,7 +226,6 @@ const css = `
   .nav-item .icon { font-size:18px;width:24px;text-align:center; }
   .nav-item .lock-badge { margin-left:auto;font-size:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:${T.gold};border-radius:8px;padding:1px 6px; }
 
-
   .sidebar-footer { padding:16px 20px;border-top:1px solid ${T.border}; }
   .sidebar-footer-card { border-radius:12px;padding:12px;margin-bottom:10px;text-decoration:none;display:block;color:${T.text};transition:transform 0.2s; }
   .sidebar-footer-card:hover { transform:translateY(-2px); }
@@ -225,6 +233,7 @@ const css = `
   .sidebar-footer-card.ig { background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:1px solid rgba(131,58,180,0.4); }
   .sidebar-footer-card-title { font-size:12px;font-weight:700; }
   .sidebar-footer-card-sub { font-size:10px;opacity:0.8;margin-top:2px; }
+
 
   .main { flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;min-width:0; }
   .topbar { display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:1px solid ${T.border};background:${T.surface};flex-shrink:0; }
@@ -236,11 +245,9 @@ const css = `
 
   .page { flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch; }
 
-  /* Cards */
   .card { background:${T.card};border:1px solid ${T.border};border-radius:18px;padding:16px;margin-bottom:12px; }
   .card-title { font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px; }
 
-  /* Buttons */
   .btn { border:none;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px; }
   .btn-primary { background:${T.rose};color:white; }
   .btn-primary:hover { background:#e11d48; }
@@ -249,7 +256,6 @@ const css = `
   .btn-full { width:100%; }
   .btn:disabled { opacity:0.4;cursor:not-allowed; }
 
-  /* Level card */
   .level-card { display:flex;align-items:center;gap:14px;background:${T.card};border:1px solid ${T.border};border-radius:16px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;width:100%;text-align:left; }
   .level-card:hover { border-color:${T.rose};background:rgba(244,63,94,0.06); }
   .level-icon { font-size:24px;width:40px;text-align:center; }
@@ -259,10 +265,8 @@ const css = `
   .level-best { font-size:11px;color:${T.gold};margin-top:3px; }
 
 
-  /* Quiz */
   .quiz-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px; }
 
-  /* Circular timer */
   .timer-circle { position:relative;width:48px;height:48px;flex-shrink:0; }
   .timer-svg { transform:rotate(-90deg);width:48px;height:48px; }
   .timer-track { fill:none;stroke:${T.border};stroke-width:3; }
@@ -271,7 +275,6 @@ const css = `
   .timer-text.urgent { color:${T.rose};animation:pulse 0.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-  /* Combo badge */
   .combo-badge { background:linear-gradient(135deg,${T.gold},#f97316);color:#000;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:800;animation:comboIn 0.3s ease; }
   @keyframes comboIn { from{transform:scale(0.7)} to{transform:scale(1)} }
 
@@ -283,7 +286,7 @@ const css = `
   .option-btn.wrong { border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error}; }
   .option-btn.selected { border-color:${T.violet};background:rgba(139,92,246,0.12); }
 
-  /* Anagram tiles */
+
   .anagram-display { text-align:center;margin:16px 0;padding:16px;background:${T.surface};border-radius:16px;border:1px solid ${T.border}; }
   .tile-pool { display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px;min-height:44px; }
   .letter-tile { width:38px;height:44px;background:linear-gradient(145deg,${T.card},${T.surface});border:1.5px solid ${T.rose};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:${T.rose};cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;box-shadow:0 2px 8px rgba(244,63,94,0.15); }
@@ -300,21 +303,17 @@ const css = `
   .power-btn:hover:not(:disabled) { border-color:${T.gold};color:${T.gold}; }
 
 
-  /* Feedback toast */
   .feedback-toast { position:fixed;top:70px;left:50%;transform:translateX(-50%);background:${T.card};border:1px solid ${T.border};border-radius:40px;padding:10px 20px;font-size:14px;font-weight:600;z-index:200;pointer-events:none;animation:slideDown 0.3s ease;max-width:90vw;text-align:center;white-space:nowrap; }
   @keyframes slideDown { from{opacity:0;transform:translate(-50%,-10px)} to{opacity:1;transform:translate(-50%,0)} }
 
-  /* Progress bar */
   .progress-bar { height:4px;background:${T.border};border-radius:2px;overflow:hidden;margin-bottom:14px; }
   .progress-fill { height:100%;background:${T.rose};border-radius:2px;transition:width 0.4s; }
 
-  /* Search */
   .search-input-wrap { position:relative;display:flex;gap:8px;margin-bottom:14px; }
   .search-input { flex:1;background:${T.surface};border:1.5px solid ${T.border};border-radius:12px;padding:12px 16px;font-size:14px;color:${T.text};outline:none;transition:border-color 0.2s; }
   .search-input:focus { border-color:${T.rose}; }
   .search-input::placeholder { color:${T.textDim}; }
 
-  /* Anime result */
   .anime-result { display:flex;gap:12px; }
   .anime-poster { width:80px;height:110px;border-radius:10px;object-fit:cover;flex-shrink:0;background:${T.surface}; }
   .anime-info { flex:1; }
@@ -324,12 +323,11 @@ const css = `
   .anime-synopsis { font-size:12px;color:${T.textMid};line-height:1.5; }
   .streaming-tag { display:inline-block;background:rgba(20,184,166,0.12);border:1px solid ${T.teal};color:${T.teal};border-radius:8px;padding:4px 10px;font-size:11px;margin:3px;font-weight:600; }
 
-  /* Watchlist */
+
   .watchlist-item { display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid ${T.border}; }
   .watchlist-item:last-child { border-bottom:none; }
   .watchlist-poster { width:40px;height:56px;border-radius:8px;object-fit:cover;background:${T.surface};flex-shrink:0; }
 
-  /* News */
   .news-item { display:flex;gap:12px;padding:12px 0;border-bottom:1px solid ${T.border};cursor:pointer;text-decoration:none;color:${T.text}; }
   .news-item:last-child { border-bottom:none; }
   .news-thumb { width:72px;height:52px;border-radius:8px;object-fit:cover;background:${T.surface};flex-shrink:0; }
@@ -340,8 +338,6 @@ const css = `
   .news-tab { background:${T.surface};border:1px solid ${T.border};border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;color:${T.textMid};transition:all 0.2s; }
   .news-tab.active { background:rgba(244,63,94,0.15);border-color:${T.rose};color:${T.rose}; }
 
-
-  /* YouTube card */
   .yt-card { display:flex;gap:12px;text-decoration:none;color:${T.text};padding:12px;background:linear-gradient(135deg,rgba(255,0,0,0.08),rgba(139,92,246,0.08));border-radius:14px;border:1px solid rgba(255,0,0,0.2);transition:all 0.2s; }
   .yt-card:hover { border-color:rgba(255,0,0,0.4);transform:translateY(-2px); }
   .yt-thumb { width:96px;height:64px;border-radius:10px;object-fit:cover;background:${T.surface};flex-shrink:0;border:2px solid #ff0000; }
@@ -349,57 +345,51 @@ const css = `
   .yt-title { font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
   .yt-sub { font-size:11px;color:#ff4444;margin-top:4px;font-weight:600; }
 
-  /* Home hero */
+
   .hero-banner { background:linear-gradient(135deg,rgba(244,63,94,0.15),rgba(139,92,246,0.15));border:1px solid rgba(244,63,94,0.2);border-radius:20px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden; }
   .hero-banner::before { content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(244,63,94,0.2),transparent 70%); }
   .hero-greeting { font-size:20px;font-weight:800; }
   .hero-sub { font-size:13px;color:${T.textMid};margin-top:4px; }
 
-  /* Daily card */
   .daily-anime-card { border-radius:16px;overflow:hidden;position:relative;margin-bottom:14px;min-height:160px; }
   .daily-anime-img { width:100%;height:160px;object-fit:cover;display:block; }
   .daily-anime-overlay { position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(7,8,15,0.95));padding:30px 14px 14px; }
   .daily-anime-title { font-size:16px;font-weight:700; }
   .daily-anime-meta { font-size:12px;color:${T.textMid};margin-top:2px; }
 
-  /* Quote */
   .quote-card { border-left:3px solid ${T.gold};padding-left:14px; }
   .quote-text { font-size:14px;font-style:italic;line-height:1.6;color:${T.text}; }
   .quote-attr { font-size:12px;color:${T.gold};margin-top:8px; }
 
-  /* Result */
   .result-screen { text-align:center;padding:30px 0; }
   .result-emoji { font-size:64px;margin-bottom:12px;display:block; }
   .result-title { font-size:24px;font-weight:800;margin-bottom:8px; }
   .result-sub { color:${T.textMid};font-size:15px;margin-bottom:24px; }
   .share-btn { background:linear-gradient(135deg,${T.violet},${T.rose});border:none;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-bottom:10px;width:100%; }
 
-  /* About */
   .stat-row { display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid ${T.border}; }
   .stat-row:last-child { border-bottom:none; }
   .stat-label { color:${T.textMid};font-size:13px; }
   .stat-value { font-weight:700;font-size:14px; }
 
-  /* Shadow Quiz */
   .shadow-lock { text-align:center;padding:40px 20px; }
   .shadow-silhouette { font-size:72px;filter:grayscale(1) brightness(0.2);margin-bottom:16px;animation:float 3s ease-in-out infinite; }
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
-  /* Skeleton shimmer */
+
   @keyframes shimmer { from{background-position:-200%} to{background-position:200%} }
   .skeleton { background:linear-gradient(90deg,${T.card} 25%,${T.surface} 50%,${T.card} 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px; }
 
-  /* Modal/Popup */
   .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);animation:fadeIn 0.2s; }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   .modal-content { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:24px;max-width:380px;width:100%;max-height:80vh;overflow-y:auto; }
   .modal-title { font-size:18px;font-weight:800;margin-bottom:12px; }
   .modal-close { background:none;border:1px solid ${T.border};border-radius:10px;padding:6px 12px;font-size:14px;cursor:pointer;color:${T.textMid}; }
 
-  /* Survival */
   .survival-lives { display:flex;gap:4px;font-size:20px; }
   .survival-stat { display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700; }
 `;
+
 
 
 // ─── Circular Timer ─────────────────────────────────────────
@@ -422,30 +412,32 @@ function CircularTimer({ timeLeft, maxTime }) {
   );
 }
 
+
 // ─── Spades Info Modal ──────────────────────────────────────
 function SpadesModal({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-          <div className="modal-title" style={{ color: T.gold }}>♠ Spades Guide</div>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <div className="modal-title" style={{ color: T.gold }}>&#9824; Spades Guide</div>
+          <button className="modal-close" onClick={onClose}>&#10005;</button>
         </div>
         <div style={{ marginBottom:16 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>💰 Earn Spades:</div>
+          <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>Earn Spades:</div>
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
-            <li>✅ Completing quizzes: +10-100♠</li>
-            <li>🔥 Combo streaks: +5♠ per 3x combo</li>
-            <li>📅 Daily challenges: +30♠</li>
-            <li>💀 Survival mode: +100♠ per 5 correct</li>
+            <li>+5&#9824; per stage completed</li>
+            <li>+100&#9824; for completing a main level (all 10 stages)</li>
+            <li>+1000&#9824; for completing ALL 5 main levels</li>
+            <li>Combo streaks: +5&#9824; per 3x combo</li>
+            <li>Daily challenges: +30&#9824;</li>
+            <li>Survival mode: +100&#9824; per 5 correct</li>
           </ul>
         </div>
         <div>
-          <div style={{ fontSize:14, fontWeight:700, color:T.rose, marginBottom:8 }}>🛒 Spend Spades:</div>
+          <div style={{ fontSize:14, fontWeight:700, color:T.rose, marginBottom:8 }}>Spend Spades:</div>
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
-            <li>💡 Hints: 30♠</li>
-            <li>⏭️ Skips: 50♠</li>
-            <li>🔓 Unlocking modes: 200♠</li>
+            <li>Hints: 30&#9824;</li>
+            <li>Skips: 50&#9824;</li>
           </ul>
         </div>
       </div>
@@ -454,14 +446,15 @@ function SpadesModal({ onClose }) {
 }
 
 
+
 // ─── Sidebar Content (shared between mobile and desktop) ────
 function SidebarContent({ page, navigate, spades, onSpadesClick }) {
   return (
     <>
       <div className="sidebar-header">
-        <div className="sidebar-logo">⚔️ AniNoir</div>
+        <div className="sidebar-logo">&#9876;&#65039; AniNoir</div>
         <div className="sidebar-tagline">Your Anime Universe</div>
-        <div className="sidebar-spades" onClick={onSpadesClick}>♠ {spades} Spades</div>
+        <div className="sidebar-spades" onClick={onSpadesClick}>&#9824; {spades} Spades</div>
       </div>
       <div className="sidebar-nav">
         {NAV.map(n => (
@@ -477,179 +470,6 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
   );
 }
 
-
-// ─── App Root ───────────────────────────────────────────────
-export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [page, setPage] = useState('home');
-  const [pageKey, setPageKey] = useState(0);
-  const [spades, setSpades] = useState(() => parseInt(localStorage.getItem('ani_spades') || '100'));
-  const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
-  const [feedback, setFeedback] = useState('');
-  const [spadesModal, setSpadesModal] = useState(false);
-  const feedbackTimer = useRef(null);
-
-  const showFeedback = (msg) => {
-    setFeedback(msg);
-    clearTimeout(feedbackTimer.current);
-    feedbackTimer.current = setTimeout(() => setFeedback(''), 2200);
-  };
-
-  useEffect(() => { localStorage.setItem('ani_spades', spades); }, [spades]);
-  useEffect(() => { localStorage.setItem('ani_badges', JSON.stringify(badges)); }, [badges]);
-
-  // Offline ready toast (show once on first visit)
-  useEffect(() => {
-    if (!localStorage.getItem('ani_offline_shown')) {
-      setTimeout(() => {
-        showFeedback('📴 Quizzes work offline! No internet needed.');
-        localStorage.setItem('ani_offline_shown', '1');
-      }, 2000);
-    }
-  }, []);
-
-  const navigate = (id) => {
-    playClick();
-    setPage(id);
-    setPageKey(k => k + 1);
-    setSidebarOpen(false);
-  };
-
-  const pageTitle = NAV.find(n => n.id === page)?.label || 'AniNoir';
-  const SHADOW_COST = 200;
-  const EMOJI_COST = 200;
-
-  return (
-    <>
-      <style>{css}</style>
-      <div className="app-shell">
-        {/* Desktop sidebar (always visible on >768px) */}
-        <div className="desktop-sidebar">
-          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
-        </div>
-
-        {/* Mobile sidebar overlay */}
-        <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
-        <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
-        </div>
-
-        <div className="main">
-          <div className="topbar">
-            <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
-            <span className="topbar-title">{pageTitle}</span>
-            <div className="topbar-chips">
-              <span className="chip" onClick={() => setSpadesModal(true)}>♠ {spades}</span>
-              <span className="chip">🏅 {badges.length}</span>
-            </div>
-          </div>
-
-          <div className="page" key={pageKey}>
-            <div className="page-enter">
-              {page === 'home' && <HomePage navigate={navigate} dailyAnime={getDailyAnime()} dailyQuote={getDailyQuote()} />}
-              {page === 'quiz' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />}
-              {page === 'emoji' && <EmojiQuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} unlockCost={EMOJI_COST} />}
-              {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
-              {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={SHADOW_COST} />}
-              {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
-              {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
-              {page === 'search' && <SearchPage showFeedback={showFeedback} />}
-              {page === 'charsearch' && <CharacterSearchPage showFeedback={showFeedback} />}
-              {page === 'watchlist' && <WatchlistPage showFeedback={showFeedback} />}
-              {page === 'news' && <NewsPage />}
-              {page === 'birthdays' && <BirthdaysPage />}
-              {page === 'daily' && <DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
-              {page === 'about' && <AboutPage spades={spades} badges={badges} />}
-            </div>
-          </div>
-        </div>
-
-        {feedback && <div className="feedback-toast">{feedback}</div>}
-        {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
-      </div>
-    </>
-  );
-}
-
-
-// ─── Home Page ───────────────────────────────────────────────
-function LatestYouTubeCard() {
-  const [video, setVideo] = useState(null);
-  useEffect(() => {
-    const RSS = 'https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=UCxvnMryqeGfklJRwGM1r9eA&count=1';
-    fetch(RSS).then(r=>r.json()).then(d=>{
-      const v = d.items?.[0];
-      if(v) setVideo({ title: v.title, link: v.link, thumb: v.thumbnail, date: new Date(v.pubDate).toLocaleDateString() });
-    }).catch(()=>{});
-  },[]);
-
-  if (!video) return null;
-  return (
-    <div className="card" style={{ padding:0, overflow:'hidden' }}>
-      <div style={{ padding:'14px 16px 8px' }}>
-        <div className="card-title" style={{ color: '#ff4444', marginBottom:8 }}>▶ LATEST VIDEO</div>
-      </div>
-      <a href={video.link} target="_blank" rel="noopener noreferrer" className="yt-card" style={{ margin:'0 12px 12px', borderRadius:14 }}>
-        <img src={video.thumb} alt="" className="yt-thumb" onError={e=>e.target.style.display='none'} />
-        <div className="yt-info">
-          <div className="yt-title">{video.title}</div>
-          <div className="yt-sub">🔴 AnimeTMTalks · {video.date}</div>
-        </div>
-      </a>
-    </div>
-  );
-}
-
-function HomePage({ navigate, dailyAnime, dailyQuote }) {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  return (
-    <div>
-      <div className="hero-banner">
-        <div className="hero-greeting">{greeting}, Otaku! 👋</div>
-        <div className="hero-sub">Ready to test your anime knowledge?</div>
-        <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10 }} onClick={() => navigate('quiz')}>
-          Start Quiz →
-        </button>
-      </div>
-
-      <LatestYouTubeCard />
-
-      <div style={{ marginBottom: 6 }}>
-        <div className="card-title" style={{ color: T.rose, padding: '0 2px 8px', fontSize: 11 }}>🎌 ANIME OF THE DAY</div>
-        <div className="daily-anime-card">
-          <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" onError={e=>{e.target.style.display='none';}} />
-          <div className="daily-anime-overlay">
-            <div className="daily-anime-title">{dailyAnime.title}</div>
-            <div className="daily-anime-meta">⭐ {dailyAnime.rating} · {dailyAnime.genre}</div>
-          </div>
-        </div>
-        <div className="card" style={{ marginTop: 0 }}>
-          <p style={{ fontSize: 13, color: T.textMid, lineHeight: 1.6 }}>{dailyAnime.desc}</p>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-title" style={{ color: T.gold }}>💬 QUOTE OF THE DAY</div>
-        <div className="quote-card">
-          <div className="quote-text">"{dailyQuote.text}"</div>
-          <div className="quote-attr">— {dailyQuote.char} · {dailyQuote.anime}</div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-title" style={{ color: T.teal }}>⚡ QUICK PLAY</div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['frames','🖼️','Frames'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
-            <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
-              <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 
 // ─── Anagram Tile Component ─────────────────────────────────
@@ -709,7 +529,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
         ))}
       </div>
       {hintRevealed && hint && (
-        <div style={{ marginBottom: 10, fontSize: 13, color: T.gold }}>💡 {hint}</div>
+        <div style={{ marginBottom: 10, fontSize: 13, color: T.gold }}>&#128161; {hint}</div>
       )}
       {answered && (
         <div style={{ fontSize: 13, color: T.textMid }}>
@@ -717,36 +537,38 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
         </div>
       )}
       <div className="anagram-actions">
-        <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>⌫</button>
+        <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>&#9003;</button>
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={clearAll} disabled={!answer.length || answered}>Clear</button>
-        <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit ✓</button>
+        <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit &#10003;</button>
       </div>
     </div>
   );
 }
 
 
-// ─── Quiz / Anagram Page ─────────────────────────────────────
-function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly = false, anagramOnly = false, mode = 'quiz' }) {
-  const [phase, setPhase] = useState('levels');
-  const [currentLevel, setCurrentLevel] = useState(0);
+
+// ─── StageQuizPage: Reusable 10-Stage System ────────────────
+function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback, renderQuestion }) {
+  const [phase, setPhase] = useState('mainLevels'); // mainLevels, stages, playing, result
+  const [selectedMainLevel, setSelectedMainLevel] = useState(null);
+  const [currentMainLevel, setCurrentMainLevel] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
   const [combo, setCombo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [maxTime, setMaxTime] = useState(30);
   const [timerActive, setTimerActive] = useState(false);
-  const [scrambled, setScrambled] = useState([]);
   const [hintRevealed, setHintRevealed] = useState(false);
   const [skipUsed, setSkipUsed] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [correctOption, setCorrectOption] = useState(null);
   const [finalScore, setFinalScore] = useState(0);
+  const [stageProgress, setStageProgress] = useState(() => getStageProgress(mode));
+  const [scrambled, setScrambled] = useState([]);
   const timerRef = useRef(null);
-  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
 
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
@@ -764,28 +586,70 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     }
   }, [qIndex, questions]);
 
-  const getFilteredPool = (levelNum) => {
-    let pool = questionBank.filter(q => q.level === levelNum);
-    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq');
-    if (anagramOnly) pool = pool.filter(q => q.type === 'anagram');
-    return shuffle(pool).slice(0, 5);
+
+  // Helper: is a stage unlocked?
+  const isStageUnlocked = (mainIdx, stageIdx) => {
+    if (mainIdx === 0 && stageIdx === 0) return true;
+    if (stageIdx === 0) {
+      // First stage of a main level: need all 10 stages of previous main level
+      for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+        const key = `${mainIdx - 1}_${s}`;
+        if (!stageProgress[key] || stageProgress[key].stars < 1) return false;
+      }
+      return true;
+    }
+    // Need previous stage passed
+    const prevKey = `${mainIdx}_${stageIdx - 1}`;
+    return stageProgress[prevKey] && stageProgress[prevKey].stars >= 1;
   };
 
-  const startLevel = (idx) => {
-    const qs = getFilteredPool(idx + 1);
-    if (!qs.length) { showFeedback('No questions for this level yet!'); return; }
-    setCurrentLevel(idx);
+  // Helper: is a main level unlocked?
+  const isMainLevelUnlocked = (mainIdx) => {
+    if (mainIdx === 0) return true;
+    for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+      const key = `${mainIdx - 1}_${s}`;
+      if (!stageProgress[key] || stageProgress[key].stars < 1) return false;
+    }
+    return true;
+  };
+
+  // Helper: count stars for a main level
+  const getMainLevelStars = (mainIdx) => {
+    let total = 0;
+    for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+      const key = `${mainIdx}_${s}`;
+      if (stageProgress[key]) total += stageProgress[key].stars;
+    }
+    return total;
+  };
+
+  // Helper: count completed stages for a main level
+  const getCompletedStages = (mainIdx) => {
+    let count = 0;
+    for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+      const key = `${mainIdx}_${s}`;
+      if (stageProgress[key] && stageProgress[key].stars >= 1) count++;
+    }
+    return count;
+  };
+
+
+  const startStage = (mainIdx, stageIdx) => {
+    if (!isStageUnlocked(mainIdx, stageIdx)) return;
+    const qs = getQuestionPool(mainIdx, stageIdx);
+    if (!qs || !qs.length) { showFeedback('No questions available for this stage!'); return; }
+    setCurrentMainLevel(mainIdx);
+    setCurrentStage(stageIdx);
     setQuestions(qs);
     setQIndex(0);
     setScore(0);
-    setStreak(0);
     setCombo(0);
     setHintRevealed(false);
     setSkipUsed(false);
     setAnswered(false);
     setSelectedOption(null);
     setCorrectOption(null);
-    const t = levels[idx].timeSeconds;
+    const t = MAIN_LEVELS[mainIdx].timeSeconds;
     setTimeLeft(t);
     setMaxTime(t);
     setTimerActive(true);
@@ -794,16 +658,16 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
   const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
 
-
   const handleTimeout = () => {
     clearTimer();
     setAnswered(true);
     const q = questions[qIndex];
-    if (q?.type === 'mcq') setCorrectOption(q.correct);
+    if (q?.type === 'mcq' || q?.correct !== undefined) setCorrectOption(q.correct);
     playWrong();
-    showFeedback('⏰ Time\'s up!');
+    showFeedback('Time is up!');
     setTimeout(() => advance(false, score), 1200);
   };
+
 
   const advance = (wasCorrect, currentScore) => {
     const nextIdx = qIndex + 1;
@@ -814,28 +678,85 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
       setAnswered(false);
       setSelectedOption(null);
       setCorrectOption(null);
-      const t = levels[currentLevel].timeSeconds;
+      const t = MAIN_LEVELS[currentMainLevel].timeSeconds;
       setTimeLeft(t);
       setMaxTime(t);
       setTimerActive(true);
     } else {
+      // Stage complete
       const fs = currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
+      const stars = getStars(fs);
+      const passed = fs >= MIN_CORRECT_TO_PASS;
+
+      // Save progress
+      const key = `${currentMainLevel}_${currentStage}`;
+      const updated = { ...stageProgress };
+      if (!updated[key] || stars > updated[key].stars) {
+        updated[key] = { stars };
+      }
+
+      // Award spades for passing
       if (passed) {
-        const reward = levels[currentLevel].reward;
-        setSpades(s => s + reward);
-        if (currentLevel === 4) {
-          const season = Math.floor(Date.now() / (90 * 24 * 3600000));
-          const bid = `season_${season}`;
-          if (!badges.includes(bid)) setBadges(b => [...b, bid]);
+        // Check if this is a new completion (not re-play)
+        const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= 1;
+        if (!wasAlreadyPassed) {
+          setSpades(s => s + STAGE_REWARD);
+        }
+
+        // Check if all 10 stages of this main level are now complete
+        let allStagesDone = true;
+        for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+          const sk = `${currentMainLevel}_${s}`;
+          if (sk === key) { if (stars < 1) { allStagesDone = false; break; } }
+          else if (!updated[sk] || updated[sk].stars < 1) { allStagesDone = false; break; }
+        }
+
+        // Check if previous state had all stages done
+        let wasAllDone = true;
+        for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+          const sk = `${currentMainLevel}_${s}`;
+          if (!stageProgress[sk] || stageProgress[sk].stars < 1) { wasAllDone = false; break; }
+        }
+
+        if (allStagesDone && !wasAllDone) {
+          setSpades(s => s + MAIN_LEVEL_REWARD);
+          showFeedback(`Main level complete! +${MAIN_LEVEL_REWARD} spades!`);
+        }
+
+        // Check if ALL 5 main levels are complete
+        let allLevelsDone = true;
+        for (let ml = 0; ml < MAIN_LEVELS.length; ml++) {
+          for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+            const sk = `${ml}_${s}`;
+            if (sk === key) { if (stars < 1) { allLevelsDone = false; break; } }
+            else if (!updated[sk] || updated[sk].stars < 1) { allLevelsDone = false; break; }
+          }
+          if (!allLevelsDone) break;
+        }
+
+        let wasAllLevelsDone = true;
+        for (let ml = 0; ml < MAIN_LEVELS.length; ml++) {
+          for (let s = 0; s < STAGES_PER_LEVEL; s++) {
+            const sk = `${ml}_${s}`;
+            if (!stageProgress[sk] || stageProgress[sk].stars < 1) { wasAllLevelsDone = false; break; }
+          }
+          if (!wasAllLevelsDone) break;
+        }
+
+        if (allLevelsDone && !wasAllLevelsDone) {
+          setSpades(s => s + ALL_LEVELS_REWARD);
+          showFeedback(`ALL levels complete! +${ALL_LEVELS_REWARD} spades!`);
         }
       }
-      updateBestScore(mode, currentLevel, fs, questions.length);
+
+      setStageProgress(updated);
+      saveStageProgress(mode, updated);
       setFinalScore(fs);
       clearTimer();
       setPhase('result');
     }
   };
+
 
   const submitMCQ = (optIdx) => {
     if (answered) return;
@@ -847,29 +768,25 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     setAnswered(true);
     if (isCorrect) {
       const newCombo = combo + 1;
-      const newStreak = streak + 1;
       setScore(s => s + 1);
-      setStreak(newStreak);
       setCombo(newCombo);
       playCorrect();
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
         playCombo();
-        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
+        showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {
-        showFeedback('✅ Correct!');
+        showFeedback('Correct!');
       }
       setTimeout(() => advance(true, score + 1), 1000);
     } else {
-      setStreak(0);
       setCombo(0);
       playWrong();
-      showFeedback('❌ Wrong!');
+      showFeedback('Wrong!');
       setTimeout(() => advance(false, score), 1000);
     }
   };
-
 
   const submitAnagram = (ans) => {
     if (answered) return;
@@ -881,43 +798,32 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     setAnswered(true);
     if (isCorrect) {
       const newCombo = combo + 1;
-      const newStreak = streak + 1;
       setScore(s => s + 1);
-      setStreak(newStreak);
       setCombo(newCombo);
       playCorrect();
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
         playCombo();
-        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
+        showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {
-        showFeedback('✅ Correct!');
+        showFeedback('Correct!');
       }
       setTimeout(() => advance(true, score + 1), 1200);
     } else {
-      setStreak(0);
       setCombo(0);
       playWrong();
-      showFeedback(`❌ Wrong! Answer: ${q.answer}`);
+      showFeedback(`Wrong! Answer: ${q.answer}`);
       setTimeout(() => advance(false, score), 1400);
     }
   };
 
-  const doShuffle = () => {
-    if (spades < 20 || answered) return;
-    const q = questions[qIndex];
-    const letters = q.text.replace(/\s/g, '').toUpperCase().split('');
-    setScrambled(shuffle(letters));
-    setSpades(s => s - 20);
-    showFeedback('🔀 Shuffled! -20♠');
-  };
 
   const doHint = () => {
     if (spades < 30 || hintRevealed || answered) return;
     setSpades(s => s - 30);
     setHintRevealed(true);
-    showFeedback('💡 Hint revealed! -30♠');
+    showFeedback('Hint revealed! -30 spades');
   };
 
   const doSkip = () => {
@@ -926,50 +832,60 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     setSkipUsed(true);
     clearTimer();
     setAnswered(true);
-    showFeedback('⏭️ Skipped! -50♠');
+    showFeedback('Skipped! -50 spades');
     setTimeout(() => advance(false, score), 800);
   };
 
+  const doShuffle = () => {
+    if (spades < 20 || answered) return;
+    const q = questions[qIndex];
+    const letters = q.text.replace(/\s/g, '').toUpperCase().split('');
+    setScrambled(shuffle(letters));
+    setSpades(s => s - 20);
+    showFeedback('Shuffled! -20 spades');
+  };
+
   const shareResult = () => {
-    const lvlName = levels[currentLevel].name;
-    const passed = finalScore >= levels[currentLevel].minCorrect;
-    const emoji = passed ? '🏆' : '😓';
-    const text = `I scored ${finalScore}/${questions.length} on ${lvlName} level! ${emoji} #AniNoir`;
+    const lvlName = MAIN_LEVELS[currentMainLevel].name;
+    const stars = getStars(finalScore);
+    const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
+    const text = `AniNoir ${mode} - ${lvlName} Stage ${currentStage + 1}: ${finalScore}/${QUESTIONS_PER_STAGE} ${starStr} #AniNoir`;
     if (navigator.share) {
-      navigator.share({ title: 'AniNoir Quiz', text }).catch(()=>{});
+      navigator.share({ title: 'AniNoir', text }).catch(()=>{});
     } else {
       navigator.clipboard?.writeText(text);
-      showFeedback('📋 Copied to clipboard!');
+      showFeedback('Copied to clipboard!');
     }
   };
 
 
-  if (phase === 'levels') {
-    const lb = getLeaderboard();
+  // ─── PHASE 1: Main Levels ───────────────────────────────────
+  if (phase === 'mainLevels') {
     return (
       <div>
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title" style={{ color: mcqOnly ? T.rose : T.violet }}>
-            {mcqOnly ? '🧠 ANIME QUIZ' : '🔤 ANIME SCRAMBLER'}
+          <div className="card-title" style={{ color: T.rose }}>
+            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 ANIME SCRAMBLER' : mode === 'emoji' ? '🎯 EMOJI QUIZ' : mode === 'shadow' ? '🕵️ SHADOW QUIZ' : '🖼️ ANIME FRAMES'}
           </div>
-          <p style={{ fontSize: 13, color: T.textMid }}>
-            {mcqOnly ? 'Answer MCQs about anime. 5 questions per level.' : 'Scramble anime titles! Tap tiles to build the name.'}
-          </p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
+          <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Pass each stage to unlock the next!</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>+5&#9824; per stage | +100&#9824; per level | +1000&#9824; for all!</p>
         </div>
-        {levels.map((lvl, idx) => {
-          const best = lb[`${mode}_${idx}`];
-          const prevBest = idx > 0 ? lb[`${mode}_${idx - 1}`] : null;
-          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
+        {MAIN_LEVELS.map((ml, idx) => {
+          const unlocked = isMainLevelUnlocked(idx);
+          const completed = getCompletedStages(idx);
+          const stars = getMainLevelStars(idx);
           return (
-            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
-              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
+            <button key={idx} className="level-card" onClick={() => { if (unlocked) { setSelectedMainLevel(idx); setPhase('stages'); } }}
+              style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
+              <span className="level-icon">{unlocked ? ml.icon : '🔒'}</span>
               <div className="level-info">
-                <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
-                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
+                <div className="level-name">{ml.name}</div>
+                <div className="level-meta">{unlocked ? ml.tagline : `Complete ${MAIN_LEVELS[idx-1]?.name || ''} to unlock`}</div>
+                {unlocked && completed > 0 && (
+                  <div className="level-best">{completed}/{STAGES_PER_LEVEL} stages · {stars}&#9733;</div>
+                )}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
             </button>
           );
         })}
@@ -977,51 +893,112 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
     );
   }
 
+
+  // ─── PHASE 2: Stages List ───────────────────────────────────
+  if (phase === 'stages') {
+    const ml = MAIN_LEVELS[selectedMainLevel];
+    return (
+      <div>
+        <button className="btn btn-secondary" style={{ marginBottom: 14, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
+          &#8592; Back to Levels
+        </button>
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div className="card-title" style={{ color: T.gold }}>{ml.icon} {ml.name}</div>
+          <p style={{ fontSize: 12, color: T.textMid }}>{ml.tagline} · {ml.timeSeconds}s per question</p>
+        </div>
+        {Array.from({ length: STAGES_PER_LEVEL }, (_, stageIdx) => {
+          const key = `${selectedMainLevel}_${stageIdx}`;
+          const stageDone = stageProgress[key];
+          const unlocked = isStageUnlocked(selectedMainLevel, stageIdx);
+          const starsEarned = stageDone ? stageDone.stars : 0;
+          const starDisplay = Array(3).fill(0).map((_, i) => i < starsEarned ? '\u2605' : '\u2606').join('');
+          return (
+            <button key={stageIdx} className="level-card" onClick={() => startStage(selectedMainLevel, stageIdx)}
+              style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
+              <span className="level-icon" style={{ fontSize: 18 }}>{unlocked ? (stageDone ? '&#10003;' : `${stageIdx + 1}`) : '🔒'}</span>
+              <div className="level-info">
+                <div className="level-name">Stage {stageIdx + 1}</div>
+                <div className="level-meta">
+                  {!unlocked ? 'Pass previous stage to unlock' : stageDone ? `${starDisplay}` : `${QUESTIONS_PER_STAGE} questions · ${ml.timeSeconds}s`}
+                </div>
+              </div>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+
+  // ─── PHASE 4: Result ────────────────────────────────────────
   if (phase === 'result') {
-    const passed = finalScore >= levels[currentLevel].minCorrect;
+    const stars = getStars(finalScore);
+    const passed = finalScore >= MIN_CORRECT_TO_PASS;
+    const starDisplay = Array(3).fill(0).map((_, i) => i < stars ? '\u2605' : '\u2606').join(' ');
+    const hasNext = currentStage < STAGES_PER_LEVEL - 1;
     return (
       <div className="result-screen">
         <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">You scored {finalScore}/{questions.length}</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
-        <button className="share-btn" onClick={shareResult}>📤 Share Result #AniNoir</button>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
-          {passed && currentLevel < levels.length - 1 && (
-            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
+        <div className="result-title">{passed ? 'Stage Cleared!' : 'Stage Failed'}</div>
+        <div className="result-sub">You scored {finalScore}/{QUESTIONS_PER_STAGE}</div>
+        <div style={{ fontSize: 28, marginBottom: 16, letterSpacing: 4 }}>{starDisplay}</div>
+        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{STAGE_REWARD}&#9824; earned!</div>}
+        <button className="share-btn" onClick={shareResult}>&#128228; Share Result</button>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8 }}>
+          <button className="btn btn-secondary" onClick={() => { setSelectedMainLevel(currentMainLevel); setPhase('stages'); }}>&#8592; Stages</button>
+          {passed && hasNext && (
+            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage + 1)}>Next Stage &#8594;</button>
+          )}
+          {passed && !hasNext && currentMainLevel < MAIN_LEVELS.length - 1 && (
+            <button className="btn btn-primary" onClick={() => { setSelectedMainLevel(currentMainLevel + 1); setPhase('stages'); }}>Next Level &#8594;</button>
+          )}
+          {!passed && (
+            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage)}>Retry</button>
           )}
         </div>
       </div>
     );
   }
 
+
+  // ─── PHASE 3: Playing ───────────────────────────────────────
   const q = questions[qIndex];
-  const progress = (qIndex / questions.length) * 100;
+  if (!q) return <div className="card"><p>Loading...</p></div>;
+  const progress = ((qIndex) / questions.length) * 100;
 
+  // Use custom render if provided
+  if (renderQuestion) {
+    return renderQuestion({
+      q, qIndex, questions, progress, timeLeft, maxTime, score, combo,
+      answered, selectedOption, correctOption, hintRevealed, currentMainLevel,
+      currentStage, submitMCQ, submitAnagram, doHint, doSkip, doShuffle,
+      scrambled, spades, skipUsed
+    });
+  }
 
+  // Default MCQ / Anagram render
   return (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
       <div className="quiz-header">
-        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
+        <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✅ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
+          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
         </div>
       </div>
-
       <div className="card">
         <div className="question-text">
-          {q.type === 'mcq' ? q.text : '🔤 ANIME SCRAMBLE'}
+          {q.type === 'anagram' ? '🔤 ANIME SCRAMBLE' : q.text}
         </div>
         {q.type === 'anagram' ? (
           <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
         ) : (
           <div>
             {hintRevealed && q.hint && (
-              <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
+              <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>&#128161; {q.hint}</div>
             )}
             {q.options.map((opt, idx) => {
               let cls = 'option-btn';
@@ -1036,20 +1013,19 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
           </div>
         )}
       </div>
-
       <div className="power-btns">
         {q.type === 'anagram' && (
           <button className="power-btn" onClick={doShuffle} disabled={spades < 20 || answered}>
-            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20♠</span>
+            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20&#9824;</span>
           </button>
         )}
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          ⏭️ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
         </button>
       </div>
     </div>
@@ -1057,241 +1033,51 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 }
 
 
-// ─── Emoji Quiz Page (NEW) ───────────────────────────────────
-function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unlockCost }) {
-  const [unlocked] = useState(true);
-  const [phase, setPhase] = useState('levels');
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [qIndex, setQIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [maxTime, setMaxTime] = useState(30);
-  const [timerActive, setTimerActive] = useState(false);
-  const [hintRevealed, setHintRevealed] = useState(false);
-  const [skipUsed, setSkipUsed] = useState(false);
-  const [answered, setAnswered] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [correctOption, setCorrectOption] = useState(null);
-  const [finalScore, setFinalScore] = useState(0);
-  const timerRef = useRef(null);
-  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
 
-  const unlock = () => {
-    if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Emoji Quiz!`); return; }
-    setSpades(s => s - unlockCost);
-    setUnlocked(true);
-    localStorage.setItem('ani_emoji_unlocked', '1');
-    showFeedback('🎯 Emoji Quiz unlocked!');
+// ─── Quiz Page (MCQ mode) ────────────────────────────────────
+function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly, anagramOnly, mode }) {
+  const getQuestionPool = (mainLevelIdx, stageIdx) => {
+    const levelNum = mainLevelIdx + 1;
+    let pool = questionBank.filter(q => q.level === levelNum);
+    if (mcqOnly) pool = pool.filter(q => q.type === 'mcq');
+    if (anagramOnly) pool = pool.filter(q => q.type === 'anagram');
+    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE);
   };
 
-  useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
-      return () => clearInterval(timerRef.current);
-    }
-    if (timerActive && timeLeft === 0) handleTimeout();
-  }, [timerActive, timeLeft]);
+  return (
+    <StageQuizPage
+      mode={mode}
+      getQuestionPool={getQuestionPool}
+      spades={spades}
+      setSpades={setSpades}
+      showFeedback={showFeedback}
+    />
+  );
+}
 
-  const getEmojiPool = (levelNum) => {
+
+
+// ─── Emoji Quiz Page ─────────────────────────────────────────
+function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unlockCost }) {
+  const getQuestionPool = (mainLevelIdx, stageIdx) => {
+    const levelNum = mainLevelIdx + 1;
     const pool = ALL_EMOJI_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5).map(q => {
+    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
       const correctAnswer = q.options[q.correct];
       const shuffledOptions = shuffle([...q.options]);
       return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
     });
   };
 
-  const startLevel = (idx) => {
-    const qs = getEmojiPool(idx + 1);
-    if (!qs.length) { showFeedback('No emoji questions for this level!'); return; }
-    setCurrentLevel(idx);
-    setQuestions(qs);
-    setQIndex(0);
-    setScore(0);
-    setStreak(0);
-    setCombo(0);
-    setHintRevealed(false);
-    setSkipUsed(false);
-    setAnswered(false);
-    setSelectedOption(null);
-    setCorrectOption(null);
-    const t = levels[idx].timeSeconds;
-    setTimeLeft(t);
-    setMaxTime(t);
-    setTimerActive(true);
-    setPhase('playing');
-  };
-
-  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
-
-
-  const handleTimeout = () => {
-    clearTimer();
-    setAnswered(true);
-    const q = questions[qIndex];
-    setCorrectOption(q.correct);
-    playWrong();
-    showFeedback('⏰ Time\'s up!');
-    setTimeout(() => advance(false, score), 1200);
-  };
-
-  const advance = (wasCorrect, currentScore) => {
-    const nextIdx = qIndex + 1;
-    if (nextIdx < questions.length) {
-      setQIndex(nextIdx);
-      setHintRevealed(false);
-      setSkipUsed(false);
-      setAnswered(false);
-      setSelectedOption(null);
-      setCorrectOption(null);
-      const t = levels[currentLevel].timeSeconds;
-      setTimeLeft(t);
-      setMaxTime(t);
-      setTimerActive(true);
-    } else {
-      const fs = currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
-      if (passed) {
-        const reward = levels[currentLevel].reward;
-        setSpades(s => s + reward);
-      }
-      updateBestScore('emoji', currentLevel, fs, questions.length);
-      setFinalScore(fs);
-      clearTimer();
-      setPhase('result');
-    }
-  };
-
-  const submitMCQ = (optIdx) => {
-    if (answered) return;
-    clearTimer();
-    const q = questions[qIndex];
-    const isCorrect = optIdx === q.correct;
-    setSelectedOption(optIdx);
-    setCorrectOption(q.correct);
-    setAnswered(true);
-    if (isCorrect) {
-      const newCombo = combo + 1;
-      setScore(s => s + 1);
-      setStreak(streak + 1);
-      setCombo(newCombo);
-      playCorrect();
-      if (newCombo >= 3) {
-        const bonus = Math.floor(newCombo / 3) * 5;
-        setSpades(s => s + bonus);
-        playCombo();
-        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
-      } else {
-        showFeedback('✅ Correct!');
-      }
-      setTimeout(() => advance(true, score + 1), 1000);
-    } else {
-      setStreak(0);
-      setCombo(0);
-      playWrong();
-      showFeedback('❌ Wrong!');
-      setTimeout(() => advance(false, score), 1000);
-    }
-  };
-
-  const doHint = () => {
-    if (spades < 30 || hintRevealed || answered) return;
-    setSpades(s => s - 30);
-    setHintRevealed(true);
-    showFeedback('💡 Hint revealed! -30♠');
-  };
-
-  const doSkip = () => {
-    if (spades < 50 || skipUsed || answered) return;
-    setSpades(s => s - 50);
-    setSkipUsed(true);
-    clearTimer();
-    setAnswered(true);
-    showFeedback('⏭️ Skipped! -50♠');
-    setTimeout(() => advance(false, score), 800);
-  };
-
-
-  if (!unlocked) return (
-    <div className="shadow-lock">
-      <div className="shadow-silhouette">🎯</div>
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Emoji Quiz</div>
-      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
-        Guess the anime from emoji clues!<br />A fun twist on anime trivia.
-      </div>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
-        <div style={{ fontSize: 12, color: T.textMid }}>One-time unlock · You have {spades}♠</div>
-      </div>
-      <button className="btn btn-primary" onClick={unlock} disabled={spades < unlockCost} style={{ width: '100%' }}>
-        {spades >= unlockCost ? '🎯 Unlock Emoji Quiz' : `Need ${unlockCost - spades} more ♠`}
-      </button>
-    </div>
-  );
-
-  if (phase === 'levels') {
-    const lb = getLeaderboard();
-    return (
-      <div>
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title" style={{ color: T.teal }}>🎯 EMOJI QUIZ</div>
-          <p style={{ fontSize: 13, color: T.textMid }}>Guess the anime from emoji clues! 5 questions per level.</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
-        </div>
-        {levels.map((lvl, idx) => {
-          const best = lb[`emoji_${idx}`];
-          const prevBest = idx > 0 ? lb[`emoji_${idx - 1}`] : null;
-          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
-          return (
-            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
-              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
-              <div className="level-info">
-                <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
-                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
-              </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (phase === 'result') {
-    const passed = finalScore >= levels[currentLevel].minCorrect;
-    return (
-      <div className="result-screen">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">You scored {finalScore}/{questions.length}</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
-          {passed && currentLevel < levels.length - 1 && (
-            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const q = questions[qIndex];
-  const progress = (qIndex / questions.length) * 100;
-
-
-  return (
+  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades, skipUsed }) => (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
       <div className="quiz-header">
-        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
+        <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✅ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
+          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
         </div>
       </div>
       <div className="card">
@@ -1299,7 +1085,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
           {q.text}
         </div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>&#128161; {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1315,19 +1101,193 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          ⏭️ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
         </button>
       </div>
     </div>
   );
+
+  return (
+    <StageQuizPage
+      mode="emoji"
+      getQuestionPool={getQuestionPool}
+      spades={spades}
+      setSpades={setSpades}
+      showFeedback={showFeedback}
+      renderQuestion={renderQuestion}
+    />
+  );
 }
 
 
-// ─── Survival Mode (NEW) ────────────────────────────────────
+
+// ─── Shadow Quiz Page ────────────────────────────────────────
+const ALL_SHADOW_QUESTIONS = [
+  ...level1Shadow,
+  ...level2Shadow,
+  ...level3Shadow,
+  ...level4Shadow,
+  ...level5Shadow,
+];
+
+function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
+  const [imageRevealed, setImageRevealed] = useState(false);
+
+  const getQuestionPool = (mainLevelIdx, stageIdx) => {
+    const levelNum = mainLevelIdx + 1;
+    const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
+    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
+      const correctAnswer = q.options[q.correct];
+      const shuffledOptions = shuffle([...q.options]);
+      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
+    });
+  };
+
+  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades, skipUsed }) => (
+    <div>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="quiz-header">
+        <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
+          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+        </div>
+      </div>
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div className="card-title" style={{ color: T.violet }}>&#128373;&#65039; WHO IS THIS CHARACTER?</div>
+        <div style={{ margin: '16px auto', width: 150, height: 150, borderRadius: 16, overflow: 'hidden', border: `2px solid ${T.border}`, position: 'relative', background: T.surface }}>
+          <img
+            src={q.image}
+            alt="shadow character"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              filter: answered ? 'none' : 'brightness(0)',
+              transition: 'filter 0.6s ease'
+            }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          {!answered && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
+              &#128373;&#65039;
+            </div>
+          )}
+        </div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>&#128161; {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+          </button>
+        )}
+        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
+          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <StageQuizPage
+      mode="shadow"
+      getQuestionPool={getQuestionPool}
+      spades={spades}
+      setSpades={setSpades}
+      showFeedback={showFeedback}
+      renderQuestion={renderQuestion}
+    />
+  );
+}
+
+
+
+// ─── Anime Frames Page ──────────────────────────────────────
+function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
+  const getQuestionPool = (mainLevelIdx, stageIdx) => {
+    const levelNum = mainLevelIdx + 1;
+    const pool = ANIME_FRAMES_QUESTIONS.filter(q => q.level === levelNum);
+    return shuffle(pool).slice(0, QUESTIONS_PER_STAGE).map(q => {
+      const correctAnswer = q.options[q.correct];
+      const shuffledOptions = shuffle([...q.options]);
+      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
+    });
+  };
+
+  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades, skipUsed }) => (
+    <div>
+      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="quiz-header">
+        <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
+        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
+          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+        </div>
+      </div>
+      <div className="card">
+        <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>&#128444;&#65039; SCENE DESCRIPTION</div>
+        <div className="question-text" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
+          "{q.text}"
+        </div>
+        {hintRevealed && q.hint && (
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>&#128161; {q.hint}</div>
+        )}
+        {q.options.map((opt, idx) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (idx === correctOption) cls += ' correct';
+            else if (idx === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
+          );
+        })}
+      </div>
+      <div className="power-btns">
+        {q.hint && (
+          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
+            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+          </button>
+        )}
+        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
+          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <StageQuizPage
+      mode="frames"
+      getQuestionPool={getQuestionPool}
+      spades={spades}
+      setSpades={setSpades}
+      showFeedback={showFeedback}
+      renderQuestion={renderQuestion}
+    />
+  );
+}
+
+
+
+// ─── Survival Mode (UNCHANGED) ──────────────────────────────
 function SurvivalPage({ spades, setSpades, showFeedback }) {
   const SURVIVAL_FREE_TRIALS = 5;
   const SURVIVAL_UNLOCK_COST = 1000;
@@ -1348,16 +1308,15 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   const freeTrialsLeft = Math.max(0, SURVIVAL_FREE_TRIALS - triesUsed);
 
   const unlockSurvival = () => {
-    if (spades < SURVIVAL_UNLOCK_COST) { showFeedback(`Need ${SURVIVAL_UNLOCK_COST}♠ to unlock Survival Mode!`); return; }
+    if (spades < SURVIVAL_UNLOCK_COST) { showFeedback(`Need ${SURVIVAL_UNLOCK_COST} spades to unlock Survival Mode!`); return; }
     setSpades(s => s - SURVIVAL_UNLOCK_COST);
     setSurvivalUnlocked(true);
     localStorage.setItem('ani_survival_unlocked', '1');
-    showFeedback('💀 Survival Mode unlocked permanently!');
+    showFeedback('Survival Mode unlocked permanently!');
   };
 
   const startGame = () => {
     if (isLocked) return;
-    // Increment tries if not permanently unlocked
     if (!survivalUnlocked) {
       const newTries = triesUsed + 1;
       setTriesUsed(newTries);
@@ -1378,16 +1337,14 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 
   const advance = () => {
     const nextIdx = qIndex + 1;
-    if (nextIdx >= questions.length) {
-      setPhase('result');
-      return;
-    }
+    if (nextIdx >= questions.length) { setPhase('result'); return; }
     setQIndex(nextIdx);
     setAnswered(false);
     setSelectedOption(null);
     setCorrectOption(null);
     setHintRevealed(false);
   };
+
 
   const submitAnswer = (optIdx) => {
     if (answered) return;
@@ -1403,12 +1360,11 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
       setScore(newScore);
       setStreak(newStreak);
       playCorrect();
-      // Every 5 correct = +100 spades
       if (newScore % 5 === 0) {
         setSpades(s => s + 100);
-        showFeedback(`✅ Correct! 💰 +100♠ (${newScore} streak!)`);
+        showFeedback(`Correct! +100 spades (${newScore} streak!)`);
       } else {
-        showFeedback(`✅ Correct! Streak: ${newStreak}`);
+        showFeedback(`Correct! Streak: ${newStreak}`);
       }
       setTimeout(advance, 1000);
     } else {
@@ -1417,10 +1373,10 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
       setStreak(0);
       playWrong();
       if (newLives <= 0) {
-        showFeedback('💀 Game Over!');
+        showFeedback('Game Over!');
         setTimeout(() => setPhase('result'), 1200);
       } else {
-        showFeedback(`❌ Wrong! ${newLives} ❤️ left`);
+        showFeedback(`Wrong! ${newLives} lives left`);
         setTimeout(advance, 1200);
       }
     }
@@ -1430,42 +1386,38 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
     if (spades < 30 || hintRevealed || answered) return;
     setSpades(s => s - 30);
     setHintRevealed(true);
-    showFeedback('💡 Hint revealed! -30♠');
+    showFeedback('Hint revealed! -30 spades');
   };
 
 
   if (phase === 'intro') {
-    // Locked state - needs 1000 spades to unlock
     if (isLocked) return (
       <div className="shadow-lock">
-        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
+        <div style={{ fontSize:72, marginBottom:16 }}>&#128128;</div>
         <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode Locked</div>
         <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
           You've used all {SURVIVAL_FREE_TRIALS} free trials!<br/>
-          Unlock permanently with {SURVIVAL_UNLOCK_COST}♠ to keep playing.
+          Unlock permanently with {SURVIVAL_UNLOCK_COST} spades to keep playing.
         </div>
         <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
-          <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {SURVIVAL_UNLOCK_COST}♠</div>
-          <div style={{ fontSize: 12, color: T.textMid }}>Permanent unlock · You have {spades}♠</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>&#128274; {SURVIVAL_UNLOCK_COST}&#9824;</div>
+          <div style={{ fontSize: 12, color: T.textMid }}>Permanent unlock · You have {spades}&#9824;</div>
         </div>
         <button className="btn btn-primary" onClick={unlockSurvival} disabled={spades < SURVIVAL_UNLOCK_COST} style={{ width: '100%' }}>
-          {spades >= SURVIVAL_UNLOCK_COST ? '💀 Unlock Survival Mode' : `Need ${SURVIVAL_UNLOCK_COST - spades} more ♠`}
+          {spades >= SURVIVAL_UNLOCK_COST ? 'Unlock Survival Mode' : `Need ${SURVIVAL_UNLOCK_COST - spades} more spades`}
         </button>
       </div>
     );
 
-    // Free trial / unlocked intro
     return (
       <div className="shadow-lock">
-        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
+        <div style={{ fontSize:72, marginBottom:16 }}>&#128128;</div>
         <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode</div>
         <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
           Infinite quiz from ALL questions mixed.<br/>
-          You have 3 lives (❤️❤️❤️). Wrong answer = lose 1 life.<br/>
-          Game over at 0 lives. Every 5 correct = +100♠!
+          You have 3 lives. Wrong answer = lose 1 life.<br/>
+          Game over at 0 lives. Every 5 correct = +100 spades!
         </div>
-
-        {/* Free trial progress bar - only show if not permanently unlocked */}
         {!survivalUnlocked && (
           <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: '14px 18px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -1476,39 +1428,38 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
               <div style={{ height: '100%', width: `${(freeTrialsLeft / SURVIVAL_FREE_TRIALS) * 100}%`, background: freeTrialsLeft <= 1 ? T.rose : `linear-gradient(90deg, ${T.gold}, ${T.teal})`, borderRadius: 4, transition: 'width 0.4s' }} />
             </div>
             <div style={{ fontSize: 11, color: T.textDim, marginTop: 6 }}>
-              {freeTrialsLeft > 0 ? `${freeTrialsLeft} free game${freeTrialsLeft > 1 ? 's' : ''} remaining. After that, unlock for ${SURVIVAL_UNLOCK_COST}♠.` : 'No free trials left!'}
+              {freeTrialsLeft > 0 ? `${freeTrialsLeft} free game${freeTrialsLeft > 1 ? 's' : ''} remaining.` : 'No free trials left!'}
             </div>
           </div>
         )}
-
         {survivalUnlocked && (
           <div style={{ background: 'rgba(34,197,94,0.1)', border: `1px solid rgba(34,197,94,0.3)`, borderRadius: 14, padding: '10px 18px', marginBottom: 20, textAlign: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.success }}>✅ Permanently Unlocked</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.success }}>Permanently Unlocked</span>
           </div>
         )}
-
         <button className="btn btn-primary" style={{ width: '100%' }} onClick={startGame}>
-          💀 Start Survival
+          Start Survival
         </button>
       </div>
     );
   }
 
+
   if (phase === 'result') return (
     <div className="result-screen">
-      <span className="result-emoji">💀</span>
+      <span className="result-emoji">&#128128;</span>
       <div className="result-title">Game Over!</div>
       <div className="result-sub">You survived {score} questions</div>
       <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>
-        💰 Earned {Math.floor(score / 5) * 100}♠ total
+        Earned {Math.floor(score / 5) * 100} spades total
       </div>
       <button className="share-btn" onClick={() => {
-        const text = `I survived ${score} questions in AniNoir Survival Mode! 💀 #AniNoir`;
+        const text = `I survived ${score} questions in AniNoir Survival Mode! #AniNoir`;
         if (navigator.share) navigator.share({ title: 'AniNoir Survival', text }).catch(()=>{});
-        else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
-      }}>📤 Share Result</button>
+        else { navigator.clipboard?.writeText(text); showFeedback('Copied!'); }
+      }}>Share Result</button>
       <button className="btn btn-primary btn-full" style={{ marginTop: 8 }} onClick={startGame}>
-        Play Again 💀
+        Play Again
       </button>
     </div>
   );
@@ -1520,16 +1471,15 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14, padding:'0 4px' }}>
         <div className="survival-lives">
-          {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '❤️' : '🖤'}</span>)}
+          {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '\u2764\uFE0F' : '\u{1F5A4}'}</span>)}
         </div>
-        <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
-        <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
+        <div className="survival-stat" style={{ color: T.gold }}>&#127942; {score}</div>
+        <div className="survival-stat" style={{ color: T.teal }}>&#128293; {streak}</div>
       </div>
-
       <div className="card">
         <div className="question-text">{q.text}</div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>&#128161; {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1545,7 +1495,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
           </button>
         )}
       </div>
@@ -1554,293 +1504,184 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 }
 
 
-// ─── Shadow Quiz Page ────────────────────────────────────────
-const ALL_SHADOW_QUESTIONS = [
-  ...level1Shadow,
-  ...level2Shadow,
-  ...level3Shadow,
-  ...level4Shadow,
-  ...level5Shadow,
-];
 
-function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
-  const [unlocked] = useState(true);
-  const [phase, setPhase] = useState('levels');
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [qIndex, setQIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [maxTime, setMaxTime] = useState(30);
-  const [timerActive, setTimerActive] = useState(false);
-  const [hintRevealed, setHintRevealed] = useState(false);
-  const [answered, setAnswered] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [correctOption, setCorrectOption] = useState(null);
-  const [finalScore, setFinalScore] = useState(0);
-  const [imageRevealed, setImageRevealed] = useState(false);
-  const timerRef = useRef(null);
-  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
+// ─── App Root ───────────────────────────────────────────────
+export default function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [page, setPage] = useState('home');
+  const [pageKey, setPageKey] = useState(0);
+  const [spades, setSpades] = useState(() => parseInt(localStorage.getItem('ani_spades') || '100'));
+  const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
+  const [feedback, setFeedback] = useState('');
+  const [spadesModal, setSpadesModal] = useState(false);
+  const feedbackTimer = useRef(null);
 
-  const unlock = () => {
-    if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Shadow Quiz!`); return; }
-    setSpades(s => s - unlockCost);
-    setUnlocked(true);
-    localStorage.setItem('ani_shadow_unlocked', '1');
-    showFeedback('🕵️ Shadow Quiz unlocked!');
+  const showFeedback = (msg) => {
+    setFeedback(msg);
+    clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = setTimeout(() => setFeedback(''), 2200);
   };
+
+  useEffect(() => { localStorage.setItem('ani_spades', spades); }, [spades]);
+  useEffect(() => { localStorage.setItem('ani_badges', JSON.stringify(badges)); }, [badges]);
 
   useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
-      return () => clearInterval(timerRef.current);
+    if (!localStorage.getItem('ani_offline_shown')) {
+      setTimeout(() => {
+        showFeedback('Quizzes work offline! No internet needed.');
+        localStorage.setItem('ani_offline_shown', '1');
+      }, 2000);
     }
-    if (timerActive && timeLeft === 0) handleTimeout();
-  }, [timerActive, timeLeft]);
+  }, []);
 
-  const getShadowPool = (levelNum) => {
-    const pool = ALL_SHADOW_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5).map(q => {
-      const correctAnswer = q.options[q.correct];
-      const shuffledOptions = shuffle([...q.options]);
-      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
-    });
+  const navigate = (id) => {
+    playClick();
+    setPage(id);
+    setPageKey(k => k + 1);
+    setSidebarOpen(false);
   };
 
-  const startLevel = (idx) => {
-    const qs = getShadowPool(idx + 1);
-    if (!qs.length) { showFeedback('No shadow questions for this level!'); return; }
-    setCurrentLevel(idx);
-    setQuestions(qs);
-    setQIndex(0);
-    setScore(0);
-    setStreak(0);
-    setCombo(0);
-    setHintRevealed(false);
-    setAnswered(false);
-    setSelectedOption(null);
-    setCorrectOption(null);
-    setImageRevealed(false);
-    const t = levels[idx].timeSeconds;
-    setTimeLeft(t);
-    setMaxTime(t);
-    setTimerActive(true);
-    setPhase('playing');
-  };
+  const pageTitle = NAV.find(n => n.id === page)?.label || 'AniNoir';
+  const SHADOW_COST = 200;
+  const EMOJI_COST = 200;
 
-  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
-
-  const handleTimeout = () => {
-    clearTimer();
-    setAnswered(true);
-    setImageRevealed(true);
-    const q = questions[qIndex];
-    setCorrectOption(q.correct);
-    playWrong();
-    showFeedback('⏰ Time\'s up!');
-    setTimeout(() => advance(false, score), 1200);
-  };
-
-  const advance = (wasCorrect, currentScore) => {
-    const nextIdx = qIndex + 1;
-    if (nextIdx < questions.length) {
-      setQIndex(nextIdx);
-      setHintRevealed(false);
-      setAnswered(false);
-      setSelectedOption(null);
-      setCorrectOption(null);
-      setImageRevealed(false);
-      const t = levels[currentLevel].timeSeconds;
-      setTimeLeft(t);
-      setMaxTime(t);
-      setTimerActive(true);
-    } else {
-      const fs = currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
-      if (passed) {
-        const reward = levels[currentLevel].reward;
-        setSpades(s => s + reward);
-      }
-      updateBestScore('shadow', currentLevel, fs, questions.length);
-      setFinalScore(fs);
-      clearTimer();
-      setPhase('result');
-    }
-  };
-
-  const submitAnswer = (optIdx) => {
-    if (answered) return;
-    clearTimer();
-    const q = questions[qIndex];
-    const isCorrect = optIdx === q.correct;
-    setSelectedOption(optIdx);
-    setCorrectOption(q.correct);
-    setAnswered(true);
-    setImageRevealed(true);
-    if (isCorrect) {
-      const newCombo = combo + 1;
-      setScore(s => s + 1);
-      setStreak(streak + 1);
-      setCombo(newCombo);
-      playCorrect();
-      if (newCombo >= 3) {
-        const bonus = Math.floor(newCombo / 3) * 5;
-        setSpades(s => s + bonus);
-        playCombo();
-        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
-      } else {
-        showFeedback('✅ Correct!');
-      }
-      setTimeout(() => advance(true, score + 1), 1200);
-    } else {
-      setStreak(0);
-      setCombo(0);
-      playWrong();
-      showFeedback('❌ Wrong!');
-      setTimeout(() => advance(false, score), 1200);
-    }
-  };
-
-  const doHint = () => {
-    if (spades < 30 || hintRevealed || answered) return;
-    setSpades(s => s - 30);
-    setHintRevealed(true);
-    showFeedback('💡 Hint revealed! -30♠');
-  };
-
-  if (!unlocked) return (
-    <div className="shadow-lock">
-      <div className="shadow-silhouette">🕵️</div>
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Shadow Quiz</div>
-      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
-        Identify anime characters from their shadowed images!<br />A true fan's ultimate test.
-      </div>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
-        <div style={{ fontSize: 12, color: T.textMid }}>One-time unlock · You have {spades}♠</div>
-      </div>
-      <button className="btn btn-primary" onClick={unlock} disabled={spades < unlockCost} style={{ width: '100%' }}>
-        {spades >= unlockCost ? '🕵️ Unlock Shadow Quiz' : `Need ${unlockCost - spades} more ♠`}
-      </button>
-    </div>
-  );
-
-  if (phase === 'levels') {
-    const lb = getLeaderboard();
-    return (
-      <div>
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title" style={{ color: T.violet }}>🕵️ SHADOW QUIZ</div>
-          <p style={{ fontSize: 13, color: T.textMid }}>Guess the anime character from their shadowed image! 4 options, 5 questions per level.</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
-        </div>
-        {levels.map((lvl, idx) => {
-          const best = lb[`shadow_${idx}`];
-          const prevBest = idx > 0 ? lb[`shadow_${idx - 1}`] : null;
-          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
-          return (
-            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
-              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
-              <div className="level-info">
-                <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
-                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
-              </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (phase === 'result') {
-    const passed = finalScore >= levels[currentLevel].minCorrect;
-    return (
-      <div className="result-screen">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">You identified {finalScore}/{questions.length} characters</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
-        <button className="share-btn" onClick={() => {
-          const text = `I identified ${finalScore}/${questions.length} shadow characters on ${levels[currentLevel].name}! 🕵️ #AniNoir`;
-          if (navigator.share) navigator.share({ title: 'AniNoir Shadow Quiz', text }).catch(()=>{});
-          else { navigator.clipboard?.writeText(text); showFeedback('📋 Copied!'); }
-        }}>📤 Share Result</button>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
-          {passed && currentLevel < levels.length - 1 && (
-            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const q = questions[qIndex];
-  if (!q) return null;
-  const progress = (qIndex / questions.length) * 100;
 
   return (
-    <div>
-      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-      <div className="quiz-header">
-        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
-        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✅ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+    <>
+      <style>{css}</style>
+      <div className="app-shell">
+        <div className="desktop-sidebar">
+          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
         </div>
-      </div>
-      <div className="card" style={{ textAlign: 'center' }}>
-        <div className="card-title" style={{ color: T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
-        <div style={{ margin: '16px auto', width: 150, height: 150, borderRadius: 16, overflow: 'hidden', border: `2px solid ${T.border}`, position: 'relative', background: T.surface }}>
-          <img
-            src={q.image}
-            alt="shadow character"
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              filter: imageRevealed ? 'none' : 'brightness(0)',
-              transition: 'filter 0.6s ease'
-            }}
-            onError={e => { e.target.style.display = 'none'; }}
-          />
-          {!imageRevealed && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
-              🕵️
+
+        <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
+        <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <SidebarContent page={page} navigate={navigate} spades={spades} onSpadesClick={() => setSpadesModal(true)} />
+        </div>
+
+        <div className="main">
+          <div className="topbar">
+            <button className="menu-btn" onClick={() => setSidebarOpen(true)}>&#9776;</button>
+            <span className="topbar-title">{pageTitle}</span>
+            <div className="topbar-chips">
+              <span className="chip" onClick={() => setSpadesModal(true)}>&#9824; {spades}</span>
+              <span className="chip">&#127941; {badges.length}</span>
             </div>
-          )}
+          </div>
+
+          <div className="page" key={pageKey}>
+            <div className="page-enter">
+              {page === 'home' && <HomePage navigate={navigate} dailyAnime={getDailyAnime()} dailyQuote={getDailyQuote()} />}
+              {page === 'quiz' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />}
+              {page === 'emoji' && <EmojiQuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} unlockCost={EMOJI_COST} />}
+              {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
+              {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={SHADOW_COST} />}
+              {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
+              {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
+              {page === 'search' && <SearchPage showFeedback={showFeedback} />}
+              {page === 'charsearch' && <CharacterSearchPage showFeedback={showFeedback} />}
+              {page === 'watchlist' && <WatchlistPage showFeedback={showFeedback} />}
+              {page === 'news' && <NewsPage />}
+              {page === 'birthdays' && <BirthdaysPage />}
+              {page === 'daily' && <DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
+              {page === 'about' && <AboutPage spades={spades} badges={badges} />}
+            </div>
+          </div>
         </div>
-        {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>💡 {q.hint}</div>
-        )}
-        {q.options.map((opt, idx) => {
-          let cls = 'option-btn';
-          if (answered) {
-            if (idx === correctOption) cls += ' correct';
-            else if (idx === selectedOption) cls += ' wrong';
-          }
-          return (
-            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
-          );
-        })}
+
+        {feedback && <div className="feedback-toast">{feedback}</div>}
+        {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
       </div>
-      <div className="power-btns">
-        {q.hint && (
-          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
-          </button>
-        )}
+    </>
+  );
+}
+
+
+
+// ─── Home Page ───────────────────────────────────────────────
+function LatestYouTubeCard() {
+  const [video, setVideo] = useState(null);
+  useEffect(() => {
+    const RSS = 'https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=UCxvnMryqeGfklJRwGM1r9eA&count=1';
+    fetch(RSS).then(r=>r.json()).then(d=>{
+      const v = d.items?.[0];
+      if(v) setVideo({ title: v.title, link: v.link, thumb: v.thumbnail, date: new Date(v.pubDate).toLocaleDateString() });
+    }).catch(()=>{});
+  },[]);
+
+  if (!video) return null;
+  return (
+    <div className="card" style={{ padding:0, overflow:'hidden' }}>
+      <div style={{ padding:'14px 16px 8px' }}>
+        <div className="card-title" style={{ color: '#ff4444', marginBottom:8 }}>LATEST VIDEO</div>
+      </div>
+      <a href={video.link} target="_blank" rel="noopener noreferrer" className="yt-card" style={{ margin:'0 12px 12px', borderRadius:14 }}>
+        <img src={video.thumb} alt="" className="yt-thumb" onError={e=>e.target.style.display='none'} />
+        <div className="yt-info">
+          <div className="yt-title">{video.title}</div>
+          <div className="yt-sub">AnimeTMTalks · {video.date}</div>
+        </div>
+      </a>
+    </div>
+  );
+}
+
+
+function HomePage({ navigate, dailyAnime, dailyQuote }) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  return (
+    <div>
+      <div className="hero-banner">
+        <div className="hero-greeting">{greeting}, Otaku!</div>
+        <div className="hero-sub">Ready to test your anime knowledge?</div>
+        <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10 }} onClick={() => navigate('quiz')}>
+          Start Quiz
+        </button>
+      </div>
+
+      <LatestYouTubeCard />
+
+      <div style={{ marginBottom: 6 }}>
+        <div className="card-title" style={{ color: T.rose, padding: '0 2px 8px', fontSize: 11 }}>ANIME OF THE DAY</div>
+        <div className="daily-anime-card">
+          <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" onError={e=>{e.target.style.display='none';}} />
+          <div className="daily-anime-overlay">
+            <div className="daily-anime-title">{dailyAnime.title}</div>
+            <div className="daily-anime-meta">&#11088; {dailyAnime.rating} · {dailyAnime.genre}</div>
+          </div>
+        </div>
+        <div className="card" style={{ marginTop: 0 }}>
+          <p style={{ fontSize: 13, color: T.textMid, lineHeight: 1.6 }}>{dailyAnime.desc}</p>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{ color: T.gold }}>QUOTE OF THE DAY</div>
+        <div className="quote-card">
+          <div className="quote-text">"{dailyQuote.text}"</div>
+          <div className="quote-attr">— {dailyQuote.char} · {dailyQuote.anime}</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{ color: T.teal }}>QUICK PLAY</div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {[['quiz','🧠','Quiz'],['emoji','🎯','Emoji'],['anagram','🔤','Scramble'],['frames','🖼️','Frames'],['shadow','🕵️','Shadow'],['survival','💀','Survive'],['daily','📅','Daily']].map(([id,ico,lbl])=>(
+            <button key={id} className="btn btn-secondary" style={{ flex:'1 0 28%', flexDirection:'column', gap:4, padding:'10px 4px', fontSize:10 }} onClick={()=>navigate(id)}>
+              <span style={{ fontSize: 20 }}>{ico}</span><span>{lbl}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
 
 
 // ─── Search Page ─────────────────────────────────────────────
-const STREAMING_MAP = { 'Crunchyroll':'🟠 Crunchyroll','Netflix':'🔴 Netflix','Funimation':'🟣 Funimation','Amazon':'🔵 Prime Video','Hulu':'🟢 Hulu','Disney':'🔵 Disney+','HIDIVE':'⚪ HIDIVE' };
+const STREAMING_MAP = { 'Crunchyroll':'Crunchyroll','Netflix':'Netflix','Funimation':'Funimation','Amazon':'Prime Video','Hulu':'Hulu','Disney':'Disney+','HIDIVE':'HIDIVE' };
 
 function SearchPage({ showFeedback }) {
   const [query, setQuery] = useState('');
@@ -1885,7 +1726,7 @@ function SearchPage({ showFeedback }) {
     const updated = [item, ...wl];
     saveWatchlist(updated);
     setWatchlist(updated);
-    showFeedback('📋 Added to Watchlist!');
+    showFeedback('Added to Watchlist!');
   };
 
   const inWatchlist = result && watchlist.find(x => x.malId === result.malId);
@@ -1896,14 +1737,14 @@ function SearchPage({ showFeedback }) {
       <div className="search-input-wrap">
         <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
           onKeyDown={e=>e.key==='Enter'&&search()} placeholder="Search anime name..." autoComplete="off" />
-        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'…':'🔍'}</button>
+        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'...':'🔍'}</button>
       </div>
 
       {loading && <div className="card"><div className="skeleton" style={{height:20,width:'60%',marginBottom:8}}/><div className="skeleton" style={{height:14,width:'90%',marginBottom:6}}/><div className="skeleton" style={{height:14,width:'70%'}}/></div>}
 
       {notFound && !loading && (
         <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
-          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
+          <div style={{fontSize:40,marginBottom:12}}>&#128270;</div>
           <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Anime Not Found</div>
           <div style={{fontSize:13,color:T.textMid}}>Incorrect anime name. Please type correctly and try again.</div>
         </div>
@@ -1918,29 +1759,29 @@ function SearchPage({ showFeedback }) {
                 <div className="anime-title">{result.titleEn||result.title}</div>
                 {result.titleEn && result.title!==result.titleEn && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{result.title}</div>}
                 <div className="anime-meta">
-                  {result.score && <span className="meta-badge">⭐ {result.score}</span>}
-                  {result.episodes && <span className="meta-badge">📺 {result.episodes} eps</span>}
-                  {result.year && <span className="meta-badge">📅 {result.year}</span>}
+                  {result.score && <span className="meta-badge">&#11088; {result.score}</span>}
+                  {result.episodes && <span className="meta-badge">&#128250; {result.episodes} eps</span>}
+                  {result.year && <span className="meta-badge">&#128197; {result.year}</span>}
                 </div>
                 <div style={{fontSize:12,color:T.textMid}}>{result.status}</div>
               </div>
             </div>
-            {result.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>🎭 {result.genres}</div>}
-            {result.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>🎬 {result.studios}</div>}
+            {result.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>&#127917; {result.genres}</div>}
+            {result.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>&#127916; {result.studios}</div>}
             <button className="btn btn-secondary btn-full" style={{ marginTop: 12 }} onClick={addToWatchlist} disabled={!!inWatchlist}>
-              {inWatchlist ? '✅ In Watchlist' : '📋 Add to Watchlist'}
+              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </button>
           </div>
 
           {result.synopsis && (
             <div className="card">
-              <div className="card-title" style={{color:T.violet}}>📖 SYNOPSIS</div>
-              <p className="anime-synopsis">{result.synopsis.slice(0,300)}{result.synopsis.length>300?'…':''}</p>
+              <div className="card-title" style={{color:T.violet}}>SYNOPSIS</div>
+              <p className="anime-synopsis">{result.synopsis.slice(0,300)}{result.synopsis.length>300?'...':''}</p>
             </div>
           )}
 
           <div className="card">
-            <div className="card-title" style={{color:T.teal}}>📺 WHERE TO WATCH</div>
+            <div className="card-title" style={{color:T.teal}}>WHERE TO WATCH</div>
             {result.streaming?.length ? (
               <div>{result.streaming.map((s,i)=><span key={i} className="streaming-tag">{STREAMING_MAP[s]||s}</span>)}</div>
             ) : (
@@ -1951,13 +1792,14 @@ function SearchPage({ showFeedback }) {
           </div>
 
           <a href={`https://myanimelist.net/anime/${result.malId}`} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
-            <div className="card" style={{textAlign:'center',color:T.textMid,fontSize:13}}>View full details on MyAnimeList →</div>
+            <div className="card" style={{textAlign:'center',color:T.textMid,fontSize:13}}>View full details on MyAnimeList</div>
           </a>
         </>
       )}
     </div>
   );
 }
+
 
 
 // ─── Watchlist Page ──────────────────────────────────────────
@@ -1968,12 +1810,12 @@ function WatchlistPage({ showFeedback }) {
     const updated = watchlist.filter(x => x.malId !== malId);
     saveWatchlist(updated);
     setWatchlist(updated);
-    showFeedback('🗑️ Removed from watchlist');
+    showFeedback('Removed from watchlist');
   };
 
   if (!watchlist.length) return (
     <div className="card" style={{textAlign:'center',padding:'40px 20px'}}>
-      <div style={{fontSize:48,marginBottom:12}}>📋</div>
+      <div style={{fontSize:48,marginBottom:12}}>&#128203;</div>
       <div style={{fontSize:16,fontWeight:700,marginBottom:8}}>Watchlist Empty</div>
       <div style={{fontSize:13,color:T.textMid}}>Search for anime and tap "Add to Watchlist" to save them here.</div>
     </div>
@@ -1982,7 +1824,7 @@ function WatchlistPage({ showFeedback }) {
   return (
     <div>
       <div className="card">
-        <div className="card-title" style={{color:T.teal}}>📋 MY WATCHLIST · {watchlist.length} anime</div>
+        <div className="card-title" style={{color:T.teal}}>MY WATCHLIST · {watchlist.length} anime</div>
         {watchlist.map((item, i) => (
           <div key={i} className="watchlist-item">
             {item.image && <img src={item.image} alt={item.title} className="watchlist-poster" onError={e=>e.target.style.display='none'} />}
@@ -1990,7 +1832,7 @@ function WatchlistPage({ showFeedback }) {
               <div style={{fontSize:14,fontWeight:700,lineHeight:1.3}}>{item.title}</div>
               {item.genres && <div style={{fontSize:11,color:T.textMid,marginTop:3}}>{item.genres.split(',').slice(0,2).join(', ')}</div>}
             </div>
-            <button onClick={()=>remove(item.malId)} style={{background:'none',border:`1px solid ${T.border}`,borderRadius:8,padding:'4px 8px',fontSize:12,color:T.textDim,flexShrink:0}}>✕</button>
+            <button onClick={()=>remove(item.malId)} style={{background:'none',border:`1px solid ${T.border}`,borderRadius:8,padding:'4px 8px',fontSize:12,color:T.textDim,flexShrink:0}}>&#10005;</button>
           </div>
         ))}
       </div>
@@ -1999,7 +1841,8 @@ function WatchlistPage({ showFeedback }) {
 }
 
 
-// ─── News Page (Crunchyroll RSS with images) ─────────────────────
+
+// ─── News Page ───────────────────────────────────────────────
 function NewsPage() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2012,7 +1855,7 @@ function NewsPage() {
       if (data.items?.length) {
         setNews(data.items.slice(0,15).map(item => ({
           title: item.title, link: item.link,
-          desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'…',
+          desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'...',
           image: item.thumbnail || item.enclosure?.link || '',
           date: new Date(item.pubDate).toLocaleDateString(),
         })));
@@ -2027,8 +1870,8 @@ function NewsPage() {
     <div>
       <div className="card">
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-          <div className="card-title" style={{color:T.teal,marginBottom:0}}>📰 ANIME NEWS</div>
-          <button className="btn btn-secondary" style={{padding:'6px 14px',fontSize:12}} onClick={fetchNews} disabled={loading}>{loading?'⟳ Loading…':'⟳ Refresh'}</button>
+          <div className="card-title" style={{color:T.teal,marginBottom:0}}>ANIME NEWS</div>
+          <button className="btn btn-secondary" style={{padding:'6px 14px',fontSize:12}} onClick={fetchNews} disabled={loading}>{loading?'Loading...':'Refresh'}</button>
         </div>
         {loading && [1,2,3,4].map(i=>(
           <div key={i} style={{display:'flex',gap:10,padding:'10px 0',borderBottom:`1px solid ${T.border}`}}>
@@ -2042,7 +1885,7 @@ function NewsPage() {
             {item.image ? (
               <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.style.display='none';}}/>
             ) : (
-              <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>📰</div>
+              <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>&#128240;</div>
             )}
             <div className="news-text">
               <div className="news-title">{item.title}</div>
@@ -2057,15 +1900,15 @@ function NewsPage() {
 }
 
 
+
 // ─── Birthdays Page (Week View) ──────────────────────────────
 function BirthdaysPage() {
   const [weekOffset, setWeekOffset] = useState(0);
 
-  // Get the start of the current week (Monday)
   const getWeekStart = (offset = 0) => {
     const now = new Date();
     const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(now.setDate(diff));
     monday.setHours(0, 0, 0, 0);
     monday.setDate(monday.getDate() + offset * 7);
@@ -2082,9 +1925,7 @@ function BirthdaysPage() {
   const formatDate = (d) => `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
   const weekLabel = `${formatDate(weekStart)} – ${formatDate(weekEnd)}`;
 
-  // Filter birthdays for this week
   const thisWeekBirthdays = CHARACTER_BIRTHDAYS.filter(c => {
-    // Create a date for this character's birthday in the current context year
     const bday = new Date(weekStart.getFullYear(), c.month - 1, c.day);
     return bday >= weekStart && bday <= weekEnd;
   }).sort((a, b) => {
@@ -2092,7 +1933,6 @@ function BirthdaysPage() {
     return a.day - b.day;
   });
 
-  // Check if today is someone's birthday
   const today = new Date();
   const todayMonth = today.getMonth() + 1;
   const todayDay = today.getDate();
@@ -2103,15 +1943,15 @@ function BirthdaysPage() {
     return DAYS_SHORT[d.getDay() === 0 ? 6 : d.getDay() - 1];
   };
 
+
   return (
     <div className="page-enter">
-      {/* Today's birthdays banner */}
       {weekOffset === 0 && todayBirthdays.length > 0 && (
         <div className="card" style={{ background: 'linear-gradient(135deg,rgba(244,63,94,0.15),rgba(245,158,11,0.15))', border: `1px solid rgba(244,63,94,0.3)`, marginBottom: 14 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: T.rose, marginBottom: 8 }}>🎉 TODAY'S BIRTHDAYS!</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: T.rose, marginBottom: 8 }}>TODAY'S BIRTHDAYS!</div>
           {todayBirthdays.map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 18 }}>🎂</span>
+              <span style={{ fontSize: 18 }}>&#127874;</span>
               <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
               <span style={{ fontSize: 11, color: T.textMid }}>({c.anime})</span>
             </div>
@@ -2119,23 +1959,21 @@ function BirthdaysPage() {
         </div>
       )}
 
-      {/* Week navigation */}
       <div className="card" style={{ marginBottom: 14 }}>
-        <div className="card-title" style={{ color: T.rose, marginBottom: 8 }}>🎂 ANIME BIRTHDAYS</div>
+        <div className="card-title" style={{ color: T.rose, marginBottom: 8 }}>ANIME BIRTHDAYS</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w - 1)}>← Prev</button>
+          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w - 1)}>Prev</button>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{weekLabel}</div>
             <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>
               {weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : weekOffset === -1 ? 'Last Week' : `${Math.abs(weekOffset)} weeks ${weekOffset > 0 ? 'ahead' : 'ago'}`}
             </div>
           </div>
-          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w + 1)}>Next →</button>
+          <button className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} onClick={() => setWeekOffset(w => w + 1)}>Next</button>
         </div>
         {weekOffset !== 0 && (
           <button className="btn btn-primary" style={{ width: '100%', marginTop: 10, padding: '8px', fontSize: 12 }} onClick={() => setWeekOffset(0)}>Back to This Week</button>
         )}
-        {/* Jump to month */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 12 }}>
           {MONTHS_SHORT.map((m, idx) => {
             const now = new Date();
@@ -2154,7 +1992,6 @@ function BirthdaysPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px' }}>
           <div style={{ fontSize: 22, fontWeight: 800, color: T.rose }}>{thisWeekBirthdays.length}</div>
@@ -2162,10 +1999,10 @@ function BirthdaysPage() {
         </div>
       </div>
 
-      {/* Birthday list */}
+
       {thisWeekBirthdays.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '30px 20px' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🎂</div>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>&#127874;</div>
           <div style={{ fontSize: 14, color: T.textMid }}>No birthdays this week!</div>
           <div style={{ fontSize: 12, color: T.textDim, marginTop: 4 }}>Try checking another week.</div>
         </div>
@@ -2183,7 +2020,7 @@ function BirthdaysPage() {
                 background: isToday ? T.roseGlow : T.goldGlow,
                 borderRadius: 12, padding: '8px 0'
               }}>
-                {isToday ? '🎉' : '🎂'}
+                {isToday ? '&#127881;' : '&#127874;'}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>
@@ -2203,6 +2040,7 @@ function BirthdaysPage() {
     </div>
   );
 }
+
 
 
 // ─── Daily Challenge Page ────────────────────────────────────
@@ -2241,26 +2079,26 @@ function DailyPage({ spades, setSpades, showFeedback }) {
       setCompleted(true);
       localStorage.setItem('ani_daily', today);
       playCorrect();
-      showFeedback('🎉 Daily complete! +30♠');
+      showFeedback('Daily complete! +30 spades');
     } else {
       playWrong();
-      showFeedback('❌ Wrong! Come back tomorrow.');
+      showFeedback('Wrong! Come back tomorrow.');
     }
   };
 
   return (
     <div>
       <div className="hero-banner" style={{background:'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(139,92,246,0.12))',borderColor:'rgba(245,158,11,0.25)'}}>
-        <div style={{fontSize:16,fontWeight:700,color:T.gold}}>📅 Daily Challenge</div>
+        <div style={{fontSize:16,fontWeight:700,color:T.gold}}>Daily Challenge</div>
         <div style={{fontSize:13,color:T.textMid,marginTop:4}}>
-          {completed ? '✅ Completed today! Come back tomorrow.' : 'Answer correctly for +30♠'}
+          {completed ? 'Completed today! Come back tomorrow.' : 'Answer correctly for +30 spades'}
         </div>
       </div>
 
       {question && (
         <div className="card">
           <div className="card-title" style={{color:T.violet}}>
-            {question.type==='mcq'?'🧠 QUESTION':'🔤 ANIME SCRAMBLE'}
+            {question.type==='mcq'?'QUESTION':'ANIME SCRAMBLE'}
           </div>
           <div className="question-text" style={{fontSize:16}}>
             {question.type==='mcq'?question.text:'🔤 ANIME SCRAMBLE'}
@@ -2283,17 +2121,18 @@ function DailyPage({ spades, setSpades, showFeedback }) {
 }
 
 
+
 // ─── About Page ──────────────────────────────────────────────
 function AboutPage({ spades, badges }) {
   const lb = getLeaderboard();
   const lbEntries = Object.entries(lb);
-  const modeLabel = (k) => k.startsWith('quiz') ? '🧠 Quiz' : k.startsWith('anagram') ? '🔤 Scrambler' : k.startsWith('emoji') ? '🎯 Emoji' : k.startsWith('frames') ? '🖼️ Frames' : '🕵️ Shadow';
+  const modeLabel = (k) => k.startsWith('quiz') ? 'Quiz' : k.startsWith('anagram') ? 'Scrambler' : k.startsWith('emoji') ? 'Emoji' : k.startsWith('frames') ? 'Frames' : 'Shadow';
   const levelLabel = (k) => { const i = parseInt(k.split('_').pop()); return levels[i]?.name || `L${i+1}`; };
 
   return (
     <div>
       <div className="hero-banner">
-        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>🎴</div>
+        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>&#127924;</div>
         <div style={{textAlign:'center'}}>
           <div style={{fontSize:18,fontWeight:800}}>About AniNoir</div>
           <div style={{fontSize:13,color:T.textMid}}>Your Anime Trivia Companion</div>
@@ -2301,16 +2140,16 @@ function AboutPage({ spades, badges }) {
       </div>
 
       <div className="card">
-        <div className="card-title" style={{color:T.gold}}>📊 STATS</div>
-        <div className="stat-row"><span className="stat-label">♠ Spades Balance</span><span className="stat-value" style={{color:T.gold}}>{spades}</span></div>
-        <div className="stat-row"><span className="stat-label">🏅 Badges Earned</span><span className="stat-value">{badges.length}</span></div>
-        <div className="stat-row"><span className="stat-label">📅 Daily Streak</span><span className="stat-value">{localStorage.getItem('ani_daily')===new Date().toDateString()?'🔥 Active':'—'}</span></div>
-        <div className="stat-row"><span className="stat-label">📋 Watchlist</span><span className="stat-value">{getWatchlist().length} anime</span></div>
+        <div className="card-title" style={{color:T.gold}}>STATS</div>
+        <div className="stat-row"><span className="stat-label">Spades Balance</span><span className="stat-value" style={{color:T.gold}}>{spades}</span></div>
+        <div className="stat-row"><span className="stat-label">Badges Earned</span><span className="stat-value">{badges.length}</span></div>
+        <div className="stat-row"><span className="stat-label">Daily Streak</span><span className="stat-value">{localStorage.getItem('ani_daily')===new Date().toDateString()?'Active':'\u2014'}</span></div>
+        <div className="stat-row"><span className="stat-label">Watchlist</span><span className="stat-value">{getWatchlist().length} anime</span></div>
       </div>
 
       {lbEntries.length > 0 && (
         <div className="card">
-          <div className="card-title" style={{color:T.teal}}>🏆 PERSONAL BESTS</div>
+          <div className="card-title" style={{color:T.teal}}>PERSONAL BESTS</div>
           {lbEntries.map(([key, val]) => (
             <div key={key} className="stat-row">
               <span className="stat-label">{modeLabel(key)} · {levelLabel(key)}</span>
@@ -2322,7 +2161,7 @@ function AboutPage({ spades, badges }) {
 
       {badges.length > 0 && (
         <div className="card">
-          <div className="card-title" style={{color:T.violet}}>🏅 BADGES</div>
+          <div className="card-title" style={{color:T.violet}}>BADGES</div>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
             {badges.map((b,i)=>(
               <span key={i} style={{background:T.violetGlow,border:`1px solid ${T.violet}`,borderRadius:8,padding:'4px 12px',fontSize:12,color:T.violet}}>
@@ -2335,21 +2174,21 @@ function AboutPage({ spades, badges }) {
 
 
       <div className="card" style={{ background:'linear-gradient(135deg,rgba(244,63,94,0.12),rgba(139,92,246,0.15))', border:'1px solid rgba(244,63,94,0.25)' }}>
-        <div className="card-title" style={{color:T.rose}}>ℹ️ ABOUT ANI-NOIR</div>
+        <div className="card-title" style={{color:T.rose}}>ABOUT ANI-NOIR</div>
         <p style={{fontSize:13,color:T.text,lineHeight:1.8,marginBottom:12}}>
-          <strong>AniNoir</strong> — The ultimate anime trivia & discovery app for true otakus! 🔥
+          <strong>AniNoir</strong> — The ultimate anime trivia & discovery app for true otakus!
         </p>
         <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
           Test your anime knowledge across multiple game modes: classic quizzes, emoji challenges, anagram scramblers, shadow quizzes, anime frame guessing, and survival mode. Level up, earn spades, collect badges, and climb the leaderboard!
         </p>
         <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
-          🎮 <strong>Features:</strong> 5 difficulty levels · 6+ game modes · Daily challenges · Anime search & character lookup · Personalized watchlist · Birthday calendar · News feed
+          Features: 5 main levels x 10 stages · 6+ game modes · Daily challenges · Anime search & character lookup · Personalized watchlist · Birthday calendar · News feed
         </p>
         <p style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:12}}>
-          Built with ❤️ by <strong>Mobarak</strong> — anime enthusiast, developer, and content creator. AniNoir is a love letter to the anime community. More features coming soon... Stay tuned!
+          Built with love by <strong>Mobarak</strong> — anime enthusiast, developer, and content creator. AniNoir is a love letter to the anime community. More features coming soon!
         </p>
         <p style={{fontSize:11,color:T.textMid,lineHeight:1.6}}>
-          Version 1.0 · Made with React + Vite · PWA Enabled
+          Version 2.0 · Made with React + Vite · PWA Enabled · 10-Stage Progression System
         </p>
       </div>
 
@@ -2379,275 +2218,7 @@ function AboutPage({ spades, badges }) {
 
 
 
-// ─── Anime Frames Page (NEW) ────────────────────────────────
-function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
-  const [unlocked] = useState(true);
-  const [phase, setPhase] = useState('levels');
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [qIndex, setQIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [maxTime, setMaxTime] = useState(30);
-  const [timerActive, setTimerActive] = useState(false);
-  const [hintRevealed, setHintRevealed] = useState(false);
-  const [skipUsed, setSkipUsed] = useState(false);
-  const [answered, setAnswered] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [correctOption, setCorrectOption] = useState(null);
-  const [finalScore, setFinalScore] = useState(0);
-  const timerRef = useRef(null);
-  const LEVEL_ICONS = ['🟢','🔵','🟠','🔴','⚫'];
-
-  const unlock = () => {
-    if (spades < unlockCost) { showFeedback(`Need ${unlockCost}♠ to unlock Anime Frames!`); return; }
-    setSpades(s => s - unlockCost);
-    setUnlocked(true);
-    localStorage.setItem('ani_frames_unlocked', '1');
-    showFeedback('🖼️ Anime Frames unlocked!');
-  };
-
-  useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => setTimeLeft(t => t - 1), 1000);
-      return () => clearInterval(timerRef.current);
-    }
-    if (timerActive && timeLeft === 0) handleTimeout();
-  }, [timerActive, timeLeft]);
-
-  const getFramesPool = (levelNum) => {
-    const pool = ANIME_FRAMES_QUESTIONS.filter(q => q.level === levelNum);
-    return shuffle(pool).slice(0, 5).map(q => {
-      const correctAnswer = q.options[q.correct];
-      const shuffledOptions = shuffle([...q.options]);
-      return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
-    });
-  };
-
-  const startLevel = (idx) => {
-    const qs = getFramesPool(idx + 1);
-    if (!qs.length) { showFeedback('No frame questions for this level!'); return; }
-    setCurrentLevel(idx);
-    setQuestions(qs);
-    setQIndex(0);
-    setScore(0);
-    setStreak(0);
-    setCombo(0);
-    setHintRevealed(false);
-    setSkipUsed(false);
-    setAnswered(false);
-    setSelectedOption(null);
-    setCorrectOption(null);
-    const t = levels[idx].timeSeconds;
-    setTimeLeft(t);
-    setMaxTime(t);
-    setTimerActive(true);
-    setPhase('playing');
-  };
-
-  const clearTimer = () => { clearInterval(timerRef.current); setTimerActive(false); };
-
-  const handleTimeout = () => {
-    clearTimer();
-    setAnswered(true);
-    const q = questions[qIndex];
-    setCorrectOption(q.correct);
-    playWrong();
-    showFeedback('⏰ Time\'s up!');
-    setTimeout(() => advance(false, score), 1200);
-  };
-
-  const advance = (wasCorrect, currentScore) => {
-    const nextIdx = qIndex + 1;
-    if (nextIdx < questions.length) {
-      setQIndex(nextIdx);
-      setHintRevealed(false);
-      setSkipUsed(false);
-      setAnswered(false);
-      setSelectedOption(null);
-      setCorrectOption(null);
-      const t = levels[currentLevel].timeSeconds;
-      setTimeLeft(t);
-      setMaxTime(t);
-      setTimerActive(true);
-    } else {
-      const fs = currentScore;
-      const passed = fs >= levels[currentLevel].minCorrect;
-      if (passed) {
-        const reward = levels[currentLevel].reward;
-        setSpades(s => s + reward);
-      }
-      updateBestScore('frames', currentLevel, fs, questions.length);
-      setFinalScore(fs);
-      clearTimer();
-      setPhase('result');
-    }
-  };
-
-  const submitMCQ = (optIdx) => {
-    if (answered) return;
-    clearTimer();
-    const q = questions[qIndex];
-    const isCorrect = optIdx === q.correct;
-    setSelectedOption(optIdx);
-    setCorrectOption(q.correct);
-    setAnswered(true);
-    if (isCorrect) {
-      const newCombo = combo + 1;
-      setScore(s => s + 1);
-      setStreak(streak + 1);
-      setCombo(newCombo);
-      playCorrect();
-      if (newCombo >= 3) {
-        const bonus = Math.floor(newCombo / 3) * 5;
-        setSpades(s => s + bonus);
-        playCombo();
-        showFeedback(`✅ Correct! 🔥 ${newCombo}x Combo +${bonus}♠`);
-      } else {
-        showFeedback('✅ Correct!');
-      }
-      setTimeout(() => advance(true, score + 1), 1000);
-    } else {
-      setStreak(0);
-      setCombo(0);
-      playWrong();
-      showFeedback('❌ Wrong!');
-      setTimeout(() => advance(false, score), 1000);
-    }
-  };
-
-  const doHint = () => {
-    if (spades < 30 || hintRevealed || answered) return;
-    setSpades(s => s - 30);
-    setHintRevealed(true);
-    showFeedback('💡 Hint revealed! -30♠');
-  };
-
-  const doSkip = () => {
-    if (spades < 50 || skipUsed || answered) return;
-    setSpades(s => s - 50);
-    setSkipUsed(true);
-    clearTimer();
-    setAnswered(true);
-    showFeedback('⏭️ Skipped! -50♠');
-    setTimeout(() => advance(false, score), 800);
-  };
-
-  if (!unlocked) return (
-    <div className="shadow-lock">
-      <div className="shadow-silhouette">🖼️</div>
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Anime Frames</div>
-      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
-        Guess the anime from a scene description!<br />Test your knowledge of iconic anime moments.
-      </div>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {unlockCost}♠</div>
-        <div style={{ fontSize: 12, color: T.textMid }}>One-time unlock · You have {spades}♠</div>
-      </div>
-      <button className="btn btn-primary" onClick={unlock} disabled={spades < unlockCost} style={{ width: '100%' }}>
-        {spades >= unlockCost ? '🖼️ Unlock Anime Frames' : `Need ${unlockCost - spades} more ♠`}
-      </button>
-    </div>
-  );
-
-  if (phase === 'levels') {
-    const lb = getLeaderboard();
-    return (
-      <div>
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title" style={{ color: T.violet }}>🖼️ ANIME FRAMES</div>
-          <p style={{ fontSize: 13, color: T.textMid }}>Read the scene description and guess which anime it's from! 5 questions per level.</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>🔥 3+ correct in a row = Combo bonus spades!</p>
-        </div>
-        {levels.map((lvl, idx) => {
-          const best = lb[`frames_${idx}`];
-          const prevBest = idx > 0 ? lb[`frames_${idx - 1}`] : null;
-          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
-          return (
-            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
-              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
-              <div className="level-info">
-                <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
-                {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
-              </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (phase === 'result') {
-    const passed = finalScore >= levels[currentLevel].minCorrect;
-    return (
-      <div className="result-screen">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">You scored {finalScore}/{questions.length}</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{levels[currentLevel].reward}♠ earned!</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Back to Levels</button>
-          {passed && currentLevel < levels.length - 1 && (
-            <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const q = questions[qIndex];
-  const progress = (qIndex / questions.length) * 100;
-
-  return (
-    <div>
-      <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
-      <div className="quiz-header">
-        <span style={{ fontSize: 12, color: T.textMid }}>{levels[currentLevel].name} · Q{qIndex+1}/{questions.length}</span>
-        <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>✅ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
-        </div>
-      </div>
-      <div className="card">
-        <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>🖼️ SCENE DESCRIPTION</div>
-        <div className="question-text" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
-          "{q.text}"
-        </div>
-        {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
-        )}
-        {q.options.map((opt, idx) => {
-          let cls = 'option-btn';
-          if (answered) {
-            if (idx === correctOption) cls += ' correct';
-            else if (idx === selectedOption) cls += ' wrong';
-          }
-          return (
-            <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
-          );
-        })}
-      </div>
-      <div className="power-btns">
-        {q.hint && (
-          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
-          </button>
-        )}
-        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          ⏭️ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-
-// ─── Character Search Page (NEW) ─────────────────────────────
+// ─── Character Search Page ───────────────────────────────────
 function CharacterSearchPage({ showFeedback }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -2676,18 +2247,17 @@ function CharacterSearchPage({ showFeedback }) {
 
   return (
     <div>
-
       <div className="search-input-wrap">
         <input className="search-input" value={query} onChange={e=>setQuery(e.target.value)}
           onKeyDown={e=>e.key==='Enter'&&search()} placeholder="Search character name..." autoComplete="off" />
-        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'…':'🔍'}</button>
+        <button className="btn btn-primary" onClick={search} disabled={loading||!query.trim()}>{loading?'...':'🔍'}</button>
       </div>
 
       {loading && <div className="card"><div className="skeleton" style={{height:20,width:'60%',marginBottom:8}}/><div className="skeleton" style={{height:14,width:'90%',marginBottom:6}}/><div className="skeleton" style={{height:14,width:'70%'}}/></div>}
 
       {notFound && !loading && (
         <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
-          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
+          <div style={{fontSize:40,marginBottom:12}}>&#128270;</div>
           <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Character Not Found</div>
           <div style={{fontSize:13,color:T.textMid}}>No characters matched your search. Try a different name.</div>
         </div>
@@ -2701,13 +2271,13 @@ function CharacterSearchPage({ showFeedback }) {
               <div className="anime-title">{char.name}</div>
               {char.nameKanji && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{char.nameKanji}</div>}
               <div className="anime-meta">
-                {char.favorites > 0 && <span className="meta-badge">❤️ {char.favorites.toLocaleString()} favorites</span>}
+                {char.favorites > 0 && <span className="meta-badge">&#10084;&#65039; {char.favorites.toLocaleString()} favorites</span>}
               </div>
             </div>
           </div>
           <a href={`https://myanimelist.net/character/${char.id}`} target="_blank" rel="noopener noreferrer"
             style={{ display:'block', textAlign:'center', fontSize:12, color:T.teal, marginTop:10, textDecoration:'none' }}>
-            View full profile on MAL →
+            View full profile on MAL
           </a>
         </div>
       ))}
