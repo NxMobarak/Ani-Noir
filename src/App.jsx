@@ -308,9 +308,9 @@ const css = `
   .question-text { font-size:18px;font-weight:600;line-height:1.4;margin-bottom:20px; }
 
   .option-btn { display:block;width:100%;text-align:left;background:${T.surface};border:1.5px solid ${T.border};border-radius:12px;padding:13px 16px;margin-bottom:10px;font-size:14px;cursor:pointer;transition:all 0.15s;color:${T.text}; }
-  .option-btn:hover:not(:disabled) { border-color:${T.rose};background:rgba(244,63,94,0.06); }
-  .option-btn.correct { border-color:${T.success};background:rgba(34,197,94,0.12);color:${T.success}; }
-  .option-btn.wrong { border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error}; }
+  .option-btn:hover:not(:disabled):not(.correct):not(.wrong) { border-color:${T.rose};background:rgba(244,63,94,0.06); }
+  .option-btn.correct { border-color:${T.success};background:rgba(34,197,94,0.12);color:${T.success};transition:none; }
+  .option-btn.wrong { border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error};transition:none; }
   .option-btn.selected { border-color:${T.violet};background:rgba(139,92,246,0.12); }
 
 
@@ -452,11 +452,11 @@ const css = `
 
   /* Correct answer flash/glow */
   @keyframes correctFlash { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.6)} 40%{box-shadow:0 0 24px 6px rgba(34,197,94,0.45)} 100%{box-shadow:0 0 12px 2px rgba(34,197,94,0.2)} }
-  .option-btn.correct { animation:correctFlash 0.7s ease-out forwards !important;opacity:1 !important;border-color:${T.success};background:rgba(34,197,94,0.14);color:${T.success};box-shadow:0 0 12px 2px rgba(34,197,94,0.2); }
+  .option-btn.correct { animation:correctFlash 0.7s ease-out forwards !important;opacity:1 !important;transition:none !important;border-color:${T.success};background:rgba(34,197,94,0.14);color:${T.success};box-shadow:0 0 12px 2px rgba(34,197,94,0.2); }
 
   /* Wrong answer shake */
   @keyframes wrongShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
-  .option-btn.wrong { animation:wrongShake 0.5s ease-out forwards !important;opacity:1 !important;border-color:#c0392b;background:rgba(192,57,43,0.12);color:#e74c3c;box-shadow:0 0 12px 2px rgba(192,57,43,0.2); }
+  .option-btn.wrong { animation:wrongShake 0.5s ease-out forwards !important;opacity:1 !important;transition:none !important;border-color:#c0392b;background:rgba(192,57,43,0.12);color:#e74c3c;box-shadow:0 0 12px 2px rgba(192,57,43,0.2); }
 
   /* Answered state: all options stay visible */
   .option-btn.answered-visible { opacity:1 !important;animation:none !important; }
