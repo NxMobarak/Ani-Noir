@@ -337,14 +337,34 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         )}
       </div>
 
-      {/* ─── Letter Blanks Display (always visible) ────────── */}
+      {/* ─── Letter Blanks — typing & hints appear here ────── */}
       {!revealed && currentChar && (
         <div className="sg-hint-display" aria-label="Character name letters">
-          {currentChar.name.split('').map((letter, i) => (
-            <span key={i} className={`sg-hint-letter ${hintLetters.includes(i) ? 'shown' : ''} ${letter === ' ' ? 'space' : ''}`}>
-              {hintLetters.includes(i) ? letter.toUpperCase() : letter === ' ' ? ' ' : '_'}
-            </span>
-          ))}
+          {currentChar.name.split('').map((letter, i) => {
+            // Show typed letter if user has typed that far
+            const typedChar = guess[i];
+            const isHinted = hintLetters.includes(i);
+            const isSpace = letter === ' ';
+            let display = '_';
+            let className = 'sg-hint-letter';
+
+            if (isSpace) {
+              display = ' ';
+              className += ' space';
+            } else if (isHinted) {
+              display = letter.toUpperCase();
+              className += ' shown';
+            } else if (typedChar) {
+              display = typedChar.toUpperCase();
+              className += ' typed';
+            }
+
+            return (
+              <span key={i} className={className}>
+                {display}
+              </span>
+            );
+          })}
         </div>
       )}
 
@@ -357,13 +377,6 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
           <div className="sg-reveal-next">Next shadow in 3s...</div>
         </div>
       )}
-
-      {/* ─── Input Field ──────────────────────────────────────── */}
-      <div className="sg-input-area">
-        <div className={`sg-input ${revealed ? (wasCorrect ? 'correct-border' : 'wrong-border') : guess ? 'active' : ''}`}>
-          {guess || ''}
-        </div>
-      </div>
 
       {/* ─── Keyboard ─────────────────────────────────────────── */}
       {!revealed && (

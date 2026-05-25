@@ -349,6 +349,11 @@
   border-bottom-color: var(--sg-crimson-bright);
 }
 
+.sg-hint-letter.typed {
+  color: var(--sg-text);
+  border-bottom-color: var(--sg-text);
+}
+
 .sg-hint-letter.space {
   border-bottom: none;
   width: 12px;
