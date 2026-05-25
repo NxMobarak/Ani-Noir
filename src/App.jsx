@@ -498,6 +498,16 @@ export default function App() {
   useEffect(() => { localStorage.setItem('ani_spades', spades); }, [spades]);
   useEffect(() => { localStorage.setItem('ani_badges', JSON.stringify(badges)); }, [badges]);
 
+  // Offline ready toast (show once on first visit)
+  useEffect(() => {
+    if (!localStorage.getItem('ani_offline_shown')) {
+      setTimeout(() => {
+        showFeedback('📴 Quizzes work offline! No internet needed.');
+        localStorage.setItem('ani_offline_shown', '1');
+      }, 2000);
+    }
+  }, []);
+
   const navigate = (id) => {
     playClick();
     setPage(id);
