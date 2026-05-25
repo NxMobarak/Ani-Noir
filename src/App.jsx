@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { questionBank, levels, getRandomQuestions, MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE, getStars, MIN_CORRECT_TO_PASS, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD } from './questions/index';
+import { questionBank, levels, getRandomQuestions, MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE, getStars, MIN_CORRECT_TO_PASS, MIN_STARS_TO_UNLOCK, STARS_TO_UNLOCK_LEVEL, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD } from './questions/index';
 import level1Frames from './questions/level1_frames';
 import level2Frames from './questions/level2_frames';
 import level3Frames from './questions/level3_frames';
@@ -559,9 +559,9 @@ function SpadesModal({ onClose }) {
         <div style={{ marginBottom:16 }}>
           <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>Earn Spades:</div>
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
-            <li>+5♠ per stage completed</li>
-            <li>+100♠ for completing a main level (all 10 stages)</li>
-            <li>+1000♠ for completing ALL 5 main levels</li>
+            <li>+5♠ per stage passed (2★+)</li>
+            <li>+100♠ for earning {STARS_TO_UNLOCK_LEVEL}★ in a level</li>
+            <li>+1000♠ for mastering ALL 5 levels</li>
             <li>Combo streaks: +5♠ per 3x combo</li>
             <li>Daily challenges: +30♠</li>
             <li>Survival mode: +100♠ per 5 correct</li>
@@ -572,6 +572,69 @@ function SpadesModal({ onClose }) {
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
             <li>Hints: 30♠</li>
             <li>Skips: 50♠</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Rules Modal ────────────────────────────────────────────
+function RulesModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+          <div className="modal-title" style={{ color: T.rose }}>📜 Game Rules</div>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ marginBottom:16 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.teal, marginBottom:8 }}>⭐ Star System</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>2 correct answers = 1★</li>
+            <li>4 correct answers = 2★</li>
+            <li>5 correct answers = 3★ (perfect!)</li>
+          </ul>
+        </div>
+
+        <div style={{ marginBottom:16 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.violet, marginBottom:8 }}>🔓 Unlock Rules</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>Need <strong style={{color:T.text}}>2★</strong> on a stage to unlock the next stage</li>
+            <li>Need <strong style={{color:T.text}}>{STARS_TO_UNLOCK_LEVEL}★</strong> total in a level to unlock the next level</li>
+            <li>Max possible stars per level: {STAGES_PER_LEVEL * 3}★ (3★ × 10 stages)</li>
+          </ul>
+        </div>
+
+        <div style={{ marginBottom:16 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.gold, marginBottom:8 }}>🏆 Levels</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            {MAIN_LEVELS.map((ml, i) => (
+              <li key={i}>{ml.icon} <strong style={{color:T.text}}>{ml.name}</strong> — {ml.timeSeconds}s per question</li>
+            ))}
+          </ul>
+        </div>
+
+        <div style={{ marginBottom:16 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>♠ Earning Spades</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>+5♠ per stage passed (need 2★)</li>
+            <li>+100♠ when you earn {STARS_TO_UNLOCK_LEVEL}★ in a level</li>
+            <li>+1000♠ for mastering all 5 levels</li>
+            <li>+5♠ bonus per 3x combo streak</li>
+            <li>+30♠ for daily challenge</li>
+            <li>+100♠ per 5 correct in Survival</li>
+          </ul>
+        </div>
+
+        <div>
+          <div style={{ fontSize:14, fontWeight:700, color:T.rose, marginBottom:8 }}>💡 Power-ups (cost spades)</div>
+          <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
+            <li>Hint: 30♠</li>
+            <li>Skip: 50♠</li>
+            <li>Shuffle (anagram): 20♠</li>
           </ul>
         </div>
       </div>
@@ -726,26 +789,19 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
   const isStageUnlocked = (mainIdx, stageIdx) => {
     if (mainIdx === 0 && stageIdx === 0) return true;
     if (stageIdx === 0) {
-      // First stage of a main level: need all 10 stages of previous main level
-      for (let s = 0; s < STAGES_PER_LEVEL; s++) {
-        const key = `${mainIdx - 1}_${s}`;
-        if (!stageProgress[key] || stageProgress[key].stars < 1) return false;
-      }
-      return true;
+      // First stage of a main level: need 25 stars from previous main level
+      return getMainLevelStars(mainIdx - 1) >= STARS_TO_UNLOCK_LEVEL;
     }
-    // Need previous stage passed
+    // Need previous stage to have at least 2 stars (MIN_STARS_TO_UNLOCK)
     const prevKey = `${mainIdx}_${stageIdx - 1}`;
-    return stageProgress[prevKey] && stageProgress[prevKey].stars >= 1;
+    return stageProgress[prevKey] && stageProgress[prevKey].stars >= MIN_STARS_TO_UNLOCK;
   };
 
   // Helper: is a main level unlocked?
   const isMainLevelUnlocked = (mainIdx) => {
     if (mainIdx === 0) return true;
-    for (let s = 0; s < STAGES_PER_LEVEL; s++) {
-      const key = `${mainIdx - 1}_${s}`;
-      if (!stageProgress[key] || stageProgress[key].stars < 1) return false;
-    }
-    return true;
+    // Need 25 stars from previous main level to unlock next
+    return getMainLevelStars(mainIdx - 1) >= STARS_TO_UNLOCK_LEVEL;
   };
 
   // Helper: count stars for a main level
@@ -821,7 +877,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
       // Stage complete
       const fs = currentScore;
       const stars = getStars(fs);
-      const passed = fs >= MIN_CORRECT_TO_PASS;
+      const passed = stars >= MIN_STARS_TO_UNLOCK;
 
       // Save progress
       const key = `${currentMainLevel}_${currentStage}`;
@@ -832,55 +888,58 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
 
       // Award spades for passing
       if (passed) {
-        // Check if this is a new completion (not re-play)
-        const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= 1;
+        // Check if this is a new completion (not re-play with same or better stars)
+        const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= MIN_STARS_TO_UNLOCK;
         if (!wasAlreadyPassed) {
           setSpades(s => s + STAGE_REWARD);
         }
 
-        // Check if all 10 stages of this main level are now complete
-        let allStagesDone = true;
+        // Calculate new total stars for this main level
+        let newTotalStars = 0;
         for (let s = 0; s < STAGES_PER_LEVEL; s++) {
           const sk = `${currentMainLevel}_${s}`;
-          if (sk === key) { if (stars < 1) { allStagesDone = false; break; } }
-          else if (!updated[sk] || updated[sk].stars < 1) { allStagesDone = false; break; }
+          if (sk === key) newTotalStars += stars;
+          else if (updated[sk]) newTotalStars += updated[sk].stars;
         }
 
-        // Check if previous state had all stages done
-        let wasAllDone = true;
+        // Calculate old total stars for this main level
+        let oldTotalStars = 0;
         for (let s = 0; s < STAGES_PER_LEVEL; s++) {
           const sk = `${currentMainLevel}_${s}`;
-          if (!stageProgress[sk] || stageProgress[sk].stars < 1) { wasAllDone = false; break; }
+          if (stageProgress[sk]) oldTotalStars += stageProgress[sk].stars;
         }
 
-        if (allStagesDone && !wasAllDone) {
+        // Check if we just hit 25 stars threshold for this level
+        if (newTotalStars >= STARS_TO_UNLOCK_LEVEL && oldTotalStars < STARS_TO_UNLOCK_LEVEL) {
           setSpades(s => s + MAIN_LEVEL_REWARD);
-          showFeedback(`Main level complete! +${MAIN_LEVEL_REWARD} spades!`);
+          showFeedback(`${MAIN_LEVELS[currentMainLevel].name} mastered! +${MAIN_LEVEL_REWARD} spades!`);
         }
 
-        // Check if ALL 5 main levels are complete
-        let allLevelsDone = true;
+        // Check if ALL 5 main levels now have 25+ stars
+        let allLevelsMastered = true;
         for (let ml = 0; ml < MAIN_LEVELS.length; ml++) {
+          let mlStars = 0;
           for (let s = 0; s < STAGES_PER_LEVEL; s++) {
             const sk = `${ml}_${s}`;
-            if (sk === key) { if (stars < 1) { allLevelsDone = false; break; } }
-            else if (!updated[sk] || updated[sk].stars < 1) { allLevelsDone = false; break; }
+            if (sk === key) mlStars += stars;
+            else if (updated[sk]) mlStars += updated[sk].stars;
           }
-          if (!allLevelsDone) break;
+          if (mlStars < STARS_TO_UNLOCK_LEVEL) { allLevelsMastered = false; break; }
         }
 
-        let wasAllLevelsDone = true;
+        let wasAllLevelsMastered = true;
         for (let ml = 0; ml < MAIN_LEVELS.length; ml++) {
+          let mlStars = 0;
           for (let s = 0; s < STAGES_PER_LEVEL; s++) {
             const sk = `${ml}_${s}`;
-            if (!stageProgress[sk] || stageProgress[sk].stars < 1) { wasAllLevelsDone = false; break; }
+            if (stageProgress[sk]) mlStars += stageProgress[sk].stars;
           }
-          if (!wasAllLevelsDone) break;
+          if (mlStars < STARS_TO_UNLOCK_LEVEL) { wasAllLevelsMastered = false; break; }
         }
 
-        if (allLevelsDone && !wasAllLevelsDone) {
+        if (allLevelsMastered && !wasAllLevelsMastered) {
           setSpades(s => s + ALL_LEVELS_REWARD);
-          showFeedback(`ALL levels complete! +${ALL_LEVELS_REWARD} spades!`);
+          showFeedback(`ALL levels mastered! +${ALL_LEVELS_REWARD} spades!`);
         }
       }
 
@@ -1002,22 +1061,23 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
           <div className="card-title" style={{ color: T.rose }}>
             {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 ANIME SCRAMBLER' : mode === 'emoji' ? '🎯 EMOJI QUIZ' : mode === 'shadow' ? '🕵️ SHADOW QUIZ' : '🖼️ ANIME FRAMES'}
           </div>
-          <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Pass each stage to unlock the next!</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>+5♠ per stage | +100♠ per level | +1000♠ for all!</p>
+          <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
         </div>
         {MAIN_LEVELS.map((ml, idx) => {
           const unlocked = isMainLevelUnlocked(idx);
           const completed = getCompletedStages(idx);
           const stars = getMainLevelStars(idx);
+          const prevStars = idx > 0 ? getMainLevelStars(idx - 1) : 0;
           return (
             <button key={idx} className="level-card" onClick={() => { if (unlocked) { setSelectedMainLevel(idx); setPhase('stages'); } }}
               style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
               <span className="level-icon">{unlocked ? ml.icon : '🔒'}</span>
               <div className="level-info">
                 <div className="level-name">{ml.name}</div>
-                <div className="level-meta">{unlocked ? ml.tagline : `Complete ${MAIN_LEVELS[idx-1]?.name || ''} to unlock`}</div>
-                {unlocked && completed > 0 && (
-                  <div className="level-best">{completed}/{STAGES_PER_LEVEL} stages · {stars}★</div>
+                <div className="level-meta">{unlocked ? ml.tagline : `Need ${STARS_TO_UNLOCK_LEVEL}★ in ${MAIN_LEVELS[idx-1]?.name} (${prevStars}/${STARS_TO_UNLOCK_LEVEL})`}</div>
+                {unlocked && stars > 0 && (
+                  <div className="level-best">{stars}★ · {completed}/{STAGES_PER_LEVEL} stages passed</div>
                 )}
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
@@ -1032,6 +1092,8 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
   // ─── PHASE 2: Stages List ───────────────────────────────────
   if (phase === 'stages') {
     const ml = MAIN_LEVELS[selectedMainLevel];
+    const totalStars = getMainLevelStars(selectedMainLevel);
+    const nextLevelName = MAIN_LEVELS[selectedMainLevel + 1]?.name;
     return (
       <div>
         <button className="btn btn-secondary" style={{ marginBottom: 14, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
@@ -1040,6 +1102,19 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
         <div className="card" style={{ marginBottom: 14 }}>
           <div className="card-title" style={{ color: T.gold }}>{ml.icon} {ml.name}</div>
           <p style={{ fontSize: 12, color: T.textMid }}>{ml.tagline} · {ml.timeSeconds}s per question</p>
+          <div style={{ marginTop: 10, padding: '10px 12px', background: T.surface, borderRadius: 12, border: `1px solid ${T.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>★ {totalStars} / {STARS_TO_UNLOCK_LEVEL}</span>
+              {nextLevelName && <span style={{ fontSize: 11, color: totalStars >= STARS_TO_UNLOCK_LEVEL ? T.success : T.textMid }}>{totalStars >= STARS_TO_UNLOCK_LEVEL ? `${nextLevelName} unlocked!` : `${STARS_TO_UNLOCK_LEVEL - totalStars}★ to unlock ${nextLevelName}`}</span>}
+            </div>
+            <div style={{ height: 6, background: T.border, borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, (totalStars / STARS_TO_UNLOCK_LEVEL) * 100)}%`, background: totalStars >= STARS_TO_UNLOCK_LEVEL ? T.success : `linear-gradient(90deg, ${T.gold}, ${T.rose})`, borderRadius: 3, transition: 'width 0.4s' }} />
+            </div>
+          </div>
+          <div style={{ marginTop: 10, fontSize: 11, color: T.textDim, lineHeight: 1.7 }}>
+            ⭐ 2 correct = 1★ · 4 correct = 2★ · 5 correct = 3★<br/>
+            🔓 Need 2★ per stage to unlock next · Need {STARS_TO_UNLOCK_LEVEL}★ total to unlock next level
+          </div>
         </div>
         {Array.from({ length: STAGES_PER_LEVEL }, (_, stageIdx) => {
           const key = `${selectedMainLevel}_${stageIdx}`;
@@ -1050,11 +1125,11 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
           return (
             <button key={stageIdx} className="level-card" onClick={() => startStage(selectedMainLevel, stageIdx)}
               style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
-              <span className="level-icon" style={{ fontSize: 18 }}>{unlocked ? (stageDone ? '✓' : `${stageIdx + 1}`) : '🔒'}</span>
+              <span className="level-icon" style={{ fontSize: 18 }}>{unlocked ? (stageDone && starsEarned >= MIN_STARS_TO_UNLOCK ? '✓' : `${stageIdx + 1}`) : '🔒'}</span>
               <div className="level-info">
                 <div className="level-name">Stage {stageIdx + 1}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Pass previous stage to unlock' : stageDone ? `${starDisplay}` : `${QUESTIONS_PER_STAGE} questions · ${ml.timeSeconds}s`}
+                  {!unlocked ? `Need 2★ on Stage ${stageIdx}` : stageDone ? `${starDisplay}` : `${QUESTIONS_PER_STAGE} questions · ${ml.timeSeconds}s`}
                 </div>
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
@@ -1069,7 +1144,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
   // ─── PHASE 4: Result ────────────────────────────────────────
   if (phase === 'result') {
     const stars = getStars(finalScore);
-    const passed = finalScore >= MIN_CORRECT_TO_PASS;
+    const passed = stars >= MIN_STARS_TO_UNLOCK;
     const starDisplay = Array(3).fill(0).map((_, i) => i < stars ? '\u2605' : '\u2606').join(' ');
     const hasNext = currentStage < STAGES_PER_LEVEL - 1;
     return (
@@ -1968,6 +2043,7 @@ export default function App() {
   const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
   const [feedback, setFeedback] = useState('');
   const [spadesModal, setSpadesModal] = useState(false);
+  const [rulesModal, setRulesModal] = useState(false);
   const [showChipHint, setShowChipHint] = useState(() => !localStorage.getItem('ani_chip_hint_shown'));
   const feedbackTimer = useRef(null);
   const [spadesFloat, setSpadesFloat] = useState(null);
@@ -2038,6 +2114,7 @@ export default function App() {
             <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
             <span className="topbar-title">{pageTitle}</span>
             <div className="topbar-chips">
+              <span className="chip" onClick={() => setRulesModal(true)}>📜</span>
               <span className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }}>
                 ♠ {spades}
                 {showChipHint && <span className="chip-tooltip">Tap for info</span>}
@@ -2086,6 +2163,7 @@ export default function App() {
         {feedback && <div className={`feedback-toast ${feedback.startsWith('Correct') ? 'correct-toast' : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? 'wrong-toast' : ''}`}>{feedback.startsWith('Correct') ? `✓ ${feedback}` : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? `✗ ${feedback}` : feedback}</div>}
         {spadesFloat && <div className="spades-float" key={Date.now()}>{spadesFloat}</div>}
         {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
+        {rulesModal && <RulesModal onClose={() => setRulesModal(false)} />}
       </div>
     </>
   );

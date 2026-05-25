@@ -62,8 +62,12 @@ export const getStars = (correct) => {
   return 0;
 };
 
-// Minimum stars to pass a stage (at least 1 star = 2 correct)
-export const MIN_CORRECT_TO_PASS = 2;
+// Minimum stars to unlock next stage (need 2 stars = 4 correct)
+export const MIN_STARS_TO_UNLOCK = 2;
+export const MIN_CORRECT_TO_PASS = 4;
+
+// Stars needed to unlock next main level (25 total stars from 10 stages)
+export const STARS_TO_UNLOCK_LEVEL = 25;
 
 // Rewards
 export const STAGE_REWARD = 5; // spades per stage
