@@ -419,25 +419,25 @@ function SpadesModal({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-          <div className="modal-title" style={{ color: T.gold }}>&#9824; Spades Guide</div>
-          <button className="modal-close" onClick={onClose}>&#10005;</button>
+          <div className="modal-title" style={{ color: T.gold }}>♠ Spades Guide</div>
+          <button className="modal-close" onClick={onClose}>✕</button>
         </div>
         <div style={{ marginBottom:16 }}>
           <div style={{ fontSize:14, fontWeight:700, color:T.success, marginBottom:8 }}>Earn Spades:</div>
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
-            <li>+5&#9824; per stage completed</li>
-            <li>+100&#9824; for completing a main level (all 10 stages)</li>
-            <li>+1000&#9824; for completing ALL 5 main levels</li>
-            <li>Combo streaks: +5&#9824; per 3x combo</li>
-            <li>Daily challenges: +30&#9824;</li>
-            <li>Survival mode: +100&#9824; per 5 correct</li>
+            <li>+5♠ per stage completed</li>
+            <li>+100♠ for completing a main level (all 10 stages)</li>
+            <li>+1000♠ for completing ALL 5 main levels</li>
+            <li>Combo streaks: +5♠ per 3x combo</li>
+            <li>Daily challenges: +30♠</li>
+            <li>Survival mode: +100♠ per 5 correct</li>
           </ul>
         </div>
         <div>
           <div style={{ fontSize:14, fontWeight:700, color:T.rose, marginBottom:8 }}>Spend Spades:</div>
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
-            <li>Hints: 30&#9824;</li>
-            <li>Skips: 50&#9824;</li>
+            <li>Hints: 30♠</li>
+            <li>Skips: 50♠</li>
           </ul>
         </div>
       </div>
@@ -452,9 +452,9 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
   return (
     <>
       <div className="sidebar-header">
-        <div className="sidebar-logo">&#9876;&#65039; AniNoir</div>
+        <div className="sidebar-logo">⚔️ AniNoir</div>
         <div className="sidebar-tagline">Your Anime Universe</div>
-        <div className="sidebar-spades" onClick={onSpadesClick}>&#9824; {spades} Spades</div>
+        <div className="sidebar-spades" onClick={onSpadesClick}>♠ {spades} Spades</div>
       </div>
       <div className="sidebar-nav">
         {NAV.map(n => (
@@ -529,7 +529,7 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
         ))}
       </div>
       {hintRevealed && hint && (
-        <div style={{ marginBottom: 10, fontSize: 13, color: T.gold }}>&#128161; {hint}</div>
+        <div style={{ marginBottom: 10, fontSize: 13, color: T.gold }}>💡 {hint}</div>
       )}
       {answered && (
         <div style={{ fontSize: 13, color: T.textMid }}>
@@ -537,9 +537,9 @@ function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correc
         </div>
       )}
       <div className="anagram-actions">
-        <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>&#9003;</button>
+        <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>⌫</button>
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={clearAll} disabled={!answer.length || answered}>Clear</button>
-        <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit &#10003;</button>
+        <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit ✓</button>
       </div>
     </div>
   );
@@ -868,7 +868,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
             {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 ANIME SCRAMBLER' : mode === 'emoji' ? '🎯 EMOJI QUIZ' : mode === 'shadow' ? '🕵️ SHADOW QUIZ' : '🖼️ ANIME FRAMES'}
           </div>
           <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Pass each stage to unlock the next!</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>+5&#9824; per stage | +100&#9824; per level | +1000&#9824; for all!</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>+5♠ per stage | +100♠ per level | +1000♠ for all!</p>
         </div>
         {MAIN_LEVELS.map((ml, idx) => {
           const unlocked = isMainLevelUnlocked(idx);
@@ -882,7 +882,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
                 <div className="level-name">{ml.name}</div>
                 <div className="level-meta">{unlocked ? ml.tagline : `Complete ${MAIN_LEVELS[idx-1]?.name || ''} to unlock`}</div>
                 {unlocked && completed > 0 && (
-                  <div className="level-best">{completed}/{STAGES_PER_LEVEL} stages · {stars}&#9733;</div>
+                  <div className="level-best">{completed}/{STAGES_PER_LEVEL} stages · {stars}★</div>
                 )}
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
@@ -900,7 +900,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
     return (
       <div>
         <button className="btn btn-secondary" style={{ marginBottom: 14, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
-          &#8592; Back to Levels
+          ← Back to Levels
         </button>
         <div className="card" style={{ marginBottom: 14 }}>
           <div className="card-title" style={{ color: T.gold }}>{ml.icon} {ml.name}</div>
@@ -915,7 +915,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
           return (
             <button key={stageIdx} className="level-card" onClick={() => startStage(selectedMainLevel, stageIdx)}
               style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
-              <span className="level-icon" style={{ fontSize: 18 }}>{unlocked ? (stageDone ? '&#10003;' : `${stageIdx + 1}`) : '🔒'}</span>
+              <span className="level-icon" style={{ fontSize: 18 }}>{unlocked ? (stageDone ? '✓' : `${stageIdx + 1}`) : '🔒'}</span>
               <div className="level-info">
                 <div className="level-name">Stage {stageIdx + 1}</div>
                 <div className="level-meta">
@@ -943,15 +943,15 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
         <div className="result-title">{passed ? 'Stage Cleared!' : 'Stage Failed'}</div>
         <div className="result-sub">You scored {finalScore}/{QUESTIONS_PER_STAGE}</div>
         <div style={{ fontSize: 28, marginBottom: 16, letterSpacing: 4 }}>{starDisplay}</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{STAGE_REWARD}&#9824; earned!</div>}
-        <button className="share-btn" onClick={shareResult}>&#128228; Share Result</button>
+        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{STAGE_REWARD}♠ earned!</div>}
+        <button className="share-btn" onClick={shareResult}>📤 Share Result</button>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8 }}>
-          <button className="btn btn-secondary" onClick={() => { setSelectedMainLevel(currentMainLevel); setPhase('stages'); }}>&#8592; Stages</button>
+          <button className="btn btn-secondary" onClick={() => { setSelectedMainLevel(currentMainLevel); setPhase('stages'); }}>← Stages</button>
           {passed && hasNext && (
-            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage + 1)}>Next Stage &#8594;</button>
+            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage + 1)}>Next Stage →</button>
           )}
           {passed && !hasNext && currentMainLevel < MAIN_LEVELS.length - 1 && (
-            <button className="btn btn-primary" onClick={() => { setSelectedMainLevel(currentMainLevel + 1); setPhase('stages'); }}>Next Level &#8594;</button>
+            <button className="btn btn-primary" onClick={() => { setSelectedMainLevel(currentMainLevel + 1); setPhase('stages'); }}>Next Level →</button>
           )}
           {!passed && (
             <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage)}>Retry</button>
@@ -985,8 +985,8 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
-          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
       <div className="card">
@@ -998,7 +998,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
         ) : (
           <div>
             {hintRevealed && q.hint && (
-              <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>&#128161; {q.hint}</div>
+              <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
             )}
             {q.options.map((opt, idx) => {
               let cls = 'option-btn';
@@ -1016,16 +1016,16 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
       <div className="power-btns">
         {q.type === 'anagram' && (
           <button className="power-btn" onClick={doShuffle} disabled={spades < 20 || answered}>
-            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20&#9824;</span>
+            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20♠</span>
           </button>
         )}
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
         </button>
       </div>
     </div>
@@ -1076,8 +1076,8 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
-          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
       <div className="card">
@@ -1085,7 +1085,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
           {q.text}
         </div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>&#128161; {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1101,11 +1101,11 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
         </button>
       </div>
     </div>
@@ -1154,12 +1154,12 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
-          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div className="card-title" style={{ color: T.violet }}>&#128373;&#65039; WHO IS THIS CHARACTER?</div>
+        <div className="card-title" style={{ color: T.violet }}>🕵️ WHO IS THIS CHARACTER?</div>
         <div style={{ margin: '16px auto', width: 150, height: 150, borderRadius: 16, overflow: 'hidden', border: `2px solid ${T.border}`, position: 'relative', background: T.surface }}>
           <img
             src={q.image}
@@ -1173,12 +1173,12 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
           />
           {!answered && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
-              &#128373;&#65039;
+              🕵️
             </div>
           )}
         </div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>&#128161; {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign: 'center' }}>💡 {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1194,11 +1194,11 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
         </button>
       </div>
     </div>
@@ -1237,17 +1237,17 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13 }}>&#10003; {score}</span>
-          {combo >= 3 && <span className="combo-badge">&#128293; {combo}x</span>}
+          <span style={{ fontSize: 13 }}>✓ {score}</span>
+          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
       <div className="card">
-        <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>&#128444;&#65039; SCENE DESCRIPTION</div>
+        <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>🖼️ SCENE DESCRIPTION</div>
         <div className="question-text" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
           "{q.text}"
         </div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>&#128161; {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1263,11 +1263,11 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
         )}
         <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          &#9193; SKIP<br /><span style={{ color: T.gold }}>50&#9824;</span>
+          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
         </button>
       </div>
     </div>
@@ -1393,15 +1393,15 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   if (phase === 'intro') {
     if (isLocked) return (
       <div className="shadow-lock">
-        <div style={{ fontSize:72, marginBottom:16 }}>&#128128;</div>
+        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
         <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode Locked</div>
         <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
           You've used all {SURVIVAL_FREE_TRIALS} free trials!<br/>
           Unlock permanently with {SURVIVAL_UNLOCK_COST} spades to keep playing.
         </div>
         <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
-          <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>&#128274; {SURVIVAL_UNLOCK_COST}&#9824;</div>
-          <div style={{ fontSize: 12, color: T.textMid }}>Permanent unlock · You have {spades}&#9824;</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {SURVIVAL_UNLOCK_COST}♠</div>
+          <div style={{ fontSize: 12, color: T.textMid }}>Permanent unlock · You have {spades}♠</div>
         </div>
         <button className="btn btn-primary" onClick={unlockSurvival} disabled={spades < SURVIVAL_UNLOCK_COST} style={{ width: '100%' }}>
           {spades >= SURVIVAL_UNLOCK_COST ? 'Unlock Survival Mode' : `Need ${SURVIVAL_UNLOCK_COST - spades} more spades`}
@@ -1411,7 +1411,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 
     return (
       <div className="shadow-lock">
-        <div style={{ fontSize:72, marginBottom:16 }}>&#128128;</div>
+        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
         <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode</div>
         <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
           Infinite quiz from ALL questions mixed.<br/>
@@ -1447,7 +1447,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
 
   if (phase === 'result') return (
     <div className="result-screen">
-      <span className="result-emoji">&#128128;</span>
+      <span className="result-emoji">💀</span>
       <div className="result-title">Game Over!</div>
       <div className="result-sub">You survived {score} questions</div>
       <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>
@@ -1473,13 +1473,13 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
         <div className="survival-lives">
           {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '\u2764\uFE0F' : '\u{1F5A4}'}</span>)}
         </div>
-        <div className="survival-stat" style={{ color: T.gold }}>&#127942; {score}</div>
-        <div className="survival-stat" style={{ color: T.teal }}>&#128293; {streak}</div>
+        <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
+        <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
       </div>
       <div className="card">
         <div className="question-text">{q.text}</div>
         {hintRevealed && q.hint && (
-          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>&#128161; {q.hint}</div>
+          <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
         )}
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
@@ -1495,7 +1495,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
       <div className="power-btns">
         {q.hint && (
           <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            &#128161; HINT<br /><span style={{ color: T.gold }}>30&#9824;</span>
+            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
           </button>
         )}
       </div>
@@ -1561,11 +1561,11 @@ export default function App() {
 
         <div className="main">
           <div className="topbar">
-            <button className="menu-btn" onClick={() => setSidebarOpen(true)}>&#9776;</button>
+            <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
             <span className="topbar-title">{pageTitle}</span>
             <div className="topbar-chips">
-              <span className="chip" onClick={() => setSpadesModal(true)}>&#9824; {spades}</span>
-              <span className="chip">&#127941; {badges.length}</span>
+              <span className="chip" onClick={() => setSpadesModal(true)}>♠ {spades}</span>
+              <span className="chip">🏅 {badges.length}</span>
             </div>
           </div>
 
@@ -1648,7 +1648,7 @@ function HomePage({ navigate, dailyAnime, dailyQuote }) {
           <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" onError={e=>{e.target.style.display='none';}} />
           <div className="daily-anime-overlay">
             <div className="daily-anime-title">{dailyAnime.title}</div>
-            <div className="daily-anime-meta">&#11088; {dailyAnime.rating} · {dailyAnime.genre}</div>
+            <div className="daily-anime-meta">⭐ {dailyAnime.rating} · {dailyAnime.genre}</div>
           </div>
         </div>
         <div className="card" style={{ marginTop: 0 }}>
@@ -1744,7 +1744,7 @@ function SearchPage({ showFeedback }) {
 
       {notFound && !loading && (
         <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
-          <div style={{fontSize:40,marginBottom:12}}>&#128270;</div>
+          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
           <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Anime Not Found</div>
           <div style={{fontSize:13,color:T.textMid}}>Incorrect anime name. Please type correctly and try again.</div>
         </div>
@@ -1759,15 +1759,15 @@ function SearchPage({ showFeedback }) {
                 <div className="anime-title">{result.titleEn||result.title}</div>
                 {result.titleEn && result.title!==result.titleEn && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{result.title}</div>}
                 <div className="anime-meta">
-                  {result.score && <span className="meta-badge">&#11088; {result.score}</span>}
-                  {result.episodes && <span className="meta-badge">&#128250; {result.episodes} eps</span>}
-                  {result.year && <span className="meta-badge">&#128197; {result.year}</span>}
+                  {result.score && <span className="meta-badge">⭐ {result.score}</span>}
+                  {result.episodes && <span className="meta-badge">📺 {result.episodes} eps</span>}
+                  {result.year && <span className="meta-badge">📅 {result.year}</span>}
                 </div>
                 <div style={{fontSize:12,color:T.textMid}}>{result.status}</div>
               </div>
             </div>
-            {result.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>&#127917; {result.genres}</div>}
-            {result.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>&#127916; {result.studios}</div>}
+            {result.genres && <div style={{marginTop:12,fontSize:12,color:T.textMid}}>🎭 {result.genres}</div>}
+            {result.studios && <div style={{marginTop:4,fontSize:12,color:T.textMid}}>🎬 {result.studios}</div>}
             <button className="btn btn-secondary btn-full" style={{ marginTop: 12 }} onClick={addToWatchlist} disabled={!!inWatchlist}>
               {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </button>
@@ -1815,7 +1815,7 @@ function WatchlistPage({ showFeedback }) {
 
   if (!watchlist.length) return (
     <div className="card" style={{textAlign:'center',padding:'40px 20px'}}>
-      <div style={{fontSize:48,marginBottom:12}}>&#128203;</div>
+      <div style={{fontSize:48,marginBottom:12}}>📋</div>
       <div style={{fontSize:16,fontWeight:700,marginBottom:8}}>Watchlist Empty</div>
       <div style={{fontSize:13,color:T.textMid}}>Search for anime and tap "Add to Watchlist" to save them here.</div>
     </div>
@@ -1832,7 +1832,7 @@ function WatchlistPage({ showFeedback }) {
               <div style={{fontSize:14,fontWeight:700,lineHeight:1.3}}>{item.title}</div>
               {item.genres && <div style={{fontSize:11,color:T.textMid,marginTop:3}}>{item.genres.split(',').slice(0,2).join(', ')}</div>}
             </div>
-            <button onClick={()=>remove(item.malId)} style={{background:'none',border:`1px solid ${T.border}`,borderRadius:8,padding:'4px 8px',fontSize:12,color:T.textDim,flexShrink:0}}>&#10005;</button>
+            <button onClick={()=>remove(item.malId)} style={{background:'none',border:`1px solid ${T.border}`,borderRadius:8,padding:'4px 8px',fontSize:12,color:T.textDim,flexShrink:0}}>✕</button>
           </div>
         ))}
       </div>
@@ -1885,7 +1885,7 @@ function NewsPage() {
             {item.image ? (
               <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.style.display='none';}}/>
             ) : (
-              <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>&#128240;</div>
+              <div className="news-thumb" style={{display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,background:T.surface,border:`1px solid ${T.border}`}}>📰</div>
             )}
             <div className="news-text">
               <div className="news-title">{item.title}</div>
@@ -1951,7 +1951,7 @@ function BirthdaysPage() {
           <div style={{ fontSize: 14, fontWeight: 700, color: T.rose, marginBottom: 8 }}>TODAY'S BIRTHDAYS!</div>
           {todayBirthdays.map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 18 }}>&#127874;</span>
+              <span style={{ fontSize: 18 }}>🎂</span>
               <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
               <span style={{ fontSize: 11, color: T.textMid }}>({c.anime})</span>
             </div>
@@ -2002,7 +2002,7 @@ function BirthdaysPage() {
 
       {thisWeekBirthdays.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '30px 20px' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>&#127874;</div>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🎂</div>
           <div style={{ fontSize: 14, color: T.textMid }}>No birthdays this week!</div>
           <div style={{ fontSize: 12, color: T.textDim, marginTop: 4 }}>Try checking another week.</div>
         </div>
@@ -2020,7 +2020,7 @@ function BirthdaysPage() {
                 background: isToday ? T.roseGlow : T.goldGlow,
                 borderRadius: 12, padding: '8px 0'
               }}>
-                {isToday ? '&#127881;' : '&#127874;'}
+                {isToday ? '🎉' : '🎂'}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>
@@ -2132,7 +2132,7 @@ function AboutPage({ spades, badges }) {
   return (
     <div>
       <div className="hero-banner">
-        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>&#127924;</div>
+        <div style={{fontSize:48,textAlign:'center',marginBottom:8}}>🎴</div>
         <div style={{textAlign:'center'}}>
           <div style={{fontSize:18,fontWeight:800}}>About AniNoir</div>
           <div style={{fontSize:13,color:T.textMid}}>Your Anime Trivia Companion</div>
@@ -2257,7 +2257,7 @@ function CharacterSearchPage({ showFeedback }) {
 
       {notFound && !loading && (
         <div className="card" style={{textAlign:'center',padding:'30px 20px'}}>
-          <div style={{fontSize:40,marginBottom:12}}>&#128270;</div>
+          <div style={{fontSize:40,marginBottom:12}}>🔎</div>
           <div style={{fontSize:16,fontWeight:700,color:T.rose,marginBottom:8}}>Character Not Found</div>
           <div style={{fontSize:13,color:T.textMid}}>No characters matched your search. Try a different name.</div>
         </div>
@@ -2271,7 +2271,7 @@ function CharacterSearchPage({ showFeedback }) {
               <div className="anime-title">{char.name}</div>
               {char.nameKanji && <div style={{fontSize:11,color:T.textDim,marginBottom:4}}>{char.nameKanji}</div>}
               <div className="anime-meta">
-                {char.favorites > 0 && <span className="meta-badge">&#10084;&#65039; {char.favorites.toLocaleString()} favorites</span>}
+                {char.favorites > 0 && <span className="meta-badge">❤️ {char.favorites.toLocaleString()} favorites</span>}
               </div>
             </div>
           </div>
