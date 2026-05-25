@@ -164,6 +164,8 @@ const NAV = [
   { id: 'emoji', icon: '🎯', label: 'Emoji Quiz' },
   { id: 'shadow', icon: '🕵️', label: 'Guess Shadow' },
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
+  { id: 'opening', icon: '🎵', label: 'Opening Challenge', comingSoon: true },
+  { id: 'ending', icon: '🎶', label: 'Ending Challenge', comingSoon: true },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
@@ -454,9 +456,10 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
       </div>
       <div className="sidebar-nav">
         {NAV.map(n => (
-            <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => navigate(n.id)}>
+            <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => !n.comingSoon && navigate(n.id)} style={n.comingSoon ? { opacity: 0.5, cursor: 'not-allowed' } : {}}>
               <span className="icon">{n.icon}</span>
               {n.label}
+              {n.comingSoon && <span className="lock-badge">SOON</span>}
             </button>
         ))}
       </div>
@@ -1881,6 +1884,20 @@ export default function App() {
               {page === 'anagram' && <QuizPage spades={spades} setSpades={setSpades} badges={badges} setBadges={setBadges} showFeedback={showFeedback} mcqOnly={false} anagramOnly={true} mode="anagram" />}
               {page === 'shadow' && <ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'frames' && <AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} unlockCost={200} />}
+              {(page === 'opening' || page === 'ending') && (
+                <div className="shadow-lock">
+                  <div style={{ fontSize: 72, marginBottom: 16 }}>{page === 'opening' ? '🎵' : '🎶'}</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{page === 'opening' ? 'Opening Challenge' : 'Ending Challenge'}</div>
+                  <div style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.7 }}>
+                    This mode is coming soon!<br/>
+                    Guess anime by their {page === 'opening' ? 'opening' : 'ending'} songs.
+                  </div>
+                  <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 14, padding: '12px 20px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: T.gold }}>Coming Soon</div>
+                    <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>Stay tuned for updates!</div>
+                  </div>
+                </div>
+              )}
               {page === 'survival' && <SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />}
               {page === 'search' && <SearchPage showFeedback={showFeedback} />}
               {page === 'charsearch' && <CharacterSearchPage showFeedback={showFeedback} />}
