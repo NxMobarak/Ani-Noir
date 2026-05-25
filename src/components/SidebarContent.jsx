@@ -46,10 +46,6 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
         <NavItem path="/news" icon="📰" label="News" />
         <NavItem path="/birthdays" icon="🎂" label="Birthdays" />
 
-        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Community</div>
-        <NavItem path="/news" icon="👥" label="Community" />
-        <NavItem path="/news" icon="💬" label="Discussions" />
-
         <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Account</div>
         <NavItem path="/profile" icon="👤" label="Profile" />
         <NavItem path="/settings" icon="⚙️" label="Settings" />

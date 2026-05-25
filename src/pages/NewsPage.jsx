@@ -65,17 +65,34 @@ export default function NewsPage() {
     ? articles
     : articles.filter(a => a.categories.includes(activeCategory));
 
+  const visibleCategories = NEWS_CATEGORIES.filter(cat => !['industry', 'guides'].includes(cat.id));
+
   return (
     <section aria-label="Anime News">
-      <BackButton />
-      <h2 style={{ color: T.text, fontSize: 18, marginBottom: 12 }}>Anime News</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <BackButton />
+          <h2 style={{ color: T.text, fontSize: 18, margin: 0 }}>Anime News</h2>
+        </div>
+        <button
+          onClick={handleRetry}
+          aria-label="Refresh news"
+          style={{
+            background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,
+            padding: '8px 10px', fontSize: 16, cursor: 'pointer', color: T.textMid,
+            transition: 'all 0.2s', lineHeight: 1,
+          }}
+        >
+          🔄
+        </button>
+      </div>
 
       {/* Category tabs */}
       <nav aria-label="News categories" style={{
         display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 16,
         paddingBottom: 4, scrollbarWidth: 'none',
       }}>
-        {NEWS_CATEGORIES.map(cat => (
+        {visibleCategories.map(cat => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
