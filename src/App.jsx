@@ -415,6 +415,108 @@ const css = `
 
   .survival-lives { display:flex;gap:4px;font-size:20px; }
   .survival-stat { display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700; }
+
+  /* ─── MOTION & ANIMATIONS ─────────────────────────────────── */
+
+  /* Hover glow on cards */
+  .card { transition:all 0.25s cubic-bezier(.4,0,.2,1); }
+  .card:hover { border-color:rgba(244,63,94,0.3);box-shadow:0 0 20px rgba(244,63,94,0.08),0 4px 16px rgba(0,0,0,0.2); }
+
+  /* Hover glow on buttons */
+  .btn { transition:all 0.2s cubic-bezier(.4,0,.2,1); }
+  .btn-primary:hover { box-shadow:0 0 20px rgba(244,63,94,0.4),0 4px 12px rgba(244,63,94,0.2);transform:translateY(-1px); }
+  .btn-secondary:hover { box-shadow:0 0 12px rgba(255,255,255,0.05);transform:translateY(-1px); }
+
+  /* Hover glow on nav items */
+  .nav-item { transition:all 0.2s cubic-bezier(.4,0,.2,1); }
+  .nav-item:hover { box-shadow:0 0 12px rgba(244,63,94,0.1);transform:translateX(4px); }
+  .nav-item.active { box-shadow:0 0 16px rgba(244,63,94,0.15); }
+
+  /* Hover glow on level cards */
+  .level-card { transition:all 0.25s cubic-bezier(.4,0,.2,1); }
+  .level-card:hover { box-shadow:0 0 20px rgba(244,63,94,0.12),0 4px 16px rgba(0,0,0,0.15);transform:translateY(-2px); }
+
+  /* Button press animation */
+  .btn:active:not(:disabled) { transform:scale(0.95) translateY(0) !important;box-shadow:none !important;transition:transform 0.1s; }
+  .option-btn:active:not(:disabled) { transform:scale(0.97);transition:transform 0.1s; }
+  .level-card:active { transform:scale(0.98) !important;transition:transform 0.1s; }
+  .nav-item:active { transform:scale(0.97) translateX(2px) !important;transition:transform 0.1s; }
+  .letter-tile:active { transform:scale(0.9) !important;transition:transform 0.08s; }
+  .share-btn:active { transform:scale(0.96);transition:transform 0.1s; }
+
+  /* XP/Spades gain floating animation */
+  @keyframes spadesFloat { 0%{opacity:1;transform:translate(-50%,-10px) scale(1)} 50%{opacity:1;transform:translate(-50%,-30px) scale(1.1)} 100%{opacity:0;transform:translate(-50%,-50px) scale(0.9)} }
+  .spades-float { position:fixed;top:60px;left:50%;transform:translateX(-50%);font-size:18px;font-weight:800;color:${T.gold};pointer-events:none;z-index:250;animation:spadesFloat 1.2s ease-out forwards;text-shadow:0 0 10px rgba(245,158,11,0.6),0 2px 4px rgba(0,0,0,0.5); }
+
+  /* Correct answer flash/glow */
+  @keyframes correctFlash { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.5)} 40%{box-shadow:0 0 20px 4px rgba(34,197,94,0.4)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+  .option-btn.correct { animation:correctFlash 0.6s ease-out;border-color:${T.success};background:rgba(34,197,94,0.12);color:${T.success}; }
+
+  /* Wrong answer shake */
+  @keyframes wrongShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
+  .option-btn.wrong { animation:wrongShake 0.5s ease-out;border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error}; }
+
+  /* Anime-style question transition */
+  @keyframes questionSliceIn { 0%{opacity:0;transform:translateX(40px) skewX(-2deg);clip-path:inset(0 100% 0 0)} 60%{clip-path:inset(0 0 0 0)} 100%{opacity:1;transform:translateX(0) skewX(0deg);clip-path:inset(0 0 0 0)} }
+  @keyframes questionFadeUp { 0%{opacity:0;transform:translateY(20px)} 100%{opacity:1;transform:translateY(0)} }
+  .question-enter { animation:questionSliceIn 0.4s cubic-bezier(.4,0,.2,1) both; }
+  .question-options-enter { animation:questionFadeUp 0.35s cubic-bezier(.4,0,.2,1) 0.15s both; }
+
+  /* Option buttons staggered entrance */
+  .option-btn { opacity:0;animation:questionFadeUp 0.3s cubic-bezier(.4,0,.2,1) both; }
+  .option-btn:nth-child(1) { animation-delay:0.1s; }
+  .option-btn:nth-child(2) { animation-delay:0.18s; }
+  .option-btn:nth-child(3) { animation-delay:0.26s; }
+  .option-btn:nth-child(4) { animation-delay:0.34s; }
+
+  /* Hover glow on option buttons */
+  .option-btn:hover:not(:disabled):not(.correct):not(.wrong) { box-shadow:0 0 16px rgba(244,63,94,0.15);transform:translateX(4px); }
+
+  /* Combo badge bounce */
+  @keyframes comboBounce { 0%{transform:scale(0.5) rotate(-10deg)} 50%{transform:scale(1.2) rotate(5deg)} 100%{transform:scale(1) rotate(0deg)} }
+  .combo-badge { animation:comboBounce 0.4s cubic-bezier(.4,0,.2,1); }
+
+  /* Result screen entrance */
+  @keyframes resultBoom { 0%{opacity:0;transform:scale(0.3)} 60%{transform:scale(1.05)} 100%{opacity:1;transform:scale(1)} }
+  .result-emoji { animation:resultBoom 0.5s cubic-bezier(.4,0,.2,1) both; }
+  .result-title { animation:questionFadeUp 0.4s ease 0.2s both; }
+  .result-sub { animation:questionFadeUp 0.4s ease 0.3s both; }
+
+  /* Hero banner subtle shimmer */
+  .hero-banner { transition:all 0.3s; }
+  .hero-banner:hover { box-shadow:0 0 30px rgba(244,63,94,0.1),0 0 60px rgba(139,92,246,0.05); }
+
+  /* Chip hover glow */
+  .chip { transition:all 0.2s cubic-bezier(.4,0,.2,1); }
+  .chip:hover { box-shadow:0 0 12px rgba(245,158,11,0.3);transform:translateY(-1px); }
+
+  /* Sidebar spades badge hover */
+  .sidebar-spades { transition:all 0.2s; }
+  .sidebar-spades:hover { box-shadow:0 0 16px rgba(245,158,11,0.3);transform:scale(1.05); }
+
+  /* Search input glow on focus */
+  .search-input:focus { box-shadow:0 0 16px rgba(244,63,94,0.15); }
+
+  /* Toast entrance enhancement */
+  @keyframes toastIn { 0%{opacity:0;transform:translate(-50%,-20px) scale(0.9)} 100%{opacity:1;transform:translate(-50%,0) scale(1)} }
+  .feedback-toast { animation:toastIn 0.3s cubic-bezier(.4,0,.2,1); }
+
+  /* Letter tile pop on appear */
+  @keyframes tilePop { 0%{transform:scale(0) rotate(-10deg)} 60%{transform:scale(1.1) rotate(3deg)} 100%{transform:scale(1) rotate(0deg)} }
+  .letter-tile { animation:tilePop 0.3s cubic-bezier(.4,0,.2,1) both; }
+  .letter-tile:nth-child(1) { animation-delay:0.02s; }
+  .letter-tile:nth-child(2) { animation-delay:0.04s; }
+  .letter-tile:nth-child(3) { animation-delay:0.06s; }
+  .letter-tile:nth-child(4) { animation-delay:0.08s; }
+  .letter-tile:nth-child(5) { animation-delay:0.1s; }
+  .letter-tile:nth-child(6) { animation-delay:0.12s; }
+  .letter-tile:nth-child(7) { animation-delay:0.14s; }
+  .letter-tile:nth-child(8) { animation-delay:0.16s; }
+  .letter-tile:nth-child(9) { animation-delay:0.18s; }
+  .letter-tile:nth-child(10) { animation-delay:0.2s; }
+
+  /* Modal entrance */
+  .modal-content { animation:resultBoom 0.3s cubic-bezier(.4,0,.2,1) both; }
 `;
 
 
@@ -1017,14 +1119,14 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
-      <div className="card">
-        <div className="question-text">
+      <div className="card" key={qIndex}>
+        <div className="question-text question-enter">
           {q.type === 'anagram' ? '🔤 ANIME SCRAMBLE' : q.text}
         </div>
         {q.type === 'anagram' ? (
           <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
         ) : (
-          <div>
+          <div className="question-options-enter">
             {hintRevealed && q.hint && (
               <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
             )}
@@ -1113,13 +1215,14 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
-      <div className="card">
-        <div className="question-text" style={{ fontSize: 36, textAlign: 'center', marginBottom: 24 }}>
+      <div className="card" key={qIndex}>
+        <div className="question-text question-enter" style={{ fontSize: 36, textAlign: 'center', marginBottom: 24 }}>
           {q.text}
         </div>
         {hintRevealed && q.hint && (
           <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
         )}
+        <div className="question-options-enter">
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
@@ -1130,6 +1233,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
             <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
           );
         })}
+        </div>
       </div>
       <div className="power-btns">
         {q.hint && (
@@ -1578,14 +1682,15 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
-      <div className="card">
+      <div className="card" key={qIndex}>
         <div style={{ fontSize: 11, color: T.teal, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>🖼️ SCENE DESCRIPTION</div>
-        <div className="question-text" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
+        <div className="question-text question-enter" style={{ fontSize: 15, fontStyle: 'italic', color: T.text }}>
           "{q.text}"
         </div>
         {hintRevealed && q.hint && (
           <div style={{ marginBottom: 12, fontSize: 13, color: T.gold, textAlign:'center' }}>💡 {q.hint}</div>
         )}
+        <div className="question-options-enter">
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
@@ -1596,6 +1701,7 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
             <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitMCQ(idx)} disabled={answered}>{opt}</button>
           );
         })}
+        </div>
       </div>
       <div className="power-btns">
         {q.hint && (
@@ -1813,11 +1919,12 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
         <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
         <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
       </div>
-      <div className="card">
-        <div className="question-text">{q.text}</div>
+      <div className="card" key={qIndex}>
+        <div className="question-text question-enter">{q.text}</div>
         {hintRevealed && q.hint && (
           <div style={{ marginBottom: 12, fontSize: 13, color: T.gold }}>💡 {q.hint}</div>
         )}
+        <div className="question-options-enter">
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
@@ -1828,6 +1935,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
             <button key={`${qIndex}-${idx}`} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}>{opt}</button>
           );
         })}
+        </div>
       </div>
       <div className="power-btns">
         {q.hint && (
@@ -1853,11 +1961,20 @@ export default function App() {
   const [spadesModal, setSpadesModal] = useState(false);
   const [showChipHint, setShowChipHint] = useState(() => !localStorage.getItem('ani_chip_hint_shown'));
   const feedbackTimer = useRef(null);
+  const [spadesFloat, setSpadesFloat] = useState(null);
+  const spadesFloatTimer = useRef(null);
 
   const showFeedback = (msg) => {
     setFeedback(msg);
     clearTimeout(feedbackTimer.current);
     feedbackTimer.current = setTimeout(() => setFeedback(''), 2200);
+    // Trigger floating spades animation on spade gain messages
+    const spadesMatch = msg.match(/\+(\d+)\s*(?:spades|♠)/i);
+    if (spadesMatch) {
+      setSpadesFloat(`+${spadesMatch[1]}♠`);
+      clearTimeout(spadesFloatTimer.current);
+      spadesFloatTimer.current = setTimeout(() => setSpadesFloat(null), 1300);
+    }
   };
 
   useEffect(() => { localStorage.setItem('ani_spades', spades); }, [spades]);
@@ -1958,6 +2075,7 @@ export default function App() {
         </div>
 
         {feedback && <div className="feedback-toast">{feedback}</div>}
+        {spadesFloat && <div className="spades-float" key={Date.now()}>{spadesFloat}</div>}
         {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
       </div>
     </>
