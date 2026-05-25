@@ -2756,34 +2756,121 @@ function SettingsPage({ showFeedback }) {
     }, 5000);
   };
 
-  const handleRevive = () => {
-    setKillPhase('idle');
-    showFeedback('Welcome back! I knew you cared.');
-  };
-
   // ─── KILL CONFIRM MODAL ─────────────────────────────────
   if (killPhase === 'confirm') {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, backdropFilter: 'blur(6px)' }}>
-        <div style={{ background: T.card, border: `2px solid ${T.rose}`, borderRadius: 20, padding: 28, maxWidth: 340, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: T.rose, marginBottom: 8 }}>Are you sure?</div>
-          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 24, lineHeight: 1.7 }}>
-            This cannot be undone...<br/>The app will shatter into pieces.
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: 'radial-gradient(ellipse at center, rgba(244,63,94,0.14) 0%, rgba(0,0,0,0.92) 70%)',
+        zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+        animation: 'killModalIn 0.35s cubic-bezier(.2,.9,.3,1.2)'
+      }}>
+        <style>{`
+          @keyframes killModalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+          @keyframes warnPulse { 0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,0.55), inset 0 0 30px 4px rgba(255,255,255,0.15)} 50%{box-shadow:0 0 0 14px rgba(244,63,94,0), inset 0 0 40px 6px rgba(255,255,255,0.22)} }
+          @keyframes warnFloat { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-6px)} }
+          @keyframes particleOrbit { from{transform:rotate(0deg) translateX(46px) rotate(0deg)} to{transform:rotate(360deg) translateX(46px) rotate(-360deg)} }
+          @keyframes cardGlow { 0%,100%{box-shadow:0 0 0 1px rgba(244,63,94,0.5),0 0 40px 4px rgba(244,63,94,0.25),inset 0 1px 0 rgba(255,255,255,0.05)} 50%{box-shadow:0 0 0 1px rgba(244,63,94,0.7),0 0 70px 8px rgba(244,63,94,0.4),inset 0 1px 0 rgba(255,255,255,0.08)} }
+          @keyframes doitGlow { 0%,100%{box-shadow:0 8px 24px -6px rgba(244,63,94,0.6),inset 0 1px 0 rgba(255,255,255,0.18)} 50%{box-shadow:0 12px 36px -4px rgba(244,63,94,0.85),inset 0 1px 0 rgba(255,255,255,0.25)} }
+          .ani-doit-btn:hover { transform:translateY(-2px); }
+          .ani-doit-btn:hover .ani-doit-arrow { transform:translateX(4px); }
+          .ani-safe-btn:hover { border-color:rgba(34,197,94,0.55) !important; background:rgba(34,197,94,0.08) !important; }
+        `}</style>
+
+        <div style={{
+          position: 'relative',
+          background: 'linear-gradient(165deg, rgba(20,22,32,0.85), rgba(13,15,22,0.92))',
+          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(244,63,94,0.45)',
+          borderRadius: 24, padding: '52px 22px 20px',
+          maxWidth: 360, width: '100%', textAlign: 'center',
+          animation: 'cardGlow 2.6s ease-in-out infinite'
+        }}>
+          {/* Floating Warning Icon with orbiting particles */}
+          <div style={{
+            position: 'absolute', top: -38, left: '50%',
+            width: 76, height: 76,
+            animation: 'warnFloat 2.6s ease-in-out infinite'
+          }}>
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 28%, #fb7185, #be123c 70%)',
+              border: '2px solid rgba(255,255,255,0.18)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 34, fontWeight: 900, color: '#fff',
+              animation: 'warnPulse 2s ease-in-out infinite',
+              filter: 'drop-shadow(0 10px 24px rgba(244,63,94,0.55))'
+            }}>
+              !
+            </div>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                position: 'absolute', top: '50%', left: '50%',
+                width: 6, height: 6, borderRadius: '50%',
+                background: '#f43f5e',
+                boxShadow: '0 0 10px 2px rgba(244,63,94,0.85)',
+                marginTop: -3, marginLeft: -3,
+                animation: `particleOrbit ${2.6 + i * 0.5}s linear infinite`,
+                animationDelay: `${-i * 0.85}s`
+              }} />
+            ))}
           </div>
-          <button onClick={handleKill} style={{
-            width: '100%', padding: '14px', borderRadius: 12, border: `2px solid ${T.rose}`,
-            background: 'rgba(244,63,94,0.15)', color: T.rose, fontSize: 15, fontWeight: 800,
-            cursor: 'pointer', marginBottom: 10
+
+          {/* Headline */}
+          <div style={{
+            fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8,
+            letterSpacing: '-0.3px',
+            textShadow: '0 0 22px rgba(244,63,94,0.45)'
           }}>
-            Do it.
-          </button>
-          <button onClick={() => { setKillPhase('idle'); showFeedback("Good. Now go earn me some spades."); }} style={{
-            width: '100%', padding: '12px', borderRadius: 12, border: `1px solid ${T.border}`,
-            background: T.surface, color: T.success, fontSize: 14, fontWeight: 600, cursor: 'pointer'
+            This cannot be undone…
+          </div>
+          <div style={{ fontSize: 13.5, color: T.textMid, marginBottom: 24, lineHeight: 1.6 }}>
+            The app will shatter into pieces.
+          </div>
+
+          {/* Do it button — destructive primary */}
+          <button onClick={handleKill} className="ani-doit-btn" style={{
+            width: '100%', padding: '15px 18px', borderRadius: 14,
+            border: 'none',
+            background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+            color: '#fff', fontSize: 15, fontWeight: 800, letterSpacing: '0.2px',
+            cursor: 'pointer', marginBottom: 10,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            transition: 'transform 0.2s ease',
+            animation: 'doitGlow 2s ease-in-out infinite'
           }}>
-            I'm sorry, I won't
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>💀</span>
+              <span>Do it.</span>
+            </span>
+            <span className="ani-doit-arrow" style={{ fontSize: 18, transition: 'transform 0.2s ease', opacity: 0.9 }}>→</span>
           </button>
+
+          {/* Safe button — calm secondary */}
+          <button onClick={() => { setKillPhase('idle'); showFeedback("Good. Now go earn me some spades."); }} className="ani-safe-btn" style={{
+            width: '100%', padding: '13px 18px', borderRadius: 14,
+            border: '1px solid rgba(34,197,94,0.3)',
+            background: 'rgba(34,197,94,0.04)',
+            color: T.success, fontSize: 14, fontWeight: 700,
+            cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            transition: 'all 0.2s ease'
+          }}>
+            <span style={{ fontSize: 15 }}>🌿</span>
+            <span>I'm sorry, I won't</span>
+          </button>
+
+          {/* Safety note */}
+          <div style={{
+            marginTop: 18, paddingTop: 14,
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            fontSize: 11.5, color: T.textDim
+          }}>
+            <span style={{ fontSize: 13 }}>🛡️</span>
+            <span>Your progress and data are safe.</span>
+          </div>
         </div>
       </div>
     );
@@ -2833,14 +2920,6 @@ function SettingsPage({ showFeedback }) {
         <div style={{ marginTop: 30, fontSize: 11, color: T.textDim, animation: 'fadeInSlow 1s 2s ease both' }}>
           Closing in a moment...
         </div>
-        <button onClick={handleRevive} style={{
-          marginTop: 20, padding: '10px 24px', borderRadius: 12,
-          border: `1px solid ${T.success}`, background: 'rgba(34,197,94,0.1)',
-          color: T.success, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          animation: 'fadeInSlow 1s 3s ease both'
-        }}>
-          Revive Me
-        </button>
       </div>
     );
   }
