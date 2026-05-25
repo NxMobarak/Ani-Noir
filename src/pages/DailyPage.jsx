@@ -40,12 +40,20 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setSelectedOption(option);
 
-    const correct = option === question.answer || option === question.correct;
+    // For MCQ questions, 'correct' is an index number. For anagram, 'answer' is a string.
+    let isCorrect = false;
+    if (question.type === 'mcq' || (typeof question.correct === 'number' && question.options)) {
+      // Compare selected option with the option at the correct index
+      isCorrect = option === question.options[question.correct];
+    } else {
+      isCorrect = option === question.answer || option === question.correct;
+    }
+
     const now = new Date();
     const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
     const dateStr = ist.toISOString().split('T')[0];
 
-    if (correct) {
+    if (isCorrect) {
       playCorrect();
       setSpades(s => s + DAILY_REWARD);
       showFeedback(`+${DAILY_REWARD} ♠ Daily Reward!`, 'success');
@@ -58,10 +66,10 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
       date: dateStr,
       question,
       answer: option,
-      wasCorrect: correct,
+      wasCorrect: isCorrect,
     }));
 
-    setDaily(prev => ({ ...prev, completed: true, wasCorrect: correct }));
+    setDaily(prev => ({ ...prev, completed: true, wasCorrect: isCorrect }));
   };
 
   const handleAnagramSolve = (attempt) => {
@@ -77,7 +85,9 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     );
   }
 
-  const correctAnswer = question.answer || question.correct;
+  const correctAnswer = (typeof question.correct === 'number' && question.options)
+    ? question.options[question.correct]
+    : (question.answer || question.correct);
   const isAnagram = question.type === 'anagram';
 
   return (

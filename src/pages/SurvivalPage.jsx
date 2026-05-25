@@ -65,7 +65,13 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setSelectedOption(option);
 
-    const correct = option === currentQ.answer || option === currentQ.correct;
+    // For MCQ/emoji questions, 'correct' is an index number
+    let correct = false;
+    if (typeof currentQ.correct === 'number' && currentQ.options) {
+      correct = option === currentQ.options[currentQ.correct];
+    } else {
+      correct = option === currentQ.answer || option === currentQ.correct;
+    }
 
     if (correct) {
       const newScore = score + 1;
@@ -163,7 +169,9 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   }
 
   // ─── Playing ───────────────────────────────────────────────
-  const correctAnswer = currentQ?.answer || currentQ?.correct;
+  const correctAnswer = (typeof currentQ?.correct === 'number' && currentQ?.options)
+    ? currentQ.options[currentQ.correct]
+    : (currentQ?.answer || currentQ?.correct);
   const options = currentQ?.options || [];
 
   return (
