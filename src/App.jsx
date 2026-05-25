@@ -2062,6 +2062,23 @@ function BirthdaysPage() {
         {weekOffset !== 0 && (
           <button className="btn btn-primary" style={{ width: '100%', marginTop: 10, padding: '8px', fontSize: 12 }} onClick={() => setWeekOffset(0)}>Back to This Week</button>
         )}
+        {/* Jump to month */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 12 }}>
+          {MONTHS_SHORT.map((m, idx) => {
+            const now = new Date();
+            const firstOfMonth = new Date(now.getFullYear(), idx, 1);
+            const currentWeekStart = getWeekStart(0);
+            const diffDays = Math.round((firstOfMonth - currentWeekStart) / (1000 * 60 * 60 * 24));
+            const targetOffset = Math.round(diffDays / 7);
+            const isCurrentMonth = now.getMonth() === idx;
+            return (
+              <button key={idx} onClick={() => setWeekOffset(targetOffset)}
+                style={{ flex: '1 0 22%', padding: '6px 2px', fontSize: 11, fontWeight: 600, borderRadius: 8, border: `1px solid ${isCurrentMonth ? T.rose : T.border}`, background: isCurrentMonth ? 'rgba(244,63,94,0.12)' : T.surface, color: isCurrentMonth ? T.rose : T.textMid, cursor: 'pointer' }}>
+                {m}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Stats */}
