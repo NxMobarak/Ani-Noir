@@ -261,8 +261,13 @@ const css = `
   .menu-btn { background:none;border:1px solid ${T.border};border-radius:10px;padding:8px 10px;font-size:16px;line-height:1;flex-shrink:0; }
   .topbar-title { font-size:16px;font-weight:700;flex:1; }
   .topbar-chips { display:flex;gap:8px; }
-  .chip { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:${T.textMid};white-space:nowrap;cursor:pointer;transition:all 0.2s; }
+  .chip { background:${T.card};border:1px solid ${T.border};border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:${T.textMid};white-space:nowrap;cursor:pointer;transition:all 0.2s;position:relative; }
   .chip:hover { border-color:${T.gold}; }
+  .chip-pulse { animation: chipPulse 2s ease-in-out 3; }
+  @keyframes chipPulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0)} 50%{box-shadow:0 0 0 6px rgba(245,158,11,0.25)} }
+  .chip-tooltip { position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:${T.card};border:1px solid ${T.gold};border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:${T.gold};white-space:nowrap;pointer-events:none;opacity:0;animation:tooltipFadeIn 0.3s 1.5s ease forwards;z-index:10; }
+  .chip-tooltip::before { content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid ${T.gold}; }
+  @keyframes tooltipFadeIn { from{opacity:0;transform:translateX(-50%) translateY(4px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
   .page { flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch; }
   .page-shadow-game { flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column; }
@@ -1846,6 +1851,7 @@ export default function App() {
   const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
   const [feedback, setFeedback] = useState('');
   const [spadesModal, setSpadesModal] = useState(false);
+  const [showChipHint, setShowChipHint] = useState(() => !localStorage.getItem('ani_chip_hint_shown'));
   const feedbackTimer = useRef(null);
 
   const showFeedback = (msg) => {
@@ -1865,6 +1871,17 @@ export default function App() {
       }, 2000);
     }
   }, []);
+
+  // Auto-dismiss chip hint after 6 seconds
+  useEffect(() => {
+    if (showChipHint) {
+      const timer = setTimeout(() => {
+        setShowChipHint(false);
+        localStorage.setItem('ani_chip_hint_shown', '1');
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [showChipHint]);
 
   const navigate = (id) => {
     playClick();
@@ -1895,8 +1912,13 @@ export default function App() {
             <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
             <span className="topbar-title">{pageTitle}</span>
             <div className="topbar-chips">
-              <span className="chip" onClick={() => setSpadesModal(true)}>♠ {spades}</span>
-              <span className="chip">🏅 {badges.length}</span>
+              <span className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }}>
+                ♠ {spades}
+                {showChipHint && <span className="chip-tooltip">Tap for info</span>}
+              </span>
+              <span className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }}>
+                🏅 {badges.length}
+              </span>
             </div>
           </div>
 
