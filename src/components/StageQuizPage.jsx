@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import T from '../constants/theme';
 import { shuffle } from '../utils/helpers';
+import { useSwipe } from '../utils/swipe';
 import { playCorrect, playWrong, playCombo } from '../utils/audio';
 import { getStageProgress, saveStageProgress } from '../utils/storage';
 import {
@@ -10,6 +11,7 @@ import {
 } from '../questions/index';
 import CircularTimer from './CircularTimer';
 import AnagramTiles from './AnagramTiles';
+import BackButton from './BackButton';
 
 
 export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback, renderQuestion }) {
@@ -296,11 +298,12 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   // ─── PHASE 1: Main Levels ───────────────────────────────────
   if (phase === 'mainLevels') {
     return (
-      <div>
+      <section aria-label="Level Selection">
+        <BackButton />
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title" style={{ color: T.rose }}>
+          <h2 className="card-title" style={{ color: T.rose }}>
             {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 ANIME SCRAMBLER' : mode === 'emoji' ? '🎯 EMOJI QUIZ' : mode === 'shadow' ? '🕵️ SHADOW QUIZ' : '🖼️ ANIME FRAMES'}
-          </div>
+          </h2>
           <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
         </div>
@@ -311,8 +314,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
           const prevStars = idx > 0 ? getMainLevelStars(idx - 1) : 0;
           return (
             <button key={idx} className="level-card" onClick={() => { if (unlocked) { setSelectedMainLevel(idx); setPhase('stages'); } }}
-              style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
-              <span className="level-icon">{unlocked ? ml.icon : '🔒'}</span>
+              style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}
+              aria-disabled={!unlocked}
+              aria-label={`${ml.name} - ${unlocked ? `${stars} stars, ${completed} stages passed` : 'Locked'}`}>
+              <span className="level-icon" aria-hidden="true">{unlocked ? ml.icon : '🔒'}</span>
               <div className="level-info">
                 <div className="level-name">{ml.name}</div>
                 <div className="level-meta">{unlocked ? ml.tagline : `Need ${STARS_TO_UNLOCK_LEVEL}★ in ${MAIN_LEVELS[idx-1]?.name} (${prevStars}/${STARS_TO_UNLOCK_LEVEL})`}</div>
@@ -320,11 +325,11 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
                   <div className="level-best">{stars}★ · {completed}/{STAGES_PER_LEVEL} stages passed</div>
                 )}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
+              <span style={{ color: T.textDim, fontSize: 20 }} aria-hidden="true">{unlocked ? '›' : ''}</span>
             </button>
           );
         })}
-      </div>
+      </section>
     );
   }
 
@@ -334,7 +339,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     const totalStars = getMainLevelStars(selectedMainLevel);
     const nextLevelName = MAIN_LEVELS[selectedMainLevel + 1]?.name;
     return (
-      <div>
+      <section aria-label={`${ml.name} Stages`}>
         <button className="btn btn-secondary" style={{ marginBottom: 14, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
           ← Back to Levels
         </button>
@@ -371,7 +376,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
             </button>
           );
         })}
-      </div>
+      </section>
     );
   }
 

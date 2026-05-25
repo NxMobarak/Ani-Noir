@@ -7,6 +7,53 @@ input { font-family: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
+/* ─── FOCUS STYLES (Accessibility) ─────────────────────────── */
+:focus-visible {
+  outline: 2px solid #f43f5e;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #f43f5e;
+  outline-offset: 2px;
+}
+
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip to content link */
+.skip-to-content:focus {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 12px 20px;
+  background: #f43f5e;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  z-index: 9999;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .app-shell { display: flex; height: 100dvh; margin: 0 auto; position: relative; overflow: hidden; }
 
 @media (max-width: 768px) {
