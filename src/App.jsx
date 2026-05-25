@@ -2223,9 +2223,41 @@ function WatchlistPage({ showFeedback }) {
 
 
 // ─── News Page ───────────────────────────────────────────────
+const NEWS_CATEGORIES = [
+  { id: 'all', label: 'All', icon: '📰' },
+  { id: 'new-releases', label: 'New Releases', icon: '🆕' },
+  { id: 'reviews', label: 'Reviews', icon: '⭐' },
+  { id: 'announcements', label: 'Announcements', icon: '📢' },
+  { id: 'industry', label: 'Industry', icon: '🏢' },
+  { id: 'guides', label: 'Guides & Lists', icon: '📋' },
+];
+
+const NEWS_CATEGORY_KEYWORDS = {
+  'new-releases': ['premiere', 'premieres', 'streams', 'streaming', 'dub', 'dubbed', 'episode', 'episodes', 'season', 'new on', 'coming to', 'simulcast', 'launch', 'releases', 'now available', 'watch', 'english dub', 'subbed'],
+  'reviews': ['review', 'reviews', 'rated', 'rating', 'ranking', 'top 10', 'top 5', 'best', 'worst', 'impressions', 'verdict', 'score'],
+  'announcements': ['announce', 'announced', 'announcement', 'reveal', 'revealed', 'confirms', 'confirmed', 'trailer', 'teaser', 'key visual', 'poster', 'cast', 'staff', 'adaptation', 'upcoming', 'greenlit', 'sequel', 'new anime', 'date reveal'],
+  'industry': ['studio', 'director', 'producer', 'acquisition', 'partnership', 'merger', 'sales', 'milestone', 'record', 'award', 'awards', 'market', 'business', 'license', 'licensed', 'contract', 'industry', 'box office', 'revenue'],
+  'guides': ['guide', 'guides', 'list', 'watch order', 'beginner', 'must-watch', 'recommend', 'recommendations', 'similar to', 'like', 'how to', 'where to watch', 'schedule', 'calendar', 'what to watch'],
+};
+
+function categorizeNewsItem(title, desc) {
+  const text = `${title} ${desc}`.toLowerCase();
+  const matched = [];
+  for (const [category, keywords] of Object.entries(NEWS_CATEGORY_KEYWORDS)) {
+    for (const kw of keywords) {
+      if (text.includes(kw)) {
+        matched.push(category);
+        break;
+      }
+    }
+  }
+  return matched.length > 0 ? matched : ['all'];
+}
+
 function NewsPage() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all');
 
   const fetchNews = async () => {
     setLoading(true);
@@ -2233,12 +2265,18 @@ function NewsPage() {
       const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss');
       const data = await res.json();
       if (data.items?.length) {
-        setNews(data.items.slice(0,15).map(item => ({
-          title: item.title, link: item.link,
-          desc: item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'...',
-          image: item.thumbnail || item.enclosure?.link || '',
-          date: new Date(item.pubDate).toLocaleDateString(),
-        })));
+        setNews(data.items.slice(0,25).map(item => {
+          const title = item.title || '';
+          const desc = item.description?.replace(/<[^>]*>/g,'').slice(0,120)+'...' || '';
+          const categories = categorizeNewsItem(title, desc);
+          return {
+            title, link: item.link,
+            desc,
+            image: item.thumbnail || item.enclosure?.link || '',
+            date: new Date(item.pubDate).toLocaleDateString(),
+            categories,
+          };
+        }));
       }
     } catch { setNews([]); }
     finally { setLoading(false); }
@@ -2246,11 +2284,49 @@ function NewsPage() {
 
   useEffect(() => { fetchNews(); }, []);
 
+  const filteredNews = activeTab === 'all'
+    ? news
+    : news.filter(item => item.categories.includes(activeTab));
+
+  // Count articles per category
+  const categoryCounts = {};
+  for (const cat of NEWS_CATEGORIES) {
+    if (cat.id === 'all') { categoryCounts.all = news.length; continue; }
+    categoryCounts[cat.id] = news.filter(item => item.categories.includes(cat.id)).length;
+  }
+
   return (
     <div>
+      {/* Category Tabs */}
+      <div className="news-filter-tabs" style={{ marginBottom: 14 }}>
+        {NEWS_CATEGORIES.map(cat => (
+          <button
+            key={cat.id}
+            className={`news-tab ${activeTab === cat.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(cat.id)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+          >
+            <span style={{ fontSize: 12 }}>{cat.icon}</span>
+            <span>{cat.label}</span>
+            {!loading && categoryCounts[cat.id] > 0 && (
+              <span style={{
+                fontSize: 10, fontWeight: 800, marginLeft: 2,
+                background: activeTab === cat.id ? 'rgba(244,63,94,0.2)' : 'rgba(255,255,255,0.06)',
+                borderRadius: 6, padding: '1px 5px',
+                color: activeTab === cat.id ? T.rose : T.textDim
+              }}>
+                {categoryCounts[cat.id]}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       <div className="card">
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-          <div className="card-title" style={{color:T.teal,marginBottom:0}}>ANIME NEWS</div>
+          <div className="card-title" style={{color:T.teal,marginBottom:0}}>
+            {activeTab === 'all' ? 'ANIME NEWS' : NEWS_CATEGORIES.find(c => c.id === activeTab)?.label.toUpperCase()}
+          </div>
           <button className="btn btn-secondary" style={{padding:'6px 14px',fontSize:12}} onClick={fetchNews} disabled={loading}>{loading?'Loading...':'Refresh'}</button>
         </div>
         {loading && [1,2,3,4].map(i=>(
@@ -2259,8 +2335,14 @@ function NewsPage() {
             <div style={{flex:1}}><div className="skeleton" style={{height:13,marginBottom:6}}/><div className="skeleton" style={{height:11,width:'80%'}}/></div>
           </div>
         ))}
-        {!loading && news.length===0 && <p style={{color:T.textMid,fontSize:13}}>No news available right now.</p>}
-        {!loading && news.map((item,i)=>(
+        {!loading && filteredNews.length===0 && (
+          <div style={{textAlign:'center',padding:'24px 12px'}}>
+            <div style={{fontSize:32,marginBottom:8}}>{NEWS_CATEGORIES.find(c => c.id === activeTab)?.icon || '📰'}</div>
+            <p style={{color:T.textMid,fontSize:13}}>No articles in this category right now.</p>
+            <p style={{color:T.textDim,fontSize:11,marginTop:4}}>Try "All" to see everything.</p>
+          </div>
+        )}
+        {!loading && filteredNews.map((item,i)=>(
           <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="news-item">
             {item.image ? (
               <img src={item.image} alt="" className="news-thumb" onError={e=>{e.target.onerror=null;e.target.style.display='none';}}/>
@@ -2270,7 +2352,21 @@ function NewsPage() {
             <div className="news-text">
               <div className="news-title">{item.title}</div>
               <div className="news-desc">{item.desc}</div>
-              <div style={{fontSize:10,color:T.textDim,marginTop:3}}>{item.date}</div>
+              <div style={{display:'flex',alignItems:'center',gap:6,marginTop:4,flexWrap:'wrap'}}>
+                <span style={{fontSize:10,color:T.textDim}}>{item.date}</span>
+                {item.categories.filter(c => c !== 'all').map(catId => {
+                  const cat = NEWS_CATEGORIES.find(c => c.id === catId);
+                  return cat ? (
+                    <span key={catId} style={{
+                      fontSize:9, fontWeight:700, letterSpacing:'0.3px',
+                      background: 'rgba(20,184,166,0.1)', border:`1px solid rgba(20,184,166,0.25)`,
+                      color: T.teal, borderRadius:6, padding:'1px 6px',
+                    }}>
+                      {cat.icon} {cat.label}
+                    </span>
+                  ) : null;
+                })}
+              </div>
             </div>
           </a>
         ))}
