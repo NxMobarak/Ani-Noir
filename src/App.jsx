@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { questionBank, levels, getRandomQuestions, MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE, getStars, MIN_CORRECT_TO_PASS, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD } from './questions/index';
 import level1Frames from './questions/level1_frames';
 import level2Frames from './questions/level2_frames';
@@ -2758,7 +2759,7 @@ function SettingsPage({ showFeedback }) {
 
   // ─── KILL CONFIRM MODAL ─────────────────────────────────
   if (killPhase === 'confirm') {
-    return (
+    return createPortal((
       <div style={{
         position: 'fixed', inset: 0,
         background: 'radial-gradient(ellipse at center, rgba(244,63,94,0.14) 0%, rgba(0,0,0,0.92) 70%)',
@@ -2873,12 +2874,12 @@ function SettingsPage({ showFeedback }) {
           </div>
         </div>
       </div>
-    );
+    ), document.body);
   }
 
   // ─── SHATTER ANIMATION ──────────────────────────────────
   if (killPhase === 'shatter') {
-    return (
+    return createPortal((
       <div style={{ position: 'fixed', inset: 0, background: T.bg, zIndex: 999, overflow: 'hidden' }}>
         <style>{`
           @keyframes shatterShake { 0%,100%{transform:translate(0)} 10%{transform:translate(-8px,4px)} 20%{transform:translate(6px,-6px)} 30%{transform:translate(-4px,8px)} 40%{transform:translate(8px,-2px)} 50%{transform:translate(-6px,6px)} }
@@ -2897,13 +2898,13 @@ function SettingsPage({ showFeedback }) {
           ))}
         </div>
       </div>
-    );
+    ), document.body);
   }
 
   // ─── DEAD SCREEN ────────────────────────────────────────
   if (killPhase === 'dead') {
     const deathText = KILL_TEXTS[Math.floor(Math.random() * KILL_TEXTS.length)];
-    return (
+    return createPortal((
       <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30 }}>
         <style>{`
           @keyframes typeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -2921,7 +2922,7 @@ function SettingsPage({ showFeedback }) {
           Closing in a moment...
         </div>
       </div>
-    );
+    ), document.body);
   }
 
   // ─── NORMAL SETTINGS PAGE ───────────────────────────────
