@@ -35,23 +35,8 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
           <span className="icon" aria-hidden="true">🏠</span>
           Home
         </button>
-        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Games</div>
-        {NAV.filter(n => ['quiz','anagram','emoji','shadow','frames','opening','ending','sceneguess','dialogue','survival','daily'].includes(n.id)).map(n => (
-          <button
-            key={n.id}
-            className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
-            onClick={() => handleNav(n)}
-            aria-current={currentPath === n.path ? 'page' : undefined}
-            aria-disabled={n.comingSoon}
-            style={n.comingSoon ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-            tabIndex={n.comingSoon ? -1 : 0}
-          >
-            <span className="icon" aria-hidden="true">{n.icon}</span>
-            {n.label}
-            {n.comingSoon && <span className="lock-badge" aria-label="Coming soon">SOON</span>}
-          </button>
-        ))}
-        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Tools</div>
+
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Have Fun</div>
         {NAV.filter(n => ['search','charsearch','watchlist','news','birthdays'].includes(n.id)).map(n => (
           <button
             key={n.id}
