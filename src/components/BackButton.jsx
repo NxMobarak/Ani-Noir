@@ -9,20 +9,15 @@ const BackButton = memo(function BackButton({ label = 'Back' }) {
   // Don't show on home page
   if (location.pathname === '/') return null;
 
+  // Always go to home — simple, predictable behavior
   const handleBack = () => {
-    // If there's history within the app, go back normally
-    // Otherwise navigate to home
-    if (window.history.length > 2) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    navigate('/', { replace: true });
   };
 
   return (
     <button
       onClick={handleBack}
-      aria-label="Go back"
+      aria-label="Go back to home"
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         background: 'none', border: 'none', color: T.textMid,

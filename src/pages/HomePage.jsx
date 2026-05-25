@@ -35,7 +35,6 @@ const LatestYouTubeCard = memo(function LatestYouTubeCard() {
 // Calculate time until midnight IST
 function getTimeUntilMidnightIST() {
   const now = new Date();
-  // IST is UTC+5:30
   const istOffset = 5.5 * 60 * 60 * 1000;
   const istNow = new Date(now.getTime() + istOffset + now.getTimezoneOffset() * 60000);
   const midnightIST = new Date(istNow);
@@ -68,19 +67,6 @@ export default function HomePage() {
   const dailyQuote = getDailyQuote();
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
-  // Prevent back button from leaving the app when on home
-  useEffect(() => {
-    const handlePopState = () => {
-      // If we're on home and user presses back, push home again
-      if (window.location.pathname === '/') {
-        window.history.pushState(null, '', '/');
-      }
-    };
-    window.history.pushState(null, '', '/');
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
 
   return (
     <div>
