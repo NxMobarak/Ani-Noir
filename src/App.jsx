@@ -1329,6 +1329,10 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
 
 // ─── Survival Mode (NEW) ────────────────────────────────────
 function SurvivalPage({ spades, setSpades, showFeedback }) {
+  const SURVIVAL_FREE_TRIALS = 5;
+  const SURVIVAL_UNLOCK_COST = 1000;
+  const [triesUsed, setTriesUsed] = useState(() => parseInt(localStorage.getItem('ani_survival_tries') || '0'));
+  const [survivalUnlocked, setSurvivalUnlocked] = useState(() => localStorage.getItem('ani_survival_unlocked') === '1');
   const [phase, setPhase] = useState('intro');
   const [questions, setQuestions] = useState([]);
   const [qIndex, setQIndex] = useState(0);
@@ -1340,7 +1344,25 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   const [correctOption, setCorrectOption] = useState(null);
   const [hintRevealed, setHintRevealed] = useState(false);
 
+  const isLocked = !survivalUnlocked && triesUsed >= SURVIVAL_FREE_TRIALS;
+  const freeTrialsLeft = Math.max(0, SURVIVAL_FREE_TRIALS - triesUsed);
+
+  const unlockSurvival = () => {
+    if (spades < SURVIVAL_UNLOCK_COST) { showFeedback(`Need ${SURVIVAL_UNLOCK_COST}♠ to unlock Survival Mode!`); return; }
+    setSpades(s => s - SURVIVAL_UNLOCK_COST);
+    setSurvivalUnlocked(true);
+    localStorage.setItem('ani_survival_unlocked', '1');
+    showFeedback('💀 Survival Mode unlocked permanently!');
+  };
+
   const startGame = () => {
+    if (isLocked) return;
+    // Increment tries if not permanently unlocked
+    if (!survivalUnlocked) {
+      const newTries = triesUsed + 1;
+      setTriesUsed(newTries);
+      localStorage.setItem('ani_survival_tries', String(newTries));
+    }
     const allMcq = [...questionBank.filter(q => q.type === 'mcq'), ...ALL_EMOJI_QUESTIONS];
     setQuestions(shuffle(allMcq));
     setQIndex(0);
@@ -1412,20 +1434,65 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
   };
 
 
-  if (phase === 'intro') return (
-    <div className="shadow-lock">
-      <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode</div>
-      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
-        Infinite quiz from ALL questions mixed.<br/>
-        You have 3 lives (❤️❤️❤️). Wrong answer = lose 1 life.<br/>
-        Game over at 0 lives. Every 5 correct = +100♠!
+  if (phase === 'intro') {
+    // Locked state - needs 1000 spades to unlock
+    if (isLocked) return (
+      <div className="shadow-lock">
+        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
+        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode Locked</div>
+        <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+          You've used all {SURVIVAL_FREE_TRIALS} free trials!<br/>
+          Unlock permanently with {SURVIVAL_UNLOCK_COST}♠ to keep playing.
+        </div>
+        <div style={{ background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 14, padding: '12px 20px', marginBottom: 20 }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: T.gold }}>🔒 {SURVIVAL_UNLOCK_COST}♠</div>
+          <div style={{ fontSize: 12, color: T.textMid }}>Permanent unlock · You have {spades}♠</div>
+        </div>
+        <button className="btn btn-primary" onClick={unlockSurvival} disabled={spades < SURVIVAL_UNLOCK_COST} style={{ width: '100%' }}>
+          {spades >= SURVIVAL_UNLOCK_COST ? '💀 Unlock Survival Mode' : `Need ${SURVIVAL_UNLOCK_COST - spades} more ♠`}
+        </button>
       </div>
-      <button className="btn btn-primary" style={{ width: '100%' }} onClick={startGame}>
-        💀 Start Survival
-      </button>
-    </div>
-  );
+    );
+
+    // Free trial / unlocked intro
+    return (
+      <div className="shadow-lock">
+        <div style={{ fontSize:72, marginBottom:16 }}>💀</div>
+        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Survival Mode</div>
+        <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+          Infinite quiz from ALL questions mixed.<br/>
+          You have 3 lives (❤️❤️❤️). Wrong answer = lose 1 life.<br/>
+          Game over at 0 lives. Every 5 correct = +100♠!
+        </div>
+
+        {/* Free trial progress bar - only show if not permanently unlocked */}
+        {!survivalUnlocked && (
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: '14px 18px', marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid }}>Free Trials</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: freeTrialsLeft <= 1 ? T.rose : T.gold }}>{freeTrialsLeft}/{SURVIVAL_FREE_TRIALS} left</span>
+            </div>
+            <div style={{ height: 8, background: T.border, borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(freeTrialsLeft / SURVIVAL_FREE_TRIALS) * 100}%`, background: freeTrialsLeft <= 1 ? T.rose : `linear-gradient(90deg, ${T.gold}, ${T.teal})`, borderRadius: 4, transition: 'width 0.4s' }} />
+            </div>
+            <div style={{ fontSize: 11, color: T.textDim, marginTop: 6 }}>
+              {freeTrialsLeft > 0 ? `${freeTrialsLeft} free game${freeTrialsLeft > 1 ? 's' : ''} remaining. After that, unlock for ${SURVIVAL_UNLOCK_COST}♠.` : 'No free trials left!'}
+            </div>
+          </div>
+        )}
+
+        {survivalUnlocked && (
+          <div style={{ background: 'rgba(34,197,94,0.1)', border: `1px solid rgba(34,197,94,0.3)`, borderRadius: 14, padding: '10px 18px', marginBottom: 20, textAlign: 'center' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.success }}>✅ Permanently Unlocked</span>
+          </div>
+        )}
+
+        <button className="btn btn-primary" style={{ width: '100%' }} onClick={startGame}>
+          💀 Start Survival
+        </button>
+      </div>
+    );
+  }
 
   if (phase === 'result') return (
     <div className="result-screen">
@@ -1671,15 +1738,17 @@ function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
         </div>
         {levels.map((lvl, idx) => {
           const best = lb[`shadow_${idx}`];
+          const prevBest = idx > 0 ? lb[`shadow_${idx - 1}`] : null;
+          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
           return (
-            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
-              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
+              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
               <div className="level-info">
                 <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
                 {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
             </button>
           );
         })}
@@ -2494,15 +2563,17 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
         </div>
         {levels.map((lvl, idx) => {
           const best = lb[`frames_${idx}`];
+          const prevBest = idx > 0 ? lb[`frames_${idx - 1}`] : null;
+          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
           return (
-            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
-              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
+              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
               <div className="level-info">
                 <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
                 {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
             </button>
           );
         })}
