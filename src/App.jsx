@@ -1242,8 +1242,8 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     if (answered || !inputValue.trim()) return;
     clearInterval(timerRef.current);
     const current = characters[currentIdx];
-    const guess = inputValue.trim().toLowerCase().replace(/[^a-z ]/g, '');
-    const answer = current.name.toLowerCase();
+    const guess = inputValue.trim().toLowerCase().replace(/[^a-z]/g, '');
+    const answer = current.name.toLowerCase().replace(/[^a-z]/g, '');
     const isCorrect = guess === answer;
 
     setAnswered(true);
@@ -1294,26 +1294,13 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setWasCorrect(false);
   };
 
-  const handleKeyPress = (letter) => {
+  const handleInputChange = (e) => {
     if (answered) return;
     const current = characters[currentIdx];
-    const namePattern = current.name;
-    // Calculate max input length (same as name length)
-    if (inputValue.length < namePattern.length) {
-      setInputValue(v => v + letter);
-    }
-  };
-
-  const handleBackspace = () => {
-    if (answered) return;
-    setInputValue(v => v.slice(0, -1));
-  };
-
-  const handleSpace = () => {
-    if (answered) return;
-    const current = characters[currentIdx];
-    if (inputValue.length < current.name.length) {
-      setInputValue(v => v + ' ');
+    const maxLen = current.name.replace(/\s/g, '').length;
+    const val = e.target.value.replace(/[^a-zA-Z]/g, ''); // only letters, no spaces
+    if (val.length <= maxLen) {
+      setInputValue(val);
     }
   };
 
@@ -1374,7 +1361,6 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const current = characters[currentIdx];
   if (!current) return <div className="card"><p>Loading...</p></div>;
   const nameWords = current.name.split(' ');
-  const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
   return (
     <div>
@@ -1421,9 +1407,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
             {nameWords.map((word, wIdx) => (
               <div key={wIdx} style={{ display: 'flex', gap: 4 }}>
                 {word.split('').map((char, cIdx) => {
-                  // Calculate global position
+                  // Calculate position in space-free input
                   let globalPos = 0;
-                  for (let w = 0; w < wIdx; w++) globalPos += nameWords[w].length + 1; // +1 for space
+                  for (let w = 0; w < wIdx; w++) globalPos += nameWords[w].length;
                   globalPos += cIdx;
                   const typedChar = inputValue[globalPos] || '';
                   const isCorrectChar = revealed && wasCorrect;
@@ -1455,47 +1441,37 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         )}
       </div>
 
-      {/* On-screen Keyboard */}
+      {/* Native Input + Submit */}
       {!answered && (
-        <div style={{ marginTop: 12 }}>
-          {KEYBOARD_ROWS.map((row, rIdx) => (
-            <div key={rIdx} style={{ display: 'flex', gap: 4, justifyContent: 'center', marginBottom: 4 }}>
-              {row.split('').map(letter => (
-                <button key={letter} onClick={() => handleKeyPress(letter.toLowerCase())}
-                  style={{
-                    width: 30, height: 38, borderRadius: 6,
-                    border: `1px solid ${T.border}`, background: T.card,
-                    color: T.text, fontSize: 13, fontWeight: 600,
-                    cursor: 'pointer', transition: 'all 0.1s'
-                  }}>
-                  {letter}
-                </button>
-              ))}
-            </div>
-          ))}
-          <div style={{ display: 'flex', gap: 4, justifyContent: 'center', marginTop: 4 }}>
-            <button onClick={handleBackspace}
-              style={{
-                flex: 1, maxWidth: 80, height: 38, borderRadius: 6,
-                border: `1px solid ${T.border}`, background: T.card,
-                color: T.rose, fontSize: 12, fontWeight: 700,
-                cursor: 'pointer'
-              }}>⌫</button>
-            <button onClick={handleSpace}
-              style={{
-                flex: 2, maxWidth: 140, height: 38, borderRadius: 6,
-                border: `1px solid ${T.border}`, background: T.card,
-                color: T.textMid, fontSize: 12, fontWeight: 600,
-                cursor: 'pointer'
-              }}>SPACE</button>
-            <button onClick={submitGuess}
-              style={{
-                flex: 1, maxWidth: 80, height: 38, borderRadius: 6,
-                border: 'none', background: T.rose,
-                color: 'white', fontSize: 12, fontWeight: 700,
-                cursor: 'pointer'
-              }}>GO</button>
-          </div>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', padding: '0 8px' }}>
+          <input
+            type="text"
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
+            placeholder="Type character name..."
+            style={{
+              flex: 1, maxWidth: 240, height: 42, borderRadius: 10,
+              border: `1.5px solid ${T.border}`, background: T.surface,
+              color: T.text, fontSize: 15, fontWeight: 600,
+              padding: '0 14px', outline: 'none',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = T.rose}
+            onBlur={(e) => e.target.style.borderColor = T.border}
+          />
+          <button onClick={submitGuess}
+            style={{
+              width: 60, height: 42, borderRadius: 10,
+              border: 'none', background: T.rose,
+              color: 'white', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer'
+            }}>GO</button>
         </div>
       )}
 
