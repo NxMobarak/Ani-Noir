@@ -2756,11 +2756,6 @@ function SettingsPage({ showFeedback }) {
     }, 5000);
   };
 
-  const handleRevive = () => {
-    setKillPhase('idle');
-    showFeedback('Welcome back! I knew you cared.');
-  };
-
   // ─── KILL CONFIRM MODAL ─────────────────────────────────
   if (killPhase === 'confirm') {
     return (
@@ -2925,14 +2920,6 @@ function SettingsPage({ showFeedback }) {
         <div style={{ marginTop: 30, fontSize: 11, color: T.textDim, animation: 'fadeInSlow 1s 2s ease both' }}>
           Closing in a moment...
         </div>
-        <button onClick={handleRevive} style={{
-          marginTop: 20, padding: '10px 24px', borderRadius: 12,
-          border: `1px solid ${T.success}`, background: 'rgba(34,197,94,0.1)',
-          color: T.success, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          animation: 'fadeInSlow 1s 3s ease both'
-        }}>
-          Revive Me
-        </button>
       </div>
     );
   }
