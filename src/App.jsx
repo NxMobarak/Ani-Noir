@@ -456,9 +456,6 @@ function SpadesModal({ onClose }) {
 
 // ─── Sidebar Content (shared between mobile and desktop) ────
 function SidebarContent({ page, navigate, spades, onSpadesClick }) {
-  const SHADOW_COST = 200;
-  const EMOJI_COST = 200;
-  const FRAMES_COST = 200;
   return (
     <>
       <div className="sidebar-header">
@@ -467,22 +464,12 @@ function SidebarContent({ page, navigate, spades, onSpadesClick }) {
         <div className="sidebar-spades" onClick={onSpadesClick}>♠ {spades} Spades</div>
       </div>
       <div className="sidebar-nav">
-        {NAV.map(n => {
-          const isShadow = n.id === 'shadow';
-          const isEmoji = n.id === 'emoji';
-          const isFrames = n.id === 'frames';
-          const showLock = isShadow || isEmoji || isFrames;
-          const cost = isShadow ? SHADOW_COST : isFrames ? FRAMES_COST : EMOJI_COST;
-          const unlockKey = isShadow ? 'ani_shadow_unlocked' : isFrames ? 'ani_frames_unlocked' : 'ani_emoji_unlocked';
-          const isUnlocked = localStorage.getItem(unlockKey) === '1';
-          return (
+        {NAV.map(n => (
             <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => navigate(n.id)}>
               <span className="icon">{n.icon}</span>
               {n.label}
-              {showLock && <span className="lock-badge">{isUnlocked ? '✨' : `🔒 ${cost}♠`}</span>}
             </button>
-          );
-        })}
+        ))}
       </div>
       <div className="sidebar-footer">
       </div>
@@ -1060,7 +1047,7 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
 
 // ─── Emoji Quiz Page (NEW) ───────────────────────────────────
 function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unlockCost }) {
-  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_emoji_unlocked') === '1');
+  const [unlocked] = useState(true);
   const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -1496,7 +1483,7 @@ const ALL_SHADOW_QUESTIONS = [
 ];
 
 function ShadowQuizPage({ spades, setSpades, showFeedback, unlockCost }) {
-  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_shadow_unlocked') === '1');
+  const [unlocked] = useState(true);
   const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -2218,9 +2205,6 @@ function AboutPage({ spades, badges }) {
         <div className="stat-row"><span className="stat-label">♠ Spades Balance</span><span className="stat-value" style={{color:T.gold}}>{spades}</span></div>
         <div className="stat-row"><span className="stat-label">🏅 Badges Earned</span><span className="stat-value">{badges.length}</span></div>
         <div className="stat-row"><span className="stat-label">📅 Daily Streak</span><span className="stat-value">{localStorage.getItem('ani_daily')===new Date().toDateString()?'🔥 Active':'—'}</span></div>
-        <div className="stat-row"><span className="stat-label">🕵️ Shadow Quiz</span><span className="stat-value">{localStorage.getItem('ani_shadow_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
-        <div className="stat-row"><span className="stat-label">🎯 Emoji Quiz</span><span className="stat-value">{localStorage.getItem('ani_emoji_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
-        <div className="stat-row"><span className="stat-label">🖼️ Anime Frames</span><span className="stat-value">{localStorage.getItem('ani_frames_unlocked')==='1'?'✅ Unlocked':'🔒 Locked'}</span></div>
         <div className="stat-row"><span className="stat-label">📋 Watchlist</span><span className="stat-value">{getWatchlist().length} anime</span></div>
       </div>
 
@@ -2297,7 +2281,7 @@ function AboutPage({ spades, badges }) {
 
 // ─── Anime Frames Page (NEW) ────────────────────────────────
 function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
-  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ani_frames_unlocked') === '1');
+  const [unlocked] = useState(true);
   const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
   const [questions, setQuestions] = useState([]);
