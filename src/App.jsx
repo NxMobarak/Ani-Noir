@@ -1193,6 +1193,8 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [answered, setAnswered] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(false);
   const timerRef = useRef(null);
+  const inputRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Start game
   const startGame = () => {
@@ -1308,7 +1310,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     if (answered) return;
     const current = characters[currentIdx];
     const maxLen = current.name.replace(/\s/g, '').length;
-    const val = e.target.value.replace(/[^a-zA-Z]/g, ''); // only letters, no spaces
+    // Extract only letters from the raw input value
+    const raw = e.target.value;
+    const val = raw.replace(/[^a-zA-Z]/g, '');
     if (val.length <= maxLen) {
       setInputValue(val);
       // Auto-submit when all boxes filled
@@ -1319,6 +1323,23 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
           if (guess.length === answer.length) submitGuess();
         }, 200);
       }
+    }
+  };
+
+  // Focus input when phase changes to playing or after next character
+  useEffect(() => {
+    if (phase === 'playing' && !answered && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [phase, currentIdx, answered]);
+
+  // Tap anywhere on the game container to refocus input (bring keyboard back)
+  const handleContainerTap = (e) => {
+    if (answered) return;
+    // Don't interfere with button clicks
+    if (e.target.tagName === 'BUTTON') return;
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
@@ -1381,7 +1402,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const nameWords = current.name.split(' ');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+    <div ref={containerRef} onClick={handleContainerTap} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       {/* Header: lives, timer, score, streak - compact row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px', marginBottom: 8, flexShrink: 0 }}>
         <div className="survival-lives" style={{ fontSize: 16 }}>
@@ -1457,22 +1478,46 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Hidden input to capture phone keyboard */}
+      {/* Hidden input to capture phone keyboard - positioned within view for mobile focus */}
       {!answered && (
-        <input
-          type="text"
-          autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
-          style={{
-            position: 'absolute', left: '-9999px', top: 0, width: 1, height: 1, opacity: 0
-          }}
-        />
+        <div style={{ position: 'relative', marginTop: 10, flexShrink: 0 }}>
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="text"
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
+            onBlur={(e) => {
+              // Refocus after a short delay to keep keyboard open on mobile
+              if (!answered) {
+                setTimeout(() => inputRef.current?.focus(), 50);
+              }
+            }}
+            style={{
+              width: '100%', height: 44, fontSize: 16,
+              background: T.surface, border: `1.5px solid ${T.border}`,
+              borderRadius: 12, padding: '0 16px',
+              color: 'transparent', caretColor: T.rose,
+              outline: 'none', textAlign: 'center',
+              letterSpacing: 4,
+            }}
+            placeholder="Type here..."
+          />
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none', fontSize: 13, color: T.textDim,
+            fontWeight: 500
+          }}>
+            {inputValue ? `${inputValue.length} / ${characters[currentIdx]?.name.replace(/\s/g, '').length || 0} letters` : 'Tap here to type...'}
+          </div>
+        </div>
       )}
 
       {/* Next button after answer + auto-advance */}
