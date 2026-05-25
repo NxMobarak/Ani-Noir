@@ -1,51 +1,67 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './styles/app.css';
 import T from './constants/theme';
 import NAV from './constants/nav';
 import { playClick } from './utils/audio';
+import { useSwipe } from './utils/swipe';
+import { safeGet, safeSet, migrateData } from './utils/dataValidator';
 import SidebarContent from './components/SidebarContent';
 import SpadesModal from './components/SpadesModal';
 import RulesModal from './components/RulesModal';
+import ErrorBoundary from './components/ErrorBoundary';
+import BackButton from './components/BackButton';
 
-// Pages
-import HomePage from './pages/HomePage';
-import QuizPage from './pages/QuizPage';
-import EmojiQuizPage from './pages/EmojiQuizPage';
-import AnimeFramesPage from './pages/AnimeFramesPage';
-import ShadowQuizPage from './pages/ShadowQuizPage';
-import SurvivalPage from './pages/SurvivalPage';
-import DailyPage from './pages/DailyPage';
-import SearchPage from './pages/SearchPage';
-import CharacterSearchPage from './pages/CharacterSearchPage';
-import WatchlistPage from './pages/WatchlistPage';
-import NewsPage from './pages/NewsPage';
-import BirthdaysPage from './pages/BirthdaysPage';
-import AboutPage from './pages/AboutPage';
-import SettingsPage from './pages/SettingsPage';
+// ─── Code Splitting: Lazy-loaded pages ──────────────────────
+const HomePage = lazy(() => import('./pages/HomePage'));
+const QuizPage = lazy(() => import('./pages/QuizPage'));
+const EmojiQuizPage = lazy(() => import('./pages/EmojiQuizPage'));
+const AnimeFramesPage = lazy(() => import('./pages/AnimeFramesPage'));
+const ShadowQuizPage = lazy(() => import('./pages/ShadowQuizPage'));
+const SurvivalPage = lazy(() => import('./pages/SurvivalPage'));
+const DailyPage = lazy(() => import('./pages/DailyPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const CharacterSearchPage = lazy(() => import('./pages/CharacterSearchPage'));
+const WatchlistPage = lazy(() => import('./pages/WatchlistPage'));
+const NewsPage = lazy(() => import('./pages/NewsPage'));
+const BirthdaysPage = lazy(() => import('./pages/BirthdaysPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
-
-// Coming Soon placeholder
-function ComingSoonPage({ title, icon }) {
+// Loading fallback for lazy-loaded pages
+function PageLoader() {
   return (
-    <div className="shadow-lock">
-      <div style={{ fontSize: 72, marginBottom: 16 }}>{icon}</div>
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{title}</div>
-      <div style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.7 }}>
-        This mode is coming soon!
-      </div>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 14, padding: '12px 20px' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: T.gold }}>Coming Soon</div>
-        <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>Stay tuned for updates!</div>
-      </div>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60 }}>
+      <div className="skeleton" style={{ width: 120, height: 20 }} />
     </div>
   );
 }
 
+// Coming Soon placeholder
+function ComingSoonPage({ title, icon }) {
+  return (
+    <section aria-label={`${title} - Coming Soon`} className="shadow-lock">
+      <BackButton />
+      <div style={{ fontSize: 72, marginBottom: 16 }} aria-hidden="true">{icon}</div>
+      <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{title}</h2>
+      <p style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.7 }}>
+        This mode is coming soon!
+      </p>
+      <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 14, padding: '12px 20px' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: T.gold }}>Coming Soon</div>
+        <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>Stay tuned for updates!</div>
+      </div>
+    </section>
+  );
+}
+
+// Run data migration on first load
+migrateData();
+
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [spades, setSpades] = useState(() => parseInt(localStorage.getItem('ani_spades') || '100'));
-  const [badges, setBadges] = useState(() => JSON.parse(localStorage.getItem('ani_badges') || '[]'));
+  const [spades, setSpades] = useState(() => safeGet('ani_spades', 100));
+  const [badges, setBadges] = useState(() => safeGet('ani_badges', []));
   const [feedback, setFeedback] = useState('');
   const [spadesModal, setSpadesModal] = useState(false);
   const [rulesModal, setRulesModal] = useState(false);
@@ -54,9 +70,10 @@ export default function App() {
   const feedbackTimer = useRef(null);
   const spadesFloatTimer = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
-
-  const showFeedback = (msg) => {
+  // Memoized feedback function to avoid re-renders
+  const showFeedback = useCallback((msg) => {
     setFeedback(msg);
     clearTimeout(feedbackTimer.current);
     feedbackTimer.current = setTimeout(() => setFeedback(''), 2200);
@@ -66,10 +83,11 @@ export default function App() {
       clearTimeout(spadesFloatTimer.current);
       spadesFloatTimer.current = setTimeout(() => setSpadesFloat(null), 1300);
     }
-  };
+  }, []);
 
-  useEffect(() => { localStorage.setItem('ani_spades', spades); }, [spades]);
-  useEffect(() => { localStorage.setItem('ani_badges', JSON.stringify(badges)); }, [badges]);
+  // Persist spades and badges
+  useEffect(() => { safeSet('ani_spades', String(spades)); }, [spades]);
+  useEffect(() => { safeSet('ani_badges', badges); }, [badges]);
 
   useEffect(() => {
     if (!localStorage.getItem('ani_offline_shown')) {
@@ -78,7 +96,7 @@ export default function App() {
         localStorage.setItem('ani_offline_shown', '1');
       }, 2000);
     }
-  }, []);
+  }, [showFeedback]);
 
   useEffect(() => {
     if (showChipHint) {
@@ -90,70 +108,103 @@ export default function App() {
     }
   }, [showChipHint]);
 
+  // Swipe to open/close sidebar on mobile
+  const sidebarSwipe = useSwipe({
+    onSwipeRight: useCallback(() => setSidebarOpen(true), []),
+    onSwipeLeft: useCallback(() => setSidebarOpen(false), []),
+    threshold: 60,
+  });
+
   const currentNav = NAV.find(n => n.path === location.pathname);
   const pageTitle = currentNav?.label || 'AniNoir';
 
+  // Memoized setSpades to avoid child re-renders
+  const memoizedSetSpades = useCallback((updater) => {
+    setSpades(updater);
+  }, []);
+
   return (
-    <div className="app-shell">
+    <div className="app-shell" {...sidebarSwipe}>
+      {/* Skip to content link for keyboard users */}
+      <a href="#main-content" className="skip-to-content" style={{
+        position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px',
+        overflow: 'hidden', zIndex: 9999,
+      }} onFocus={(e) => { e.target.style.cssText = 'position:fixed;top:10px;left:10px;z-index:9999;padding:12px 20px;background:#f43f5e;color:#fff;border-radius:8px;font-weight:700;text-decoration:none;'; }}
+        onBlur={(e) => { e.target.style.cssText = 'position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;'; }}
+      >
+        Skip to content
+      </a>
+
       {/* Desktop Sidebar */}
-      <div className="desktop-sidebar">
+      <nav className="desktop-sidebar" aria-label="Main navigation">
         <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} />
-      </div>
+      </nav>
 
       {/* Mobile Sidebar */}
-      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
-      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Mobile navigation" role="navigation">
         <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} onCloseSidebar={() => setSidebarOpen(false)} />
-      </div>
-
+      </nav>
 
       {/* Main Content */}
       <div className="main">
-        <div className="topbar">
-          <button className="menu-btn" onClick={() => setSidebarOpen(true)}>☰</button>
-          <span className="topbar-title">{pageTitle}</span>
-          <div className="topbar-chips">
-            <span className="chip" onClick={() => setRulesModal(true)}>📜</span>
-            <span className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }}>
+        <header className="topbar">
+          <button className="menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" aria-expanded={sidebarOpen}>☰</button>
+          <h1 className="topbar-title" style={{ fontSize: 16, fontWeight: 700 }}>{pageTitle}</h1>
+          <div className="topbar-chips" role="toolbar" aria-label="Quick actions">
+            <button className="chip" onClick={() => setRulesModal(true)} aria-label="View rules">📜</button>
+            <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${spades} spades`}>
               ♠ {spades}
               {showChipHint && <span className="chip-tooltip">Tap for info</span>}
-            </span>
-            <span className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }}>
+            </button>
+            <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${badges.length} badges`}>
               🏅 {badges.length}
-            </span>
+            </button>
           </div>
-        </div>
+        </header>
 
-        <div className="page">
+        <main id="main-content" className="page" role="main">
           <div className="page-enter" key={location.pathname}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/quiz" element={<QuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />} />
-              <Route path="/anagram" element={<QuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} anagramOnly={true} mode="anagram" />} />
-              <Route path="/emoji" element={<EmojiQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />} />
-              <Route path="/shadow" element={<ShadowQuizPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />} />
-              <Route path="/frames" element={<AnimeFramesPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />} />
-              <Route path="/opening" element={<ComingSoonPage title="Opening Challenge" icon="🎵" />} />
-              <Route path="/ending" element={<ComingSoonPage title="Ending Challenge" icon="🎶" />} />
-              <Route path="/sceneguess" element={<ComingSoonPage title="Guess the Scene" icon="🎬" />} />
-              <Route path="/dialogue" element={<ComingSoonPage title="Dialogue Challenge" icon="💬" />} />
-              <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />} />
-              <Route path="/daily" element={<DailyPage spades={spades} setSpades={setSpades} showFeedback={showFeedback} />} />
-              <Route path="/search" element={<SearchPage showFeedback={showFeedback} />} />
-              <Route path="/charsearch" element={<CharacterSearchPage showFeedback={showFeedback} />} />
-              <Route path="/watchlist" element={<WatchlistPage showFeedback={showFeedback} />} />
-              <Route path="/news" element={<NewsPage />} />
-              <Route path="/birthdays" element={<BirthdaysPage />} />
-              <Route path="/settings" element={<SettingsPage showFeedback={showFeedback} />} />
-              <Route path="/about" element={<AboutPage spades={spades} badges={badges} />} />
-            </Routes>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/quiz" element={<QuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />} />
+                  <Route path="/anagram" element={<QuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} anagramOnly={true} mode="anagram" />} />
+                  <Route path="/emoji" element={<EmojiQuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/shadow" element={<ShadowQuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/frames" element={<AnimeFramesPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/opening" element={<ComingSoonPage title="Opening Challenge" icon="🎵" />} />
+                  <Route path="/ending" element={<ComingSoonPage title="Ending Challenge" icon="🎶" />} />
+                  <Route path="/sceneguess" element={<ComingSoonPage title="Guess the Scene" icon="🎬" />} />
+                  <Route path="/dialogue" element={<ComingSoonPage title="Dialogue Challenge" icon="💬" />} />
+                  <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/daily" element={<DailyPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/search" element={<SearchPage showFeedback={showFeedback} />} />
+                  <Route path="/charsearch" element={<CharacterSearchPage showFeedback={showFeedback} />} />
+                  <Route path="/watchlist" element={<WatchlistPage showFeedback={showFeedback} />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/birthdays" element={<BirthdaysPage />} />
+                  <Route path="/settings" element={<SettingsPage showFeedback={showFeedback} />} />
+                  <Route path="/about" element={<AboutPage spades={spades} badges={badges} />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Feedback Toast */}
-      {feedback && <div className={`feedback-toast ${feedback.startsWith('Correct') ? 'correct-toast' : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? 'wrong-toast' : ''}`}>{feedback.startsWith('Correct') ? `✓ ${feedback}` : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? `✗ ${feedback}` : feedback}</div>}
-      {spadesFloat && <div className="spades-float" key={Date.now()}>{spadesFloat}</div>}
+      {feedback && (
+        <div
+          className={`feedback-toast ${feedback.startsWith('Correct') ? 'correct-toast' : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? 'wrong-toast' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          {feedback.startsWith('Correct') ? `✓ ${feedback}` : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? `✗ ${feedback}` : feedback}
+        </div>
+      )}
+      {spadesFloat && <div className="spades-float" key={Date.now()} aria-hidden="true">{spadesFloat}</div>}
       {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
       {rulesModal && <RulesModal onClose={() => setRulesModal(false)} />}
     </div>

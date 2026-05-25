@@ -55,7 +55,7 @@ export const SHADOW_CHARACTERS = [
   { file: 'inosuke.webp', name: 'Inosuke' },
   { file: 'itachi.webp', name: 'Itachi' },
   { file: 'jinwoo.webp', name: 'Jinwoo' },
-  { file: 'jotato.webp', name: 'Jotaro' },
+  { file: 'jotaro.webp', name: 'Jotaro' },
   { file: 'kakashi.webp', name: 'Kakashi' },
   { file: 'kaneki.webp', name: 'Kaneki' },
   { file: 'killua.webp', name: 'Killua' },

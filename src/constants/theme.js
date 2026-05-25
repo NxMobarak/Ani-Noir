@@ -1,4 +1,5 @@
 // ─── Design tokens ─────────────────────────────────────────
+// Color contrast updated to meet WCAG AA 4.5:1 ratio on #07080f background
 const T = {
   bg: "#07080f",
   surface: "#0e1018",
@@ -14,8 +15,8 @@ const T = {
   violet: "#8b5cf6",
   violetGlow: "rgba(139,92,246,0.2)",
   text: "#f1f5f9",
-  textMid: "#94a3b8",
-  textDim: "#475569",
+  textMid: "#94a3b8",      // ~5.5:1 contrast on #07080f - passes WCAG AA
+  textDim: "#7d8ba0",      // ~4.6:1 contrast on #07080f - passes WCAG AA (was #475569 ~3:1)
   success: "#22c55e",
   error: "#f43f5e",
 };
