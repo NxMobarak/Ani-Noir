@@ -1315,16 +1315,19 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     const val = raw.replace(/[^a-zA-Z]/g, '');
     if (val.length <= maxLen) {
       setInputValue(val);
-      // Auto-submit when all boxes filled
-      if (val.length === maxLen) {
-        setTimeout(() => {
-          const guess = val.toLowerCase().replace(/[^a-z]/g, '');
-          const answer = current.name.toLowerCase().replace(/[^a-z]/g, '');
-          if (guess.length === answer.length) submitGuess();
-        }, 200);
-      }
     }
   };
+
+  // Auto-submit when all boxes are filled
+  useEffect(() => {
+    if (answered || !characters[currentIdx]) return;
+    const current = characters[currentIdx];
+    const maxLen = current.name.replace(/\s/g, '').length;
+    if (inputValue.length === maxLen && inputValue.length > 0) {
+      const timer = setTimeout(() => submitGuess(), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [inputValue]);
 
   // Focus input when phase changes to playing or after next character
   useEffect(() => {
@@ -1478,9 +1481,9 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Hidden input to capture phone keyboard - positioned within view for mobile focus */}
+      {/* Visible input field for typing */}
       {!answered && (
-        <div style={{ position: 'relative', marginTop: 10, flexShrink: 0 }}>
+        <div style={{ marginTop: 10, flexShrink: 0 }}>
           <input
             ref={inputRef}
             type="text"
@@ -1493,30 +1496,16 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={(e) => { if (e.key === 'Enter') submitGuess(); }}
-            onBlur={(e) => {
-              // Refocus after a short delay to keep keyboard open on mobile
-              if (!answered) {
-                setTimeout(() => inputRef.current?.focus(), 50);
-              }
-            }}
+            placeholder="Tap here to type..."
             style={{
-              width: '100%', height: 44, fontSize: 16,
+              width: '100%', height: 38, fontSize: 14,
               background: T.surface, border: `1.5px solid ${T.border}`,
-              borderRadius: 12, padding: '0 16px',
-              color: 'transparent', caretColor: T.rose,
+              borderRadius: 10, padding: '0 14px',
+              color: T.text, caretColor: T.rose,
               outline: 'none', textAlign: 'center',
-              letterSpacing: 4,
+              letterSpacing: 2, fontWeight: 600,
             }}
-            placeholder="Type here..."
           />
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            pointerEvents: 'none', fontSize: 13, color: T.textDim,
-            fontWeight: 500
-          }}>
-            {inputValue ? `${inputValue.length} / ${characters[currentIdx]?.name.replace(/\s/g, '').length || 0} letters` : 'Tap here to type...'}
-          </div>
         </div>
       )}
 
