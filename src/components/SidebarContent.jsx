@@ -27,7 +27,15 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
         </button>
       </div>
       <div className="sidebar-nav" role="list">
-        <div style={{ padding: '4px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Games</div>
+        <button
+          className={`nav-item ${currentPath === '/' ? 'active' : ''}`}
+          onClick={() => handleNav({ path: '/', id: 'home' })}
+          aria-current={currentPath === '/' ? 'page' : undefined}
+        >
+          <span className="icon" aria-hidden="true">🏠</span>
+          Home
+        </button>
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Games</div>
         {NAV.filter(n => ['quiz','anagram','emoji','shadow','frames','opening','ending','sceneguess','dialogue','survival','daily'].includes(n.id)).map(n => (
           <button
             key={n.id}
