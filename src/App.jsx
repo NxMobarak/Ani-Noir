@@ -331,6 +331,8 @@ const css = `
 
 
   .feedback-toast { position:fixed;top:70px;left:50%;transform:translateX(-50%);background:${T.card};border:1px solid ${T.border};border-radius:40px;padding:10px 20px;font-size:14px;font-weight:600;z-index:200;pointer-events:none;animation:slideDown 0.3s ease;max-width:90vw;text-align:center;white-space:nowrap; }
+  .feedback-toast.correct-toast { border-color:${T.success};background:rgba(34,197,94,0.12);color:${T.success};box-shadow:0 0 20px rgba(34,197,94,0.3),0 0 40px rgba(34,197,94,0.1);text-shadow:0 0 8px rgba(34,197,94,0.4); }
+  .feedback-toast.wrong-toast { border-color:#c0392b;background:rgba(192,57,43,0.12);color:#e74c3c;box-shadow:0 0 20px rgba(192,57,43,0.3),0 0 40px rgba(192,57,43,0.1);text-shadow:0 0 8px rgba(192,57,43,0.4); }
   @keyframes slideDown { from{opacity:0;transform:translate(-50%,-10px)} to{opacity:1;transform:translate(-50%,0)} }
 
   .progress-bar { height:4px;background:${T.border};border-radius:2px;overflow:hidden;margin-bottom:14px; }
@@ -449,12 +451,15 @@ const css = `
   .spades-float { position:fixed;top:60px;left:50%;transform:translateX(-50%);font-size:18px;font-weight:800;color:${T.gold};pointer-events:none;z-index:250;animation:spadesFloat 1.2s ease-out forwards;text-shadow:0 0 10px rgba(245,158,11,0.6),0 2px 4px rgba(0,0,0,0.5); }
 
   /* Correct answer flash/glow */
-  @keyframes correctFlash { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.5)} 40%{box-shadow:0 0 20px 4px rgba(34,197,94,0.4)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
-  .option-btn.correct { animation:correctFlash 0.6s ease-out;border-color:${T.success};background:rgba(34,197,94,0.12);color:${T.success}; }
+  @keyframes correctFlash { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.6)} 40%{box-shadow:0 0 24px 6px rgba(34,197,94,0.45)} 100%{box-shadow:0 0 12px 2px rgba(34,197,94,0.2)} }
+  .option-btn.correct { animation:correctFlash 0.7s ease-out forwards !important;opacity:1 !important;border-color:${T.success};background:rgba(34,197,94,0.14);color:${T.success};box-shadow:0 0 12px 2px rgba(34,197,94,0.2); }
 
   /* Wrong answer shake */
   @keyframes wrongShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
-  .option-btn.wrong { animation:wrongShake 0.5s ease-out;border-color:${T.error};background:rgba(244,63,94,0.12);color:${T.error}; }
+  .option-btn.wrong { animation:wrongShake 0.5s ease-out forwards !important;opacity:1 !important;border-color:#c0392b;background:rgba(192,57,43,0.12);color:#e74c3c;box-shadow:0 0 12px 2px rgba(192,57,43,0.2); }
+
+  /* Answered state: all options stay visible */
+  .option-btn.answered-visible { opacity:1 !important;animation:none !important; }
 
   /* Anime-style question transition */
   @keyframes questionSliceIn { 0%{opacity:0;transform:translateX(40px) skewX(-2deg);clip-path:inset(0 100% 0 0)} 60%{clip-path:inset(0 0 0 0)} 100%{opacity:1;transform:translateX(0) skewX(0deg);clip-path:inset(0 0 0 0)} }
@@ -463,7 +468,7 @@ const css = `
   .question-options-enter { animation:questionFadeUp 0.35s cubic-bezier(.4,0,.2,1) 0.15s both; }
 
   /* Option buttons staggered entrance */
-  .option-btn { opacity:0;animation:questionFadeUp 0.3s cubic-bezier(.4,0,.2,1) both; }
+  .option-btn { animation:questionFadeUp 0.3s cubic-bezier(.4,0,.2,1) both; }
   .option-btn:nth-child(1) { animation-delay:0.1s; }
   .option-btn:nth-child(2) { animation-delay:0.18s; }
   .option-btn:nth-child(3) { animation-delay:0.26s; }
@@ -1133,6 +1138,7 @@ function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback,
             {q.options.map((opt, idx) => {
               let cls = 'option-btn';
               if (answered) {
+                cls += ' answered-visible';
                 if (idx === correctOption) cls += ' correct';
                 else if (idx === selectedOption) cls += ' wrong';
               }
@@ -1226,6 +1232,7 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
+            cls += ' answered-visible';
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
@@ -1694,6 +1701,7 @@ function AnimeFramesPage({ spades, setSpades, showFeedback, unlockCost }) {
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
+            cls += ' answered-visible';
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
@@ -1928,6 +1936,7 @@ function SurvivalPage({ spades, setSpades, showFeedback }) {
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
+            cls += ' answered-visible';
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
@@ -2074,7 +2083,7 @@ export default function App() {
           </div>
         </div>
 
-        {feedback && <div className="feedback-toast">{feedback}</div>}
+        {feedback && <div className={`feedback-toast ${feedback.startsWith('Correct') ? 'correct-toast' : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? 'wrong-toast' : ''}`}>{feedback.startsWith('Correct') ? `✓ ${feedback}` : (feedback.startsWith('Wrong') || feedback.startsWith("Time")) ? `✗ ${feedback}` : feedback}</div>}
         {spadesFloat && <div className="spades-float" key={Date.now()}>{spadesFloat}</div>}
         {spadesModal && <SpadesModal onClose={() => setSpadesModal(false)} />}
       </div>
@@ -2759,7 +2768,7 @@ function DailyPage({ spades, setSpades, showFeedback }) {
             <div>
               {question.options?.map((opt,idx) => {
                 let cls = 'option-btn';
-                if (answered) { if(idx===question.correct) cls+=' correct'; else if(idx===selectedOpt) cls+=' wrong'; }
+                if (answered) { cls+=' answered-visible'; if(idx===question.correct) cls+=' correct'; else if(idx===selectedOpt) cls+=' wrong'; }
                 return <button key={idx} className={cls} onClick={()=>submit(idx)} disabled={answered}>{opt}</button>;
               })}
             </div>
