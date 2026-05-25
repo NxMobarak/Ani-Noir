@@ -124,10 +124,10 @@ export default function AboutPage({ spades, badges }) {
         <h3 style={{ color: T.text, fontSize: 14, marginBottom: 12 }}>Follow Us</h3>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
           <a
-            href="https://www.youtube.com/@AniNoir"
+            href="https://youtube.com/@animetmtalks?si=ANiLHy2G23IuILi3"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => { e.preventDefault(); window.open('https://www.youtube.com/@AniNoir', '_blank', 'noopener,noreferrer'); }}
+            onClick={(e) => { e.preventDefault(); window.open('https://youtube.com/@animetmtalks?si=ANiLHy2G23IuILi3', '_blank', 'noopener,noreferrer'); }}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '10px 16px', borderRadius: 10,
@@ -138,10 +138,10 @@ export default function AboutPage({ spades, badges }) {
             ▶ YouTube
           </a>
           <a
-            href="https://www.instagram.com/ani.noir"
+            href="https://www.instagram.com/mobarak.jpg?igsh=azk2MTFvcmxteGxp"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => { e.preventDefault(); window.open('https://www.instagram.com/ani.noir', '_blank', 'noopener,noreferrer'); }}
+            onClick={(e) => { e.preventDefault(); window.open('https://www.instagram.com/mobarak.jpg?igsh=azk2MTFvcmxteGxp', '_blank', 'noopener,noreferrer'); }}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '10px 16px', borderRadius: 10,
