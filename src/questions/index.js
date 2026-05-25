@@ -33,11 +33,11 @@ export const questionBank = [
 // Rewards: +5 spades per stage, +100 spades per main level completion, +1000 for completing all 5
 
 export const MAIN_LEVELS = [
-  { name: "Genin", tagline: "Even a kid can pass it in one go", timeSeconds: 30, icon: '🟢' },
-  { name: "Chunin", tagline: "60% can pass this", timeSeconds: 28, icon: '🔵' },
-  { name: "Jonin", tagline: "30% can pass it", timeSeconds: 25, icon: '🟠' },
-  { name: "Elite Shinobi", tagline: "10% can pass it", timeSeconds: 20, icon: '🔴' },
-  { name: "Kage", tagline: "1% can pass it", timeSeconds: 15, icon: '⚫' },
+  { name: "Genin", tagline: "Even a kid can pass this easily.", timeSeconds: 30, icon: '🟢' },
+  { name: "Chunin", tagline: "Now the real challenge begins.", timeSeconds: 28, icon: '🔵' },
+  { name: "Jonin", tagline: "Only true anime fans can survive.", timeSeconds: 25, icon: '🟠' },
+  { name: "Shinobi", tagline: "This level destroys fake anime experts.", timeSeconds: 20, icon: '🔴' },
+  { name: "Kage", tagline: "The ultimate test for anime legends.", timeSeconds: 15, icon: '⚫' },
 ];
 
 export const STAGES_PER_LEVEL = 10;
@@ -64,7 +64,7 @@ export const levels = [
   { name: "Genin", minCorrect: 3, timeSeconds: 30, reward: 10 },
   { name: "Chunin", minCorrect: 4, timeSeconds: 30, reward: 20 },
   { name: "Jonin", minCorrect: 4, timeSeconds: 25, reward: 30 },
-  { name: "Elite Shinobi", minCorrect: 5, timeSeconds: 20, reward: 50 },
+  { name: "Shinobi", minCorrect: 5, timeSeconds: 20, reward: 50 },
   { name: "Kage", minCorrect: 5, timeSeconds: 15, reward: 100 }
 ];
 
