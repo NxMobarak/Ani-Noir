@@ -165,7 +165,7 @@ export default function AboutPage({ spades, badges }) {
             </svg>
             <div>
               <div style={{ fontWeight: 700, marginBottom: 2 }}>@mobarak.jpg</div>
-              <div style={{ fontSize: 11, color: '#94a3b8' }}>Developer of Ani-Noir — behind the scenes & updates</div>
+              <div style={{ fontSize: 11, color: '#94a3b8' }}>Developer of Ani-Noir. Follow for behind the scenes, updates and more quiz</div>
             </div>
           </a>
         </div>
