@@ -302,7 +302,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         <BackButton />
         <div className="card" style={{ marginBottom: 16 }}>
           <h2 className="card-title" style={{ color: T.rose }}>
-            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 ANIME SCRAMBLER' : mode === 'emoji' ? '🎯 EMOJI QUIZ' : mode === 'shadow' ? '🕵️ SHADOW QUIZ' : '🖼️ ANIME FRAMES'}
+            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : '🖼️ ANIME MOMENTS'}
           </h2>
           <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
