@@ -239,6 +239,7 @@ const css = `
   .chip:hover { border-color:${T.gold}; }
 
   .page { flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch; }
+  .page-shadow-game { flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column; }
 
   .card { background:${T.card};border:1px solid ${T.border};border-radius:18px;padding:16px;margin-bottom:12px; }
   .card-title { font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px; }
@@ -1363,26 +1364,23 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const nameWords = current.name.split(' ');
 
   return (
-    <div>
-      {/* Header: lives, score, streak */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, padding: '0 4px' }}>
-        <div className="survival-lives">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      {/* Header: lives, timer, score, streak - compact row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px', marginBottom: 8, flexShrink: 0 }}>
+        <div className="survival-lives" style={{ fontSize: 16 }}>
           {[...Array(3)].map((_, i) => <span key={i}>{i < lives ? '\u2764\uFE0F' : '\u{1F5A4}'}</span>)}
         </div>
-        <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
-        <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
-      </div>
-
-      {/* Timer */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
         <CircularTimer timeLeft={timeLeft} maxTime={30} />
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div className="survival-stat" style={{ color: T.gold }}>🏆 {score}</div>
+          <div className="survival-stat" style={{ color: T.teal }}>🔥 {streak}</div>
+        </div>
       </div>
 
-      {/* Shadow Image */}
-      <div className="card" style={{ textAlign: 'center', paddingBottom: 20 }}>
-        <div className="card-title" style={{ color: T.violet }}>🕵️ GUESS THE CHARACTER</div>
+      {/* Shadow Image - compact */}
+      <div style={{ textAlign: 'center', flexShrink: 0 }}>
         <div style={{
-          margin: '16px auto', width: 200, height: 200, borderRadius: 16,
+          margin: '0 auto', width: 150, height: 150, borderRadius: 14,
           overflow: 'hidden', border: `2px solid ${revealed ? T.success : T.border}`,
           position: 'relative', background: '#ffffff',
           transition: 'border-color 0.4s'
@@ -1397,53 +1395,53 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
             }}
           />
         </div>
-
-        {/* Letter Boxes */}
-        <div style={{ marginTop: 16, marginBottom: 12 }}>
-          <div style={{ fontSize: 11, color: T.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-            Character Name
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {nameWords.map((word, wIdx) => (
-              <div key={wIdx} style={{ display: 'flex', gap: 4 }}>
-                {word.split('').map((char, cIdx) => {
-                  // Calculate position in space-free input
-                  let globalPos = 0;
-                  for (let w = 0; w < wIdx; w++) globalPos += nameWords[w].length;
-                  globalPos += cIdx;
-                  const typedChar = inputValue[globalPos] || '';
-                  const isCorrectChar = revealed && wasCorrect;
-                  const isWrongReveal = revealed && !wasCorrect;
-                  return (
-                    <div key={cIdx} style={{
-                      width: 28, height: 36, borderRadius: 6,
-                      border: `2px solid ${isCorrectChar ? T.success : isWrongReveal ? T.rose : typedChar ? T.violet : T.border}`,
-                      background: isCorrectChar ? 'rgba(34,197,94,0.12)' : isWrongReveal ? 'rgba(244,63,94,0.08)' : T.surface,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 14, fontWeight: 700,
-                      color: isCorrectChar ? T.success : isWrongReveal ? T.rose : T.text,
-                      transition: 'all 0.2s'
-                    }}>
-                      {revealed && !wasCorrect ? char.toUpperCase() : typedChar.toUpperCase()}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Result feedback */}
-        {answered && (
-          <div style={{ marginTop: 12, fontSize: 15, fontWeight: 700, color: wasCorrect ? T.success : T.rose }}>
-            {wasCorrect ? '✓ Correct!' : `✗ Answer: ${current.name}`}
-          </div>
-        )}
       </div>
+
+      {/* Letter Boxes */}
+      <div style={{ marginTop: 12, marginBottom: 8, textAlign: 'center', flexShrink: 0 }}>
+        <div style={{ fontSize: 10, color: T.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+          Character Name
+        </div>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          {nameWords.map((word, wIdx) => (
+            <div key={wIdx} style={{ display: 'flex', gap: 3 }}>
+              {word.split('').map((char, cIdx) => {
+                // Calculate position in space-free input
+                let globalPos = 0;
+                for (let w = 0; w < wIdx; w++) globalPos += nameWords[w].length;
+                globalPos += cIdx;
+                const typedChar = inputValue[globalPos] || '';
+                const isCorrectChar = revealed && wasCorrect;
+                const isWrongReveal = revealed && !wasCorrect;
+                return (
+                  <div key={cIdx} style={{
+                    width: 26, height: 32, borderRadius: 5,
+                    border: `2px solid ${isCorrectChar ? T.success : isWrongReveal ? T.rose : typedChar ? T.violet : T.border}`,
+                    background: isCorrectChar ? 'rgba(34,197,94,0.12)' : isWrongReveal ? 'rgba(244,63,94,0.08)' : T.surface,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 13, fontWeight: 700,
+                    color: isCorrectChar ? T.success : isWrongReveal ? T.rose : T.text,
+                    transition: 'all 0.2s'
+                  }}>
+                    {revealed && !wasCorrect ? char.toUpperCase() : typedChar.toUpperCase()}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Result feedback */}
+      {answered && (
+        <div style={{ textAlign: 'center', marginTop: 8, fontSize: 15, fontWeight: 700, color: wasCorrect ? T.success : T.rose, flexShrink: 0 }}>
+          {wasCorrect ? '✓ Correct!' : `✗ Answer: ${current.name}`}
+        </div>
+      )}
 
       {/* Native Input + Submit */}
       {!answered && (
-        <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', padding: '0 8px' }}>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', padding: '0 8px', flexShrink: 0 }}>
           <input
             type="text"
             autoFocus
@@ -1462,7 +1460,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
               padding: '0 14px', outline: 'none',
               transition: 'border-color 0.2s'
             }}
-            onFocus={(e) => e.target.style.borderColor = T.rose}
+            onFocus={(e) => { e.target.style.borderColor = T.rose; setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300); }}
             onBlur={(e) => e.target.style.borderColor = T.border}
           />
           <button onClick={submitGuess}
@@ -1477,7 +1475,7 @@ function ShadowQuizPage({ spades, setSpades, showFeedback }) {
 
       {/* Next button after answer */}
       {answered && lives > 0 && (
-        <button className="btn btn-primary btn-full" style={{ marginTop: 14 }} onClick={nextCharacter}>
+        <button className="btn btn-primary btn-full" style={{ marginTop: 14, flexShrink: 0 }} onClick={nextCharacter}>
           Next Character →
         </button>
       )}
