@@ -2399,6 +2399,48 @@ function NewsPage() {
 
 
 
+// ─── Character Avatar (fetches from Jikan API, caches in localStorage) ───
+function CharAvatar({ name, size = 36 }) {
+  const [img, setImg] = useState(() => {
+    try { const cache = JSON.parse(localStorage.getItem('ani_avatar_cache') || '{}'); return cache[name] || null; } catch { return null; }
+  });
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (img || failed) return;
+    let cancelled = false;
+    const fetchAvatar = async () => {
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(name.split('(')[0].trim())}&limit=1`);
+        const data = await res.json();
+        const url = data.data?.[0]?.images?.jpg?.image_url;
+        if (!cancelled && url) {
+          setImg(url);
+          try {
+            const cache = JSON.parse(localStorage.getItem('ani_avatar_cache') || '{}');
+            cache[name] = url;
+            localStorage.setItem('ani_avatar_cache', JSON.stringify(cache));
+          } catch {}
+        } else if (!cancelled) { setFailed(true); }
+      } catch { if (!cancelled) setFailed(true); }
+    };
+    // Stagger requests to avoid rate limiting
+    const delay = Math.random() * 1500;
+    const timer = setTimeout(fetchAvatar, delay);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [name, img, failed]);
+
+  if (!img) return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: T.surface, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.45, flexShrink: 0 }}>
+      {failed ? '👤' : <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />}
+    </div>
+  );
+
+  return (
+    <img src={img} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: T.surface, border: `1px solid ${T.border}` }} onError={() => { setImg(null); setFailed(true); }} />
+  );
+}
+
 // ─── Birthdays Page (Week View) ──────────────────────────────
 function BirthdaysPage() {
   const [weekOffset, setWeekOffset] = useState(0);
@@ -2513,13 +2555,7 @@ function BirthdaysPage() {
               border: isToday ? `1.5px solid ${T.rose}` : undefined,
               background: isToday ? 'rgba(244,63,94,0.06)' : undefined,
             }}>
-              <div style={{
-                fontSize: 28, width: 44, textAlign: 'center',
-                background: isToday ? T.roseGlow : T.goldGlow,
-                borderRadius: 12, padding: '8px 0'
-              }}>
-                {isToday ? '🎉' : '🎂'}
-              </div>
+              <CharAvatar name={char.name} size={38} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>
                   {char.name}
