@@ -166,6 +166,8 @@ const NAV = [
   { id: 'frames', icon: '🖼️', label: 'Anime Frames' },
   { id: 'opening', icon: '🎵', label: 'Opening Challenge', comingSoon: true },
   { id: 'ending', icon: '🎶', label: 'Ending Challenge', comingSoon: true },
+  { id: 'sceneguess', icon: '🎬', label: 'Guess the Scene', comingSoon: true },
+  { id: 'dialogue', icon: '💬', label: 'Dialogue Challenge', comingSoon: true },
   { id: 'survival', icon: '💀', label: 'Survival' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge' },
   { id: 'search', icon: '🔍', label: 'Anime Search' },
