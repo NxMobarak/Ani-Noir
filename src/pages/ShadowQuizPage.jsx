@@ -7,12 +7,20 @@ import '../styles/shadow-quiz.css';
 
 /* ─── Shadow Image Component ─────────────────────────────────── */
 const ShadowImage = memo(function ShadowImage({ file, revealed }) {
+  const [loaded, setLoaded] = useState(false);
   return (
-    <img
-      src={`/shadows/${file}`}
-      alt="Shadow character silhouette"
-      className={`sg-silhouette ${revealed ? 'revealed' : 'hidden'}`}
-    />
+    <>
+      {!loaded && (
+        <div style={{ width: 160, height: 160, borderRadius: 12, background: '#e0e0e0', animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%)' }} />
+      )}
+      <img
+        src={`/shadows/${file}`}
+        alt="Shadow character silhouette"
+        className={`sg-silhouette ${revealed ? 'revealed' : 'hidden'}`}
+        style={loaded ? {} : { position: 'absolute', opacity: 0 }}
+        onLoad={() => setLoaded(true)}
+      />
+    </>
   );
 });
 
@@ -425,16 +433,6 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
                 ))}
               </div>
             ))}
-            {/* Space bar row */}
-            <div className="sg-keyboard-row">
-              <button
-                className="sg-key-space"
-                onClick={() => handleKeyPress('SPACE')}
-                aria-label="Space"
-              >
-                SPACE
-              </button>
-            </div>
           </div>
 
           {/* Right side: Backspace + Enter */}

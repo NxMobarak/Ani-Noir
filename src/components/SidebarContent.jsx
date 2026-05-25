@@ -4,7 +4,7 @@ import T from '../constants/theme';
 import NAV from '../constants/nav';
 import { playClick } from '../utils/audio';
 
-const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onCloseSidebar }) {
+const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onCloseSidebar, onRulesClick }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,7 +27,8 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
         </button>
       </div>
       <div className="sidebar-nav" role="list">
-        {NAV.map(n => (
+        <div style={{ padding: '4px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Games</div>
+        {NAV.filter(n => ['quiz','anagram','emoji','shadow','frames','opening','ending','sceneguess','dialogue','survival','daily'].includes(n.id)).map(n => (
           <button
             key={n.id}
             className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
@@ -42,6 +43,36 @@ const SidebarContent = memo(function SidebarContent({ spades, onSpadesClick, onC
             {n.comingSoon && <span className="lock-badge" aria-label="Coming soon">SOON</span>}
           </button>
         ))}
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Tools</div>
+        {NAV.filter(n => ['search','charsearch','watchlist','news','birthdays'].includes(n.id)).map(n => (
+          <button
+            key={n.id}
+            className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
+            onClick={() => handleNav(n)}
+            aria-current={currentPath === n.path ? 'page' : undefined}
+          >
+            <span className="icon" aria-hidden="true">{n.icon}</span>
+            {n.label}
+          </button>
+        ))}
+        <div style={{ padding: '12px 14px 8px', fontSize: 10, fontWeight: 700, color: '#7d8ba0', letterSpacing: 1, textTransform: 'uppercase' }}>Account</div>
+        {NAV.filter(n => ['profile','settings','about'].includes(n.id)).map(n => (
+          <button
+            key={n.id}
+            className={`nav-item ${currentPath === n.path ? 'active' : ''}`}
+            onClick={() => handleNav(n)}
+            aria-current={currentPath === n.path ? 'page' : undefined}
+          >
+            <span className="icon" aria-hidden="true">{n.icon}</span>
+            {n.label}
+          </button>
+        ))}
+        {onRulesClick && (
+          <button className="nav-item" onClick={() => { onRulesClick(); if (onCloseSidebar) onCloseSidebar(); }}>
+            <span className="icon" aria-hidden="true">📜</span>
+            Game Rules
+          </button>
+        )}
       </div>
       <div className="sidebar-footer" />
     </>

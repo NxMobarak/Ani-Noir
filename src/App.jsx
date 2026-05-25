@@ -138,13 +138,13 @@ export default function App() {
 
       {/* Desktop Sidebar */}
       <nav className="desktop-sidebar" aria-label="Main navigation">
-        <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} />
+        <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} onRulesClick={() => setRulesModal(true)} />
       </nav>
 
       {/* Mobile Sidebar */}
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
       <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Mobile navigation" role="navigation">
-        <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} onCloseSidebar={() => setSidebarOpen(false)} />
+        <SidebarContent spades={spades} onSpadesClick={() => setSpadesModal(true)} onCloseSidebar={() => setSidebarOpen(false)} onRulesClick={() => setRulesModal(true)} />
       </nav>
 
       {/* Main Content */}
@@ -154,12 +154,11 @@ export default function App() {
           <h1 className="topbar-title" style={{ fontSize: 16, fontWeight: 700 }}>{pageTitle}</h1>
           <div className="topbar-chips" role="toolbar" aria-label="Quick actions">
             <button className="chip" onClick={() => navigate('/profile')} aria-label="Profile" style={{ padding: '4px 8px' }}>👤</button>
-            <button className="chip" onClick={() => setRulesModal(true)} aria-label="View rules">📜</button>
             <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${spades} spades`}>
               ♠ {spades}
               {showChipHint && <span className="chip-tooltip">Tap for info</span>}
             </button>
-            <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${badges.length} badges`}>
+            <button className="chip" onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); }} aria-label={`${badges.length} badges`}>
               🏅 {badges.length}
             </button>
           </div>

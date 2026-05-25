@@ -113,8 +113,9 @@ export default function ProfilePage({ spades, badges, showFeedback }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
             <h2 style={{ color: T.text, fontSize: 18, fontWeight: 800, margin: 0 }}>{displayName}</h2>
             <button onClick={() => { setTempName(name); setEditing(true); }} style={{
-              background: 'none', border: `1px solid ${T.border}`, borderRadius: 6,
-              padding: '3px 8px', fontSize: 10, color: T.textMid, cursor: 'pointer',
+              background: 'none', border: `1px solid ${T.border}`, borderRadius: 8,
+              padding: '6px 12px', fontSize: 12, color: T.textMid, cursor: 'pointer',
+              minHeight: 32,
             }}>✏️ Edit</button>
           </div>
         )}

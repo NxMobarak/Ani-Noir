@@ -32,7 +32,7 @@
   background: var(--sg-black);
   overflow: hidden;
   position: relative;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 /* ─── TOP HEADER ────────────────────────────────────────────── */
@@ -429,6 +429,7 @@
 /* ─── KEYBOARD ──────────────────────────────────────────────── */
 .sg-keyboard {
   padding: 6px 8px 10px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   flex-shrink: 0;
   display: flex;
   gap: 4px;
@@ -473,6 +474,17 @@
   transform: translateY(1px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   background: var(--sg-surface);
+  opacity: 0.7;
+}
+
+@keyframes keyTap {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+.sg-key:focus:not(:focus-visible) {
+  animation: keyTap 0.15s ease;
 }
 
 .sg-key-space {
@@ -527,9 +539,10 @@
 }
 
 .sg-key-backspace:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.95);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   background: var(--sg-surface);
+  opacity: 0.7;
 }
 
 .sg-key-enter {
@@ -552,9 +565,10 @@
 }
 
 .sg-key-enter:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.95);
   box-shadow: 0 1px 3px rgba(139, 26, 43, 0.3);
   background: var(--sg-crimson-bright);
+  opacity: 0.8;
 }
 
 /* ─── BOTTOM NAVIGATION ─────────────────────────────────────── */
