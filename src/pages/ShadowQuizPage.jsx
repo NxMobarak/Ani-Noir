@@ -144,7 +144,8 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     if (revealed || !currentChar || !guess.trim()) return;
     clearInterval(timerRef.current);
 
-    const isCorrect = guess.trim().toLowerCase() === currentChar.name.toLowerCase();
+    const fullGuess = getFullGuess();
+    const isCorrect = fullGuess.trim().toLowerCase() === currentChar.name.toLowerCase();
 
     if (isCorrect) {
       setRevealed(true);
@@ -197,6 +198,28 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       setGuess(g => g + key);
     }
   }, [revealed, handleSubmit]);
+
+  // Build the full answer by merging typed letters with hinted letters
+  // Hinted positions are auto-filled, user only types non-hinted positions
+  const getFullGuess = useCallback(() => {
+    if (!currentChar) return '';
+    const name = currentChar.name;
+    let typedIdx = 0;
+    let result = '';
+    for (let i = 0; i < name.length; i++) {
+      if (name[i] === ' ') {
+        result += ' ';
+      } else if (hintLetters.includes(i)) {
+        // Auto-fill hinted letter
+        result += name[i];
+      } else {
+        // Use typed character if available
+        result += (guess[typedIdx] || '');
+        typedIdx++;
+      }
+    }
+    return result;
+  }, [currentChar, guess, hintLetters]);
 
   useEffect(() => {
     return () => {
@@ -340,31 +363,37 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       {/* ─── Letter Blanks — typing & hints appear here ────── */}
       {!revealed && currentChar && (
         <div className="sg-hint-display" aria-label="Character name letters">
-          {currentChar.name.split('').map((letter, i) => {
-            // Show typed letter if user has typed that far
-            const typedChar = guess[i];
-            const isHinted = hintLetters.includes(i);
-            const isSpace = letter === ' ';
-            let display = '_';
-            let className = 'sg-hint-letter';
+          {(() => {
+            const name = currentChar.name;
+            let typedIdx = 0;
+            return name.split('').map((letter, i) => {
+              const isSpace = letter === ' ';
+              const isHinted = hintLetters.includes(i);
+              let display = '_';
+              let className = 'sg-hint-letter';
 
-            if (isSpace) {
-              display = ' ';
-              className += ' space';
-            } else if (isHinted) {
-              display = letter.toUpperCase();
-              className += ' shown';
-            } else if (typedChar) {
-              display = typedChar.toUpperCase();
-              className += ' typed';
-            }
+              if (isSpace) {
+                display = ' ';
+                className += ' space';
+              } else if (isHinted) {
+                display = letter.toUpperCase();
+                className += ' shown';
+              } else {
+                const typedChar = guess[typedIdx];
+                typedIdx++;
+                if (typedChar) {
+                  display = typedChar.toUpperCase();
+                  className += ' typed';
+                }
+              }
 
-            return (
-              <span key={i} className={className}>
-                {display}
-              </span>
-            );
-          })}
+              return (
+                <span key={i} className={className}>
+                  {display}
+                </span>
+              );
+            });
+          })()}
         </div>
       )}
 
