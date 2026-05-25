@@ -959,15 +959,17 @@ function QuizPage({ spades, setSpades, badges, setBadges, showFeedback, mcqOnly 
         </div>
         {levels.map((lvl, idx) => {
           const best = lb[`${mode}_${idx}`];
+          const prevBest = idx > 0 ? lb[`${mode}_${idx - 1}`] : null;
+          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
           return (
-            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
-              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
+              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
               <div className="level-info">
                 <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
                 {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
             </button>
           );
         })}
@@ -1241,15 +1243,17 @@ function EmojiQuizPage({ spades, setSpades, badges, setBadges, showFeedback, unl
         </div>
         {levels.map((lvl, idx) => {
           const best = lb[`emoji_${idx}`];
+          const prevBest = idx > 0 ? lb[`emoji_${idx - 1}`] : null;
+          const isLocked = idx > 0 && (!prevBest || prevBest.score < levels[idx - 1].minCorrect);
           return (
-            <button key={idx} className="level-card" onClick={() => startLevel(idx)}>
-              <span className="level-icon">{LEVEL_ICONS[idx]}</span>
+            <button key={idx} className="level-card" onClick={() => !isLocked && startLevel(idx)} style={{ opacity: isLocked ? 0.5 : 1, cursor: isLocked ? 'not-allowed' : 'pointer' }}>
+              <span className="level-icon">{isLocked ? '🔒' : LEVEL_ICONS[idx]}</span>
               <div className="level-info">
                 <div className="level-name">{lvl.name}</div>
-                <div className="level-meta">Pass {lvl.minCorrect}/5 · {lvl.timeSeconds}s · +{lvl.reward}♠</div>
+                <div className="level-meta">{isLocked ? `Pass ${levels[idx-1].name} to unlock` : `Pass ${lvl.minCorrect}/5 · ${lvl.timeSeconds}s · +${lvl.reward}♠`}</div>
                 {best && <div className="level-best">🏅 Best: {best.score}/{best.total} · {best.date}</div>}
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>›</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{isLocked ? '' : '›'}</span>
             </button>
           );
         })}
