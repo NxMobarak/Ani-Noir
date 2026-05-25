@@ -1,38 +1,59 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import T from '../constants/theme';
 import { SHADOW_CHARACTERS } from '../constants/data';
 import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong, playCombo } from '../utils/audio';
-import CircularTimer from '../components/CircularTimer';
 import BackButton from '../components/BackButton';
+import '../styles/shadow-quiz.css';
 
+/* ─── Shadow Image Component ─────────────────────────────────── */
 const ShadowImage = memo(function ShadowImage({ file, revealed }) {
   return (
     <img
       src={`/shadows/${file}`}
       alt="Shadow character silhouette"
-      style={{
-        width: 180, height: 180, objectFit: 'contain',
-        filter: revealed ? 'none' : 'brightness(0)',
-        transition: 'filter 0.5s ease',
-        borderRadius: 12,
-      }}
+      className={`sg-silhouette ${revealed ? 'revealed' : 'hidden'}`}
     />
   );
 });
 
+/* ─── Keyboard Layout ─────────────────────────────────────────── */
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-  ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
+  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
 ];
 
+/* ─── SVG Icons ───────────────────────────────────────────────── */
+const HeartIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+
+const BackspaceIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+    <line x1="18" y1="9" x2="12" y2="15"/>
+    <line x1="12" y1="9" x2="18" y2="15"/>
+  </svg>
+);
+
+/* ─── Main Component ──────────────────────────────────────────── */
 export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [phase, setPhase] = useState('intro');
   const [characters, setCharacters] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [revealed, setRevealed] = useState(false);
@@ -47,6 +68,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setCurrentIdx(0);
     setLives(3);
     setScore(0);
+    setWrongCount(0);
     setStreak(0);
     setTimeLeft(30);
     setRevealed(false);
@@ -77,6 +99,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setRevealed(true);
     setWasCorrect(false);
     setStreak(0);
+    setWrongCount(w => w + 1);
     playWrong();
     const newLives = lives - 1;
     setLives(newLives);
@@ -133,6 +156,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       setRevealed(true);
       setWasCorrect(false);
       setStreak(0);
+      setWrongCount(w => w + 1);
       playWrong();
       const newLives = lives - 1;
       setLives(newLives);
@@ -146,10 +170,12 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
 
   const handleKeyPress = useCallback((key) => {
     if (revealed) return;
-    if (key === '⌫') {
+    if (key === 'BACKSPACE') {
       setGuess(g => g.slice(0, -1));
     } else if (key === 'ENTER') {
       handleSubmit();
+    } else if (key === 'SPACE') {
+      setGuess(g => g + ' ');
     } else {
       setGuess(g => g + key);
     }
@@ -162,189 +188,249 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     };
   }, []);
 
-  // ─── Intro ─────────────────────────────────────────────────
+  // ─── Timer calculations ────────────────────────────────────
+  const timerRadius = 21;
+  const timerCircumference = 2 * Math.PI * timerRadius;
+  const timerProgress = Math.max(0, timeLeft / 30);
+  const timerOffset = timerCircumference * (1 - timerProgress);
+  const isUrgent = timeLeft <= 5;
+
+  // ═══════════════════════════════════════════════════════════════
+  // INTRO SCREEN
+  // ═══════════════════════════════════════════════════════════════
   if (phase === 'intro') {
     return (
-      <section aria-label="Shadow Quiz Introduction" style={{ padding: 20, textAlign: 'center' }}>
+      <section className="shadow-game sg-intro" aria-label="Shadow Quiz Introduction">
         <BackButton />
-        <div style={{ fontSize: 48, marginBottom: 16 }} aria-hidden="true">🕶️</div>
-        <h2 style={{ color: T.text, marginBottom: 8 }}>Shadow Quiz</h2>
-        <p style={{ color: T.textMid, marginBottom: 8, fontSize: 14 }}>
-          Guess the anime character from their silhouette!
-        </p>
-        <div style={{ color: T.textMid, fontSize: 13, marginBottom: 20 }}>
-          • 3 lives — survival style<br />
-          • 30 seconds per character<br />
-          • Type the character name<br />
-          • Every 5 correct = +100 ♠<br />
-          • 3x streak = bonus spades
+        <div className="sg-intro-icon" aria-hidden="true">🕶️</div>
+        <div className="sg-intro-title">
+          <span className="guess">GUESS THE</span>
+          <span className="shadow">SHADOW</span>
         </div>
-        <button className="btn btn-primary" onClick={startGame} aria-label="Start Shadow Quiz">
-          Start Game
+        <p className="sg-intro-desc">
+          Identify the anime character from their silhouette
+        </p>
+        <div className="sg-intro-rules">
+          <span>❤️</span> 3 lives — survival style<br />
+          <span>⏱️</span> 30 seconds per character<br />
+          <span>⌨️</span> Type the character name<br />
+          <span>♠️</span> Every 5 correct = +100 spades<br />
+          <span>🔥</span> 3x streak = bonus reward
+        </div>
+        <button className="sg-start-btn" onClick={startGame} aria-label="Start Shadow Quiz">
+          ENTER THE SHADOWS
         </button>
       </section>
     );
   }
 
-  // ─── Result ────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════
+  // RESULT SCREEN
+  // ═══════════════════════════════════════════════════════════════
   if (phase === 'result') {
     return (
-      <section aria-label="Game Results" style={{ padding: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }} aria-hidden="true">
-          {score >= 20 ? '🏆' : score >= 10 ? '⭐' : '💀'}
+      <section className="shadow-game sg-result" aria-label="Game Results">
+        <div className="sg-result-icon" aria-hidden="true">
+          {score >= 20 ? '🏆' : score >= 10 ? '⚔️' : '💀'}
         </div>
-        <h2 style={{ color: T.text, marginBottom: 8 }}>Game Over</h2>
-        <p style={{ color: T.gold, fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
-          Score: {score}
-        </p>
-        <p style={{ color: T.textMid, fontSize: 14, marginBottom: 20 }}>
-          Characters guessed correctly
-        </p>
-        <button className="btn btn-primary" onClick={startGame}>
-          Play Again
+        <h2 className="sg-result-title">
+          {score >= 20 ? 'LEGENDARY' : score >= 10 ? 'WELL PLAYED' : 'GAME OVER'}
+        </h2>
+        <div className="sg-result-score">{score}</div>
+        <p className="sg-result-label">Shadows Identified</p>
+        <button className="sg-play-again-btn" onClick={startGame}>
+          CHALLENGE AGAIN
         </button>
       </section>
     );
   }
 
-  // ─── Playing ───────────────────────────────────────────────
-  const progress = ((currentIdx) / characters.length) * 100;
-
+  // ═══════════════════════════════════════════════════════════════
+  // PLAYING SCREEN
+  // ═══════════════════════════════════════════════════════════════
   return (
-    <section aria-label="Shadow Quiz Game" className="page-shadow-game" style={{ padding: 12 }}>
-      {/* Progress bar */}
-      <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginBottom: 12 }}>
-        <div style={{ height: '100%', width: `${progress}%`, background: T.rose, borderRadius: 2, transition: 'width 0.4s' }} />
+    <section className="shadow-game" aria-label="Shadow Quiz Game">
+      
+      {/* ─── Top Header ───────────────────────────────────────── */}
+      <div className="sg-header">
+        <div className="sg-header-menu" aria-label="Menu">
+          <MenuIcon />
+        </div>
+        
+        <div className="sg-header-title">
+          <span className="guess">GUESS</span>{' '}
+          <span className="shadow">SHADOW</span>
+        </div>
+        
+        <div className="sg-header-right">
+          <div className="sg-header-stat">
+            <span className="icon">♠</span>
+            <span>{spades}</span>
+          </div>
+          <div className="sg-avatar">👤</div>
+        </div>
       </div>
 
-      {/* Lives and Score row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div className="survival-lives" aria-label={`${lives} lives remaining`}>
+      {/* ─── Game Stats Area ──────────────────────────────────── */}
+      <div className="sg-stats">
+        {/* Lives */}
+        <div className="sg-lives" aria-label={`${lives} lives remaining`}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <span key={i} style={{ fontSize: 18, opacity: i < lives ? 1 : 0.2 }} aria-hidden="true">❤️</span>
+            <div key={i} className={`sg-life ${i >= lives ? 'lost' : ''}`}>
+              <HeartIcon />
+            </div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{ color: T.success, fontSize: 13, fontWeight: 700 }}>✓ {score}</span>
-          <span style={{ color: T.error, fontSize: 13, fontWeight: 700 }}>✗ {(currentIdx - score)}</span>
+
+        {/* Timer + Streak */}
+        <div className="sg-timer-section">
+          <div className={`sg-timer-ring ${isUrgent ? 'urgent' : ''}`}>
+            <svg viewBox="0 0 48 48">
+              <circle className="track" cx="24" cy="24" r={timerRadius} />
+              <circle
+                className="progress"
+                cx="24" cy="24" r={timerRadius}
+                strokeDasharray={timerCircumference}
+                strokeDashoffset={timerOffset}
+              />
+            </svg>
+            <div className="sg-timer-number">{timeLeft}</div>
+          </div>
+          {streak >= 2 && (
+            <div className="sg-streak" aria-live="polite">🔥 {streak}x STREAK</div>
+          )}
+        </div>
+
+        {/* Scores */}
+        <div className="sg-scores">
+          <div className="sg-score-correct">
+            <span>✓</span> {score}
+          </div>
+          <div className="sg-score-wrong">
+            <span>✗</span> {wrongCount}
+          </div>
         </div>
       </div>
 
-      {/* Timer centered */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
-        <CircularTimer timeLeft={timeLeft} maxTime={30} />
-      </div>
-
-      {/* Streak indicator */}
-      {streak >= 2 && (
-        <div style={{ textAlign: 'center', color: T.rose, fontSize: 12, marginBottom: 8, fontWeight: 600 }} aria-live="polite">
-          🔥 {streak}x Streak
+      {/* ─── Main Shadow Card ─────────────────────────────────── */}
+      <div className={`sg-shadow-card ${!revealed ? 'active-glow' : ''}`}>
+        {/* Floating particles */}
+        <div className="sg-particles">
+          <div className="sg-particle" />
+          <div className="sg-particle" />
+          <div className="sg-particle" />
+          <div className="sg-particle" />
+          <div className="sg-particle" />
+          <div className="sg-particle" />
         </div>
-      )}
 
-      {/* Shadow image with lighter background */}
-      <div style={{
-        display: 'flex', justifyContent: 'center', marginBottom: 10,
-        background: 'linear-gradient(135deg, #1e293b, #334155)',
-        borderRadius: 16, padding: 16,
-        border: '1px solid rgba(255,255,255,0.1)',
-      }}>
         <ShadowImage file={currentChar?.file} revealed={revealed} />
+
+        {/* Hint button */}
+        {!revealed && (
+          <button className="sg-hint-btn" aria-label="Use hint for 10 diamonds">
+            <span className="bulb">💡</span>
+            <span className="cost">-10</span>
+          </button>
+        )}
       </div>
 
-      {/* Character name on reveal */}
+      {/* ─── Reveal Info ──────────────────────────────────────── */}
       {revealed && (
-        <div style={{ textAlign: 'center', marginBottom: 8 }} aria-live="polite">
-          <div style={{
-            fontSize: 16, fontWeight: 700,
-            color: wasCorrect ? T.success : T.error,
-          }}>
-            {wasCorrect ? '✓ Correct!' : `✗ It was: ${currentChar?.name}`}
+        <div className="sg-reveal-info" aria-live="polite">
+          <div className={`sg-reveal-name ${wasCorrect ? 'correct' : 'wrong'}`}>
+            {wasCorrect ? `✓ ${currentChar?.name}` : `✗ It was: ${currentChar?.name}`}
           </div>
-          <div style={{ color: T.textMid, fontSize: 11, marginTop: 2 }}>
-            Next character in 3s...
-          </div>
+          <div className="sg-reveal-next">Next shadow in 3s...</div>
         </div>
       )}
 
-      {/* Guess display */}
-      <div style={{
-        background: '#0e1018',
-        border: `1.5px solid ${revealed ? (wasCorrect ? T.success : T.error) : 'rgba(255,255,255,0.15)'}`,
-        borderRadius: 12,
-        padding: '10px 14px',
-        marginBottom: 10,
-        textAlign: 'center',
-        minHeight: 40,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{
-          fontSize: 18, fontWeight: 700, color: T.text,
-          letterSpacing: 1,
-        }}>
-          {guess || <span style={{ color: T.textDim, fontWeight: 400, fontSize: 14 }}>Type character name...</span>}
-        </span>
+      {/* ─── Input Field ──────────────────────────────────────── */}
+      <div className="sg-input-area">
+        <div className={`sg-input ${revealed ? (wasCorrect ? 'correct-border' : 'wrong-border') : guess ? 'active' : ''}`}>
+          {guess || <span className="sg-input-placeholder">Type character name...</span>}
+        </div>
       </div>
 
-      {/* On-screen Keyboard */}
+      {/* ─── Keyboard ─────────────────────────────────────────── */}
       {!revealed && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {KEYBOARD_ROWS.map((row, rowIdx) => (
-            <div key={rowIdx} style={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
-              {row.map((key) => {
-                const isSpecial = key === 'ENTER' || key === '⌫';
-                return (
+        <div className="sg-keyboard">
+          <div className="sg-keyboard-main">
+            {KEYBOARD_ROWS.map((row, rowIdx) => (
+              <div key={rowIdx} className="sg-keyboard-row">
+                {row.map((key) => (
                   <button
                     key={key}
+                    className="sg-key"
                     onClick={() => handleKeyPress(key)}
-                    style={{
-                      minWidth: isSpecial ? 48 : 30,
-                      height: 38,
-                      borderRadius: 6,
-                      border: 'none',
-                      background: key === 'ENTER' ? T.rose : '#1e293b',
-                      color: key === 'ENTER' ? '#fff' : T.text,
-                      fontSize: isSpecial ? 11 : 14,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.1s',
-                      flex: isSpecial ? '1.4' : '1',
-                    }}
-                    aria-label={key === '⌫' ? 'Backspace' : key}
+                    aria-label={key}
                   >
                     {key}
                   </button>
-                );
-              })}
+                ))}
+              </div>
+            ))}
+            {/* Space bar row */}
+            <div className="sg-keyboard-row">
+              <button
+                className="sg-key-space"
+                onClick={() => handleKeyPress('SPACE')}
+                aria-label="Space"
+              >
+                SPACE
+              </button>
             </div>
-          ))}
-          {/* Space bar */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 3, marginTop: 2 }}>
+          </div>
+
+          {/* Right side: Backspace + Enter */}
+          <div className="sg-keyboard-actions">
             <button
-              onClick={() => handleKeyPress(' ')}
-              style={{
-                width: '60%',
-                height: 36,
-                borderRadius: 6,
-                border: 'none',
-                background: '#1e293b',
-                color: T.textDim,
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-              aria-label="Space"
+              className="sg-key-backspace"
+              onClick={() => handleKeyPress('BACKSPACE')}
+              aria-label="Backspace"
             >
-              SPACE
+              <BackspaceIcon />
+            </button>
+            <button
+              className="sg-key-enter"
+              onClick={() => handleKeyPress('ENTER')}
+              aria-label="Enter"
+            >
+              GO
             </button>
           </div>
         </div>
       )}
+
+      {/* ─── Bottom Navigation ────────────────────────────────── */}
+      <nav className="sg-bottom-nav" aria-label="Game navigation">
+        <button className="sg-nav-item" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          <span>Home</span>
+        </button>
+        <button className="sg-nav-item active" aria-label="Shadow Quiz">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          <span>Shadow</span>
+        </button>
+        <button className="sg-nav-item" aria-label="Leaderboard">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20V10M18 20V4M6 20v-4"/>
+          </svg>
+          <span>Rank</span>
+        </button>
+        <button className="sg-nav-item" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 10 3.17V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </nav>
     </section>
   );
 }
