@@ -12,7 +12,6 @@ import emojiL5 from '../games/emoji-wars/questions/level5';
 import shadowL5 from '../games/anime-shadow/questions/level5';
 import momentsL5 from '../games/anime-moments/questions/level5';
 import dialogueL5 from '../games/dialogue-clash/questions/level5';
-import themeL5 from '../games/anime-theme/questions/level5';
 import frameGuessL5 from '../games/frame-guess/questions/level5';
 
 const DAILY_KEY = 'ani_daily';
@@ -28,7 +27,6 @@ function buildDailyPool() {
   shadowL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Shadow' }));
   momentsL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Moments' }));
   dialogueL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Dialogue Clash' }));
-  themeL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Theme' }));
   frameGuessL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Frame Guess' }));
   return pool.filter(q => q.text || q.emoji);
 }

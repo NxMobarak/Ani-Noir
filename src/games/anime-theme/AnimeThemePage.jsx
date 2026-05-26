@@ -77,28 +77,23 @@ function getClipsManifest() {
     const stored = localStorage.getItem(CLIPS_KEY);
     if (stored) return JSON.parse(stored);
   } catch {}
-  // Default placeholder clips - will be replaced when user uploads
+  // Actual uploaded clips - add new filenames here when uploading more levels
   return [
-    'l1-01-naruto.mp3', 'l1-02-attack-on-titan.mp3', 'l1-03-one-piece.mp3',
-    'l1-04-dragon-ball-z.mp3', 'l1-05-death-note.mp3', 'l1-06-demon-slayer.mp3',
-    'l1-07-my-hero-academia.mp3', 'l1-08-tokyo-ghoul.mp3', 'l1-09-jujutsu-kaisen.mp3',
-    'l1-10-bleach.mp3',
-    'l2-01-fullmetal-alchemist.mp3', 'l2-02-sword-art-online.mp3', 'l2-03-hunter-x-hunter.mp3',
-    'l2-04-chainsaw-man.mp3', 'l2-05-spy-x-family.mp3', 'l2-06-haikyuu.mp3',
-    'l2-07-black-clover.mp3', 'l2-08-one-punch-man.mp3', 'l2-09-naruto-shippuden.mp3',
-    'l2-10-fairy-tail.mp3',
-    'l3-01-steins-gate.mp3', 'l3-02-mob-psycho-100.mp3', 'l3-03-vinland-saga.mp3',
-    'l3-04-re-zero.mp3', 'l3-05-solo-leveling.mp3', 'l3-06-frieren.mp3',
-    'l3-07-fire-force.mp3', 'l3-08-parasyte.mp3', 'l3-09-dr-stone.mp3',
-    'l3-10-mushoku-tensei.mp3',
-    'l4-01-cowboy-bebop.mp3', 'l4-02-violet-evergarden.mp3', 'l4-03-neon-genesis-evangelion.mp3',
-    'l4-04-code-geass.mp3', 'l4-05-jojos-bizarre-adventure.mp3', 'l4-06-samurai-champloo.mp3',
-    'l4-07-made-in-abyss.mp3', 'l4-08-your-lie-in-april.mp3', 'l4-09-psycho-pass.mp3',
-    'l4-10-dororo.mp3',
-    'l5-01-serial-experiments-lain.mp3', 'l5-02-ping-pong-the-animation.mp3',
-    'l5-03-texhnolyze.mp3', 'l5-04-tatami-galaxy.mp3', 'l5-05-paranoia-agent.mp3',
-    'l5-06-flcl.mp3', 'l5-07-baccano.mp3', 'l5-08-ergo-proxy.mp3',
-    'l5-09-samurai-x-trust-and-betrayal.mp3', 'l5-10-mononoke.mp3',
+    // Level 1
+    'l1-01-demon-slayer.mp3',
+    'l1-02-naruto.mp3',
+    'l1-03-tokyo-ghoul.mp3',
+    'l1-04-attack-on-titan.mp3',
+    'l1-05-jujutsu-kaisen.mp3',
+    'l1-06-naruto-shippuden.mp3',
+    'l1-07-fullmetal-alchemist-brot.mp3',
+    'l1-08-oshi-no-ko.mp3',
+    'l1-09-cowboy-bebop.mp3',
+    'l1-10-dragon-ball-z.mp3',
+    // Level 2 - add clips here
+    // Level 3 - add clips here
+    // Level 4 - add clips here
+    // Level 5 - add clips here
   ];
 }
 
