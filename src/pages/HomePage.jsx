@@ -127,16 +127,16 @@ export default function HomePage() {
         <h2 className="card-title" style={{ color: '#94a3b8', fontSize: 12, padding: '0 2px 10px' }}>GAME MODES</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
           {[
-            ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge'],
-            ['/word-ninja', '🔤', 'Word Ninja', 'Guess the anime by words'],
-            ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles'],
-            ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes'],
-            ['/frames', '🖼️', 'Moments', 'Identify iconic anime scenes'],
-            ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame'],
-            ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!'],
-            ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?'],
-          ].map(([path, ico, lbl, desc]) => (
-            <button key={path} className="game-mode-card" onClick={() => navigate(path)}>
+            ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge', 'brain'],
+            ['/word-ninja', '🔤', 'Word Ninja', 'Guess the anime by words', 'brain'],
+            ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles', 'brain'],
+            ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes', 'visual'],
+            ['/frames', '🖼️', 'Moments', 'Identify iconic anime scenes', 'visual'],
+            ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame', 'visual'],
+            ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!', 'audio'],
+            ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?', 'brain'],
+          ].map(([path, ico, lbl, desc, glow]) => (
+            <button key={path} className={`game-mode-card glow-${glow}`} onClick={() => navigate(path)}>
               <span className="game-mode-icon" aria-hidden="true">{ico}</span>
               <span className="game-mode-name">{lbl}</span>
               <span className="game-mode-desc">{desc}</span>
