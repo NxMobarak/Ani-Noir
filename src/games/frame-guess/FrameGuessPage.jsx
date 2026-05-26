@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import T from '../../constants/theme';
-import { playCorrect, playWrong } from '../../utils/audio';
+import { playCorrect, playWrong, playCombo } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
 
@@ -15,6 +15,7 @@ const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const QUESTIONS_PER_LEVEL = 10;
 const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
+const HINT_COST = 100;
 const MAX_SKIPS = 3;
 const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_frame_progress';
@@ -43,7 +44,10 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [skipsUsed, setSkipsUsed] = useState(0);
+  const [hintUsed, setHintUsed] = useState(false);
+  const [hiddenOption, setHiddenOption] = useState(null);
   const [timeLeft, setTimeLeft] = useState(TIMER_TOTAL);
   const [answered, setAnswered] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(null);
@@ -93,6 +97,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setWasCorrect(false);
     setSelectedOption(optIdx);
+    setStreak(0);
     playWrong();
     showFeedback(`Wrong! Answer: ${shuffledData.shuffled[shuffledData.correctIndex]}`);
     advanceRef.current = setTimeout(() => advanceToNext(), 2500);
@@ -103,14 +108,26 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setWasCorrect(true);
     setSelectedOption(optIdx);
-    playCorrect();
-    setScore(s => s + 1);
-    showFeedback('Correct!');
+    const newScore = score + 1;
+    setScore(newScore);
+    const newStreak = streak + 1;
+    setStreak(newStreak);
+
+    if (newStreak >= 3 && newStreak % 3 === 0) {
+      const bonus = 50;
+      setSpades(s => s + bonus);
+      playCombo();
+      showFeedback(`🔥 ${newStreak}x Streak! +${bonus}♠`);
+    } else {
+      playCorrect();
+      showFeedback('Correct!');
+    }
+
     advanceRef.current = setTimeout(() => advanceToNext(), 1500);
   };
 
   const submitAnswer = (optIdx) => {
-    if (answered) return;
+    if (answered || optIdx === hiddenOption) return;
     if (optIdx === shuffledData.correctIndex) {
       handleCorrect(optIdx);
     } else {
@@ -136,6 +153,8 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
       setAnswered(false);
       setWasCorrect(null);
       setSelectedOption(null);
+      setHintUsed(false);
+      setHiddenOption(null);
     }
   };
 
@@ -144,6 +163,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     const newSkips = skipsUsed + 1;
     setSkipsUsed(newSkips);
     setSpades(s => s - SKIP_COST);
+    setStreak(0);
     showFeedback(`Skipped! -${SKIP_COST}♠ (${newSkips}/${MAX_SKIPS})`);
     if (newSkips >= MAX_SKIPS) {
       clearAllTimers();
@@ -157,12 +177,30 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     advanceRef.current = setTimeout(() => advanceToNext(), 800);
   };
 
+  const doHint = () => {
+    if (spades < HINT_COST || hintUsed || answered) return;
+    setSpades(s => s - HINT_COST);
+    setHintUsed(true);
+    // Hide one wrong option
+    const wrongIndices = shuffledData.shuffled
+      .map((_, i) => i)
+      .filter(i => i !== shuffledData.correctIndex && i !== hiddenOption);
+    if (wrongIndices.length > 0) {
+      const randomWrong = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+      setHiddenOption(randomWrong);
+    }
+    showFeedback(`💡 Hint! -${HINT_COST}♠ — 1 option removed`);
+  };
+
   const startLevel = (levelIdx) => {
     if (levelIdx > 0 && !progress[levelIdx - 1]?.passed) return;
     setCurrentLevel(levelIdx);
     setCurrentIdx(0);
     setScore(0);
+    setStreak(0);
     setSkipsUsed(0);
+    setHintUsed(false);
+    setHiddenOption(null);
     setTimeLeft(TIMER_TOTAL);
     setAnswered(false);
     setWasCorrect(null);
@@ -247,7 +285,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', marginBottom: 8 }}>
         <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ background: 'none', border: 'none', color: T.text, fontSize: 18, marginRight: 12 }}>←</button>
-        <div style={{ flex: 1 }} />
+        <div style={{ flex: 1 }}>
+          {streak >= 3 && <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: 10 }}>🔥 {streak}x</span>}
+        </div>
         <div style={{ fontSize: 14, fontWeight: 700, color: T.success }}>✓ {score}</div>
       </div>
 
@@ -272,9 +312,10 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         />
       </div>
 
-      {/* MCQ Options — key forces full re-render on question change */}
+      {/* MCQ Options */}
       <div key={`q-${currentLevel}-${currentIdx}`} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
         {shuffledData.shuffled.map((opt, idx) => {
+          if (idx === hiddenOption) return null; // hidden by hint
           let cls = 'option-btn';
           if (answered) {
             if (idx === shuffledData.correctIndex) cls += ' correct';
@@ -289,11 +330,14 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         })}
       </div>
 
-      {/* Skip Button */}
+      {/* Skip + Hint Buttons */}
       {!answered && (
         <div style={{ display: 'flex', gap: 8, padding: '0 0 10px' }}>
           <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
             ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
+          </button>
+          <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST || hintUsed} style={{ flex: 1, opacity: hintUsed ? 0.4 : 1 }}>
+            💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
           </button>
         </div>
       )}
