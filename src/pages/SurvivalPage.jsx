@@ -115,38 +115,13 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   const trialsLeft = FREE_TRIALS - getTrials();
   const unlocked = isUnlocked();
 
-  // ─── Intro ─────────────────────────────────────────────────
-  if (phase === 'intro') {
-    return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>⚔️</div>
-        <h2 style={{ color: T.text, marginBottom: 8 }}>Survival Mode</h2>
-
-        <p style={{ color: T.textMid, marginBottom: 8, fontSize: 14 }}>
-          Infinite quiz – how far can you go with 3 lives?
-        </p>
-        <div style={{ color: T.textDim, fontSize: 13, marginBottom: 20 }}>
-          • All question types combined<br />
-          • 3 lives – no timer<br />
-          • Every 5 correct = +100 ♠<br />
-          • Build your streak for combos
-        </div>
-
-        {!unlocked && (
-          <div style={{ color: T.textMid, fontSize: 12, marginBottom: 12 }}>
-            {trialsLeft > 0
-              ? `Free trials remaining: ${trialsLeft}/${FREE_TRIALS}`
-              : `Unlock permanently for ${UNLOCK_COST} ♠`
-            }
-          </div>
-        )}
-
-        <button className="btn btn-primary" onClick={startGame}>
-          {!unlocked && trialsLeft <= 0 ? `Unlock (${UNLOCK_COST} ♠)` : 'Start Survival'}
-        </button>
-      </div>
-    );
-  }
+  // Auto-start game on mount
+  useEffect(() => {
+    if (phase === 'intro') {
+      startGame();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ─── Result ────────────────────────────────────────────────
   if (phase === 'result') {
@@ -187,6 +162,11 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         <div style={{ color: T.gold, fontWeight: 700, fontSize: 16 }}>
           Score: {score}
         </div>
+      </div>
+
+      {/* Rules hint */}
+      <div style={{ fontSize: 9, color: T.textDim, textAlign: 'center', marginBottom: 10 }}>
+        3 lives • No timer • Every 5 correct = +100 ♠ • Streak = combo bonus
       </div>
 
       {/* Streak */}
