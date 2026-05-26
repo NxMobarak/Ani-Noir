@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
@@ -19,6 +19,17 @@ const MAX_SKIPS = 3;
 const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_frame_progress';
 
+// Shuffle options and track correct index
+function shuffleOptions(options, correctIdx) {
+  const indexed = options.map((opt, i) => ({ opt, isCorrect: i === correctIdx }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const newCorrect = indexed.findIndex(item => item.isCorrect);
+  return { shuffled: indexed.map(item => item.opt), correctIndex: newCorrect };
+}
+
 function getProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
   catch { return {}; }
@@ -38,12 +49,21 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const [wasCorrect, setWasCorrect] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [progress, setProgress] = useState(getProgress);
+  const [shuffledData, setShuffledData] = useState({ shuffled: [], correctIndex: 0 });
 
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
 
   const levelQuestions = LEVELS[currentLevel] || [];
   const currentQ = levelQuestions[currentIdx];
+
+  // Shuffle options whenever question changes
+  useEffect(() => {
+    if (currentQ) {
+      const result = shuffleOptions(currentQ.options, currentQ.correct);
+      setShuffledData(result);
+    }
+  }, [currentLevel, currentIdx]);
 
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
@@ -74,7 +94,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     setWasCorrect(false);
     setSelectedOption(optIdx);
     playWrong();
-    showFeedback(`Wrong! Answer: ${currentQ.options[currentQ.correct]}`);
+    showFeedback(`Wrong! Answer: ${shuffledData.shuffled[shuffledData.correctIndex]}`);
     advanceRef.current = setTimeout(() => advanceToNext(), 2500);
   };
 
@@ -91,7 +111,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
 
   const submitAnswer = (optIdx) => {
     if (answered) return;
-    if (optIdx === currentQ.correct) {
+    if (optIdx === shuffledData.correctIndex) {
       handleCorrect(optIdx);
     } else {
       handleWrong(optIdx);
@@ -252,16 +272,16 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         />
       </div>
 
-      {/* MCQ Options */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-        {currentQ.options.map((opt, idx) => {
+      {/* MCQ Options — key forces full re-render on question change */}
+      <div key={`q-${currentLevel}-${currentIdx}`} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+        {shuffledData.shuffled.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
-            if (idx === currentQ.correct) cls += ' correct';
+            if (idx === shuffledData.correctIndex) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
           return (
-            <button key={idx} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}
+            <button key={`${currentIdx}-${idx}`} className={cls} onClick={() => submitAnswer(idx)} disabled={answered}
               style={{ padding: '12px 14px', fontSize: 14 }}>
               {opt}
             </button>
