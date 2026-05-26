@@ -553,7 +553,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       {!answered && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 14px 10px' }}>
           {!hintUsed && (
-            <button className="sg-key-enter" onClick={submitGuess} style={{ width: '100%', height: 44, borderRadius: 10, fontSize: 14, fontWeight: 800, letterSpacing: 2 }}>
+            <button className="sg-key-enter" onClick={submitGuess} style={{ width: '100%', height: 52, borderRadius: 10, fontSize: 16, fontWeight: 800, letterSpacing: 2 }}>
               GO
             </button>
           )}
