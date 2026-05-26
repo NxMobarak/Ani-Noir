@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
@@ -15,7 +15,6 @@ const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const QUESTIONS_PER_LEVEL = 10;
 const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
-const HINT_COST = 100;
 const MAX_SKIPS = 3;
 const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_frame_progress';
@@ -162,8 +161,8 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         <BackButton />
         <div className="card" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: T.teal }}>🎬 FRAME GUESS</h2>
-          <p style={{ fontSize: 12, color: T.textMid }}>Guess the anime from a scene description!</p>
-          <p style={{ fontSize: 11, color: T.gold, marginTop: 4 }}>10 questions per level · Need 8/10 to unlock next</p>
+          <p style={{ fontSize: 12, color: T.textMid }}>Guess the anime from a screenshot!</p>
+          <p style={{ fontSize: 11, color: T.gold, marginTop: 4 }}>10 frames per level · Need 8/10 to unlock next</p>
         </div>
         {LEVEL_NAMES.map((name, idx) => {
           const unlocked = idx === 0 || progress[idx - 1]?.passed;
@@ -176,7 +175,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
               <div className="level-info">
                 <div className="level-name">{name}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Need 8/10 on previous level' : !hasQs ? 'Coming soon' : levelData ? `${levelData.score}/10 correct` : '10 questions · 30s timer'}
+                  {!unlocked ? 'Need 8/10 on previous level' : !hasQs ? 'Coming soon' : levelData ? `${levelData.score}/10 correct` : '10 frames · 30s timer'}
                 </div>
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked && hasQs ? '›' : ''}</span>
@@ -243,11 +242,14 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         <div style={{ fontSize: 10, color: T.textMid }}>Q{currentIdx + 1}/{Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)}</div>
       </div>
 
-      {/* Question */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.6, color: T.text }}>
-          {currentQ.text}
-        </div>
+      {/* Frame Image */}
+      <div style={{ margin: '0 0 12px', borderRadius: 14, overflow: 'hidden', border: `1px solid ${T.border}`, aspectRatio: '16/9', background: T.surface }}>
+        <img
+          src={`/frames/${currentQ.image}`}
+          alt="Guess this anime frame"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
       </div>
 
       {/* MCQ Options */}

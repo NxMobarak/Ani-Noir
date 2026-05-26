@@ -1,13 +1,13 @@
 // Frame Guess - Level 5 (Hardest)
 export default [
-  { text: "A girl plays violin on stage while cherry blossoms float through an open window.", options: ["Your Lie in April", "Nodame Cantabile", "K-On!", "Sound! Euphonium"], correct: 0 },
-  { text: "A cowboy bounty hunter smokes on a spaceship while jazz plays in background.", options: ["Trigun", "Cowboy Bebop", "Outlaw Star", "Space Dandy"], correct: 1 },
-  { text: "A girl dissolves into golden butterflies after confessing her love.", options: ["Clannad", "Anohana", "Your Lie in April", "Violet Evergarden"], correct: 2 },
-  { text: "A typewriter girl writes letters for people who can't express emotions.", options: ["Violet Evergarden", "The Wind Rises", "Whisper of the Heart", "March Comes In Like a Lion"], correct: 0 },
-  { text: "A masked man in a top hat plays cards against a devil in a casino.", options: ["Kakegurui", "Death Parade", "No Game No Life", "Kaiji"], correct: 1 },
-  { text: "A scientist creates a time machine from a microwave and sends texts to the past.", options: ["Erased", "Steins;Gate", "Re:Zero", "Tokyo Revengers"], correct: 1 },
-  { text: "A girl runs through rain to return a library book before moving away forever.", options: ["Weathering With You", "A Silent Voice", "5 Centimeters Per Second", "Garden of Words"], correct: 3 },
-  { text: "A basketball player does a fade-away jumper with 'the zone' aura around him.", options: ["Slam Dunk", "Kuroko's Basketball", "Ahiru no Sora", "Haikyuu"], correct: 1 },
-  { text: "A penguin-hat girl collapses and her brothers search for the Penguindrum.", options: ["Penguindrum", "Sarazanmai", "Flip Flappers", "Revolutionary Girl Utena"], correct: 0 },
-  { text: "A detective eats sweets while sitting in a peculiar crouching position.", options: ["Detective Conan", "Death Note", "Psycho-Pass", "Monster"], correct: 1 },
+  { image: 'l5-01.webp', options: ['Your Lie in April', 'Nodame Cantabile', 'K-On!', 'Sound! Euphonium'], correct: 0 },
+  { image: 'l5-02.webp', options: ['Trigun', 'Cowboy Bebop', 'Outlaw Star', 'Space Dandy'], correct: 1 },
+  { image: 'l5-03.webp', options: ['Clannad', 'Anohana', 'Your Lie in April', 'Violet Evergarden'], correct: 2 },
+  { image: 'l5-04.webp', options: ['Violet Evergarden', 'The Wind Rises', 'Whisper of the Heart', 'March Comes In Like a Lion'], correct: 0 },
+  { image: 'l5-05.webp', options: ['Kakegurui', 'Death Parade', 'No Game No Life', 'Kaiji'], correct: 1 },
+  { image: 'l5-06.webp', options: ['Erased', 'Steins;Gate', 'Re:Zero', 'Tokyo Revengers'], correct: 1 },
+  { image: 'l5-07.webp', options: ['Weathering With You', 'A Silent Voice', '5 Centimeters Per Second', 'Garden of Words'], correct: 3 },
+  { image: 'l5-08.webp', options: ['Slam Dunk', 'Kuroko\'s Basketball', 'Ahiru no Sora', 'Haikyuu'], correct: 1 },
+  { image: 'l5-09.webp', options: ['Penguindrum', 'Sarazanmai', 'Flip Flappers', 'Revolutionary Girl Utena'], correct: 0 },
+  { image: 'l5-10.webp', options: ['Detective Conan', 'Death Note', 'Psycho-Pass', 'Monster'], correct: 1 },
 ];
