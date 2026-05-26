@@ -143,7 +143,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
     clearTimeout(audioTimerRef.current);
-    clearInterval(countdownRef.current);
+    clearTimeout(countdownRef.current);
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -298,19 +298,10 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   };
 
   const startCountdown = () => {
-    setPhase('countdown');
-    setCountdown(3);
-    let count = 3;
-    countdownRef.current = setInterval(() => {
-      count -= 1;
-      if (count <= 0) {
-        clearInterval(countdownRef.current);
-        setCountdown(0);
-        advanceToNext();
-      } else {
-        setCountdown(count);
-      }
-    }, 1000);
+    // 3 second delay then advance — countdown shown in reveal info area
+    countdownRef.current = setTimeout(() => {
+      advanceToNext();
+    }, 3000);
   };
 
   const advanceToNext = () => {
@@ -400,15 +391,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     );
   }
 
-  // ─── Countdown ────────────────────────────────────────────
-  if (phase === 'countdown') {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <div style={{ fontSize: 64, fontWeight: 900, color: T.rose, marginBottom: 16 }}>{countdown}</div>
-        <p style={{ fontSize: 13, color: T.textMid }}>Loading next theme...</p>
-      </div>
-    );
-  }
+  // (countdown phase removed — delay handled via setTimeout in playing phase)
 
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
