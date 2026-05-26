@@ -9,6 +9,7 @@ import {
   getStars, MIN_STARS_TO_UNLOCK, STARS_TO_UNLOCK_LEVEL,
   STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD
 } from '../games/shared/config';
+import { addXP, XP_REWARDS } from '../utils/xpSystem';
 import CircularTimer from './CircularTimer';
 import WordNinjaTiles from './WordNinjaTiles';
 import BackButton from './BackButton';
@@ -146,6 +147,12 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= MIN_STARS_TO_UNLOCK;
         if (!wasAlreadyPassed) {
           setSpades(s => s + STAGE_REWARD);
+          // Award XP for stage completion
+          if (fs >= QUESTIONS_PER_STAGE) {
+            addXP(XP_REWARDS.STAGE_PERFECT);
+          } else {
+            addXP(XP_REWARDS.STAGE_COMPLETE);
+          }
         }
         let newTotalStars = 0;
         for (let s = 0; s < STAGES_PER_LEVEL; s++) {
@@ -160,6 +167,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         }
         if (newTotalStars >= STARS_TO_UNLOCK_LEVEL && oldTotalStars < STARS_TO_UNLOCK_LEVEL) {
           setSpades(s => s + MAIN_LEVEL_REWARD);
+          addXP(XP_REWARDS.LEVEL_COMPLETE);
           showFeedback(`${MAIN_LEVELS[currentMainLevel].name} mastered! +${MAIN_LEVEL_REWARD} spades!`);
         }
         let allLevelsMastered = true;
@@ -211,6 +219,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
+        addXP(XP_REWARDS.COMBO_BONUS);
         playCombo();
         showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {
@@ -241,6 +250,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
+        addXP(XP_REWARDS.COMBO_BONUS);
         playCombo();
         showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {

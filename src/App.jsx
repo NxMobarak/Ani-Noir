@@ -5,6 +5,7 @@ import NAV from './constants/nav';
 import { playClick } from './utils/audio';
 import { useSwipe } from './utils/swipe';
 import { safeGet, safeSet, migrateData } from './utils/dataValidator';
+import { getXP, getRank } from './utils/xpSystem';
 import SidebarContent from './components/SidebarContent';
 import SpadesModal from './components/SpadesModal';
 import RulesModal from './components/RulesModal';
@@ -147,6 +148,9 @@ export default function App() {
             </button>
             <button className="chip" onClick={() => { showFeedback(`You have ${badges.length} badge${badges.length !== 1 ? 's' : ''}! Check About page.`); }} aria-label={`${badges.length} badges`}>
               🏅 {badges.length}
+            </button>
+            <button className="chip" onClick={() => navigate('/profile')} aria-label={`Rank: ${getRank(getXP()).name}`}>
+              {getRank(getXP()).icon} {getRank(getXP()).name}
             </button>
           </div>
         </header>

@@ -4,6 +4,7 @@ import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong, playCombo } from '../utils/audio';
 import { questionBank } from '../questions/index';
 import { ALL_EMOJI_QUESTIONS } from '../constants/questions';
+import { addXP, XP_REWARDS } from '../utils/xpSystem';
 
 const SURVIVAL_UNLOCK_KEY = 'ani_survival_unlocked';
 const SURVIVAL_TRIALS_KEY = 'ani_survival_trials';
@@ -81,6 +82,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
 
       if (newScore % 5 === 0) {
         setSpades(s => s + 100);
+        addXP(XP_REWARDS.SURVIVAL_PER_5);
         showFeedback('+100 ♠ Milestone!', 'success');
       }
 

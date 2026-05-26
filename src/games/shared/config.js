@@ -2,11 +2,11 @@
 // Used by all 9 game modes via StageQuizPage component
 
 export const MAIN_LEVELS = [
-  { name: "Genin", tagline: "Even a kid can pass this easily.", timeSeconds: 30, icon: '🟢' },
-  { name: "Chunin", tagline: "Now the real challenge begins.", timeSeconds: 28, icon: '🔵' },
-  { name: "Jonin", tagline: "Only true anime fans can survive.", timeSeconds: 25, icon: '🟠' },
-  { name: "Shinobi", tagline: "This level destroys fake anime experts.", timeSeconds: 20, icon: '🔴' },
-  { name: "Kage", tagline: "The ultimate test for anime legends.", timeSeconds: 15, icon: '⚫' },
+  { name: "Level 1", tagline: "Even a kid can pass this easily.", timeSeconds: 30, icon: '🟢' },
+  { name: "Level 2", tagline: "Now the real challenge begins.", timeSeconds: 28, icon: '🔵' },
+  { name: "Level 3", tagline: "Only true anime fans can survive.", timeSeconds: 25, icon: '🟠' },
+  { name: "Level 4", tagline: "This level destroys fake anime experts.", timeSeconds: 20, icon: '🔴' },
+  { name: "Level 5", tagline: "The ultimate test for anime legends.", timeSeconds: 15, icon: '⚫' },
 ];
 
 export const STAGES_PER_LEVEL = 20;

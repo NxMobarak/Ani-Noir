@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import T from '../constants/theme';
 import BackButton from '../components/BackButton';
+import { getXP, getRank, getRankIndex, getRankProgress, getNextRank, getXPToNextRank, XP_RANKS } from '../utils/xpSystem';
 
 const PROFILE_NAME_KEY = 'ani_profile_name';
 const PROFILE_AVATAR_KEY = 'ani_profile_avatar';
@@ -121,6 +122,49 @@ export default function ProfilePage({ spades, badges, showFeedback }) {
         )}
         <p style={{ color: T.textMid, fontSize: 12 }}>Your anime quiz journey</p>
       </div>
+
+      {/* XP Rank */}
+      {(() => {
+        const xp = getXP();
+        const rank = getRank(xp);
+        const rankIdx = getRankIndex(xp);
+        const progress = getRankProgress(xp);
+        const nextRank = getNextRank(xp);
+        const xpNeeded = getXPToNextRank(xp);
+        return (
+          <div style={{
+            background: T.card, border: `1px solid ${T.border}`, borderRadius: 16,
+            padding: 16, marginBottom: 16, textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 6 }}>{rank.icon}</div>
+            <h3 style={{ color: rank.color, fontSize: 18, fontWeight: 800, margin: '0 0 4px' }}>
+              {rank.name}
+            </h3>
+            <p style={{ color: T.textMid, fontSize: 12, marginBottom: 12 }}>
+              {xp.toLocaleString()} XP · Rank {rankIdx + 1}/10
+            </p>
+            {nextRank && (
+              <>
+                <div style={{ height: 8, background: T.surface, borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                  <div style={{
+                    height: '100%', width: `${Math.min(100, progress * 100)}%`,
+                    background: `linear-gradient(90deg, ${rank.color}, ${nextRank.color})`,
+                    borderRadius: 4, transition: 'width 0.4s',
+                  }} />
+                </div>
+                <p style={{ color: T.textDim, fontSize: 11 }}>
+                  {xpNeeded.toLocaleString()} XP to <span style={{ color: nextRank.color, fontWeight: 700 }}>{nextRank.icon} {nextRank.name}</span>
+                </p>
+              </>
+            )}
+            {!nextRank && (
+              <p style={{ color: T.gold, fontSize: 12, fontWeight: 700 }}>
+                MAX RANK ACHIEVED!
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Avatar Selection */}
       <div style={{

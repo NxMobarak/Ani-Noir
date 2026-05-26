@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import T from '../constants/theme';
 import { getDailyAnime, getDailyQuote } from '../constants/data';
 import { fetchWithRetry } from '../utils/api';
+import { getXP, getRank, getRankIndex, getRankProgress, getNextRank, getXPToNextRank } from '../utils/xpSystem';
 
 const LatestYouTubeCard = memo(function LatestYouTubeCard() {
   const [video, setVideo] = useState(null);
@@ -107,6 +108,37 @@ export default function HomePage() {
       </section>
 
       <LatestYouTubeCard />
+
+      {/* XP RANK CARD */}
+      {(() => {
+        const xp = getXP();
+        const rank = getRank(xp);
+        const rankIdx = getRankIndex(xp);
+        const progress = getRankProgress(xp);
+        const nextRank = getNextRank(xp);
+        const xpNeeded = getXPToNextRank(xp);
+        return (
+          <section className="card" aria-label="Your Ninja Rank" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 30 }}>{rank.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: rank.color }}>{rank.name}</div>
+                <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>{xp.toLocaleString()} XP · Rank {rankIdx + 1}/10</div>
+                {nextRank && (
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{ height: 5, background: T.surface, borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(100, progress * 100)}%`, background: `linear-gradient(90deg, ${rank.color}, ${nextRank.color})`, borderRadius: 3, transition: 'width 0.4s' }} />
+                    </div>
+                    <div style={{ fontSize: 10, color: T.textDim, marginTop: 3 }}>{xpNeeded.toLocaleString()} XP to {nextRank.name}</div>
+                  </div>
+                )}
+                {!nextRank && <div style={{ fontSize: 11, color: T.gold, fontWeight: 700, marginTop: 4 }}>MAX RANK!</div>}
+              </div>
+              <span style={{ color: T.textDim, fontSize: 18 }}>›</span>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* DAILY CHALLENGE */}
       <section className="card" aria-label="Daily Challenge">

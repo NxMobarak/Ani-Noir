@@ -3,6 +3,7 @@ import T from '../constants/theme';
 import { questionBank } from '../questions/index';
 import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong } from '../utils/audio';
+import { addXP, XP_REWARDS } from '../utils/xpSystem';
 import WordNinjaTiles from '../components/WordNinjaTiles';
 
 const DAILY_KEY = 'ani_daily';
@@ -56,6 +57,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     if (isCorrect) {
       playCorrect();
       setSpades(s => s + DAILY_REWARD);
+      addXP(XP_REWARDS.DAILY_CHALLENGE);
       showFeedback(`+${DAILY_REWARD} ♠ Daily Reward!`, 'success');
     } else {
       playWrong();
