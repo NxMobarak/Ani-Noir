@@ -108,24 +108,28 @@ export default function HomePage() {
 
       <LatestYouTubeCard />
 
-      {/* ALL GAMES - 9 games in 3x3 grid */}
-      <section className="card" aria-label="All Games">
-        <h2 className="card-title" style={{ color: T.teal }}>ALL GAMES</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
+      {/* GAME MODES */}
+      <section aria-label="Game Modes">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px 10px' }}>
+          <h2 className="card-title" style={{ color: '#94a3b8', marginBottom: 0, fontSize: 12 }}>GAME MODES</h2>
+          <button className="btn" style={{ background: 'none', padding: 0, fontSize: 12, color: '#f43f5e', fontWeight: 600, gap: 4 }} onClick={() => navigate('/quiz')}>SEE ALL &rarr;</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
           {[
-            ['/quiz', '🧠', 'Anime Quiz'],
-            ['/word-ninja', '🔤', 'Word Ninja'],
-            ['/emoji', '🎯', 'Emoji Wars'],
-            ['/shadow', '🕵️', 'Anime Shadow'],
-            ['/frames', '🖼️', 'Anime Moments'],
-            ['/sceneguess', '🎬', 'Frame Guess'],
-            ['/dialogue', '💬', 'Dialogue Clash'],
-            ['/opening', '🎵', 'Opening Challenge'],
-            ['/ending', '🎶', 'Ending Challenge'],
-          ].map(([path, ico, lbl]) => (
-            <button key={path} className="btn btn-secondary" style={{ flexDirection: 'column', gap: 4, padding: '12px 6px', fontSize: 10 }} onClick={() => navigate(path)}>
-              <span style={{ fontSize: 22 }} aria-hidden="true">{ico}</span>
-              <span style={{ lineHeight: 1.2, textAlign: 'center' }}>{lbl}</span>
+            ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge'],
+            ['/word-ninja', '🔤', 'Word Ninja', 'Guess the anime by words'],
+            ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles'],
+            ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes'],
+            ['/frames', '🖼️', 'Anime Moments', 'Identify iconic anime scenes'],
+            ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame'],
+            ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!'],
+            ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?'],
+          ].map(([path, ico, lbl, desc]) => (
+            <button key={path} className="game-mode-card" onClick={() => navigate(path)}>
+              <span className="game-mode-icon" aria-hidden="true">{ico}</span>
+              <span className="game-mode-name">{lbl}</span>
+              <span className="game-mode-desc">{desc}</span>
+              <span className="game-mode-play">PLAY &rarr;</span>
             </button>
           ))}
         </div>
