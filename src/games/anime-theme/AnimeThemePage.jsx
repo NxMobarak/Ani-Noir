@@ -434,10 +434,6 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       {/* Header */}
       <div className="sg-header">
         <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ background: 'none', border: 'none', color: T.text, fontSize: 18 }}>←</button>
-        <div className="sg-header-title">
-          <span className="guess" style={{ fontSize: 12 }}>ANIME</span>
-          <span className="shadow" style={{ fontSize: 14 }}>THEME</span>
-        </div>
       </div>
 
       {/* Stats */}
