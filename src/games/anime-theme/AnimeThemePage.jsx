@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
@@ -124,7 +124,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const currentFilename = levelClips[currentClip];
   const currentAnswer = currentFilename ? parseFilename(currentFilename) : '';
   const allLevelAnswers = levelClips.map(f => parseFilename(f));
-  const currentOptions = currentFilename ? generateOptions(currentAnswer, allLevelAnswers) : [];
+  // Memoize options so they don't reshuffle on every re-render (e.g. timer tick)
+  const currentOptions = useMemo(() => {
+    if (!currentFilename) return [];
+    return generateOptions(currentAnswer, allLevelAnswers);
+  }, [currentFilename, currentAnswer]);
 
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
@@ -265,15 +269,16 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const startCountdown = () => {
     setPhase('countdown');
     setCountdown(3);
+    let count = 3;
     countdownRef.current = setInterval(() => {
-      setCountdown(c => {
-        if (c <= 1) {
-          clearInterval(countdownRef.current);
-          advanceToNext();
-          return 0;
-        }
-        return c - 1;
-      });
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(countdownRef.current);
+        setCountdown(0);
+        advanceToNext();
+      } else {
+        setCountdown(count);
+      }
     }, 1000);
   };
 
@@ -309,6 +314,30 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const addLetter = (letter) => { if (!answered) setGuess(g => g + letter); };
   const removeLetter = () => { if (!answered) setGuess(g => g.slice(0, -1)); };
   const addSpace = () => { if (!answered) setGuess(g => g + ' '); };
+
+  // Physical keyboard support
+  useEffect(() => {
+    if (phase !== 'playing' || answered) return;
+    const handleKeyDown = (e) => {
+      if (e.repeat) return;
+      const key = e.key;
+      if (key === 'Backspace') {
+        e.preventDefault();
+        removeLetter();
+      } else if (key === 'Enter') {
+        e.preventDefault();
+        submitGuess();
+      } else if (key === ' ') {
+        e.preventDefault();
+        addSpace();
+      } else if (/^[a-zA-Z]$/.test(key)) {
+        e.preventDefault();
+        addLetter(key.toUpperCase());
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, answered, guess]);
 
   // ─── Level Select ─────────────────────────────────────────
   if (phase === 'levels') {
