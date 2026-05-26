@@ -17,8 +17,7 @@ const WordNinja = lazy(() => import('./games/word-ninja'));
 const EmojiWars = lazy(() => import('./games/emoji-wars'));
 const AnimeShadow = lazy(() => import('./games/anime-shadow'));
 const AnimeMoments = lazy(() => import('./games/anime-moments'));
-const OpeningChallenge = lazy(() => import('./games/opening-challenge'));
-const EndingChallenge = lazy(() => import('./games/ending-challenge'));
+const AnimeTheme = lazy(() => import('./games/anime-theme'));
 const FrameGuess = lazy(() => import('./games/frame-guess'));
 const DialogueClash = lazy(() => import('./games/dialogue-clash'));
 
@@ -166,8 +165,7 @@ export default function App() {
                   <Route path="/emoji" element={<EmojiWars spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/shadow" element={<AnimeShadow spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/frames" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/opening" element={<OpeningChallenge spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/ending" element={<EndingChallenge spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/opening" element={<AnimeTheme spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/sceneguess" element={<FrameGuess spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/dialogue" element={<DialogueClash spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
