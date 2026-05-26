@@ -86,7 +86,7 @@ function getClipsManifest() {
     'l1-04-attack-on-titan.mp3',
     'l1-05-jujutsu-kaisen.mp3',
     'l1-06-naruto-shippuden.mp3',
-    'l1-07-fullmetal-alchemist-brot.mp3',
+    'l1-07-fullmetal-alchemist-brotherhood.mp3',
     'l1-08-oshi-no-ko.mp3',
     'l1-09-cowboy-bebop.mp3',
     'l1-10-dragon-ball-z.mp3',
