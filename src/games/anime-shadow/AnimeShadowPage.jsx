@@ -9,21 +9,16 @@ import level2 from './questions/level2';
 import level3 from './questions/level3';
 import level4 from './questions/level4';
 import level5 from './questions/level5';
-import level6 from './questions/level6';
-import level7 from './questions/level7';
-import level8 from './questions/level8';
-import level9 from './questions/level9';
-import level10 from './questions/level10';
 
-const LEVELS = [level1, level2, level3, level4, level5, level6, level7, level8, level9, level10];
-const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 9', 'Level 10'];
-const CHARS_PER_LEVEL = 5;
+const LEVELS = [level1, level2, level3, level4, level5];
+const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
+const CHARS_PER_LEVEL = 10;
 const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
 const HINT_COST = 100;
 const MAX_SKIPS = 3;
 const MAX_HINT_WRONG = 3;
-const PASS_THRESHOLD = 4; // 4/5 to unlock next
+const PASS_THRESHOLD = 8; // 8/10 to unlock next
 const STORAGE_KEY = 'ani_shadow_progress';
 
 const KEYBOARD_ROWS = [
@@ -314,7 +309,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         <div className="card" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: 'var(--sg-crimson-bright, #c62839)' }}>🕶️ ANIME SHADOW</h2>
           <p style={{ fontSize: 12, color: '#7a7873' }}>Identify the anime character from their silhouette!</p>
-          <p style={{ fontSize: 11, color: '#c4953a', marginTop: 4 }}>5 shadows per level · Need 4/5 to unlock next</p>
+          <p style={{ fontSize: 11, color: '#c4953a', marginTop: 4 }}>10 shadows per level · Need 8/10 to unlock next</p>
         </div>
         {LEVEL_NAMES.map((name, idx) => {
           const unlocked = idx === 0 || progress[idx - 1]?.passed;
@@ -327,7 +322,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
               <div className="level-info">
                 <div className="level-name">{name}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Need 4/5 on previous level' : !hasChars ? 'Coming soon' : levelData ? `${levelData.score}/5 correct` : '5 shadows · 30s timer'}
+                  {!unlocked ? 'Need 8/10 on previous level' : !hasChars ? 'Coming soon' : levelData ? `${levelData.score}/10 correct` : '10 shadows · 30s timer'}
                 </div>
               </div>
               <span style={{ color: '#4a4844', fontSize: 20 }}>{unlocked && hasChars ? '›' : ''}</span>
@@ -369,7 +364,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
           {!passed && <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>}
-          {passed && currentLevel < 9 && <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>}
+          {passed && currentLevel < 4 && <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>}
         </div>
       </div>
     );

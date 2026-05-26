@@ -1,8 +1,13 @@
-// Anime Shadow - Level 5
+// Anime Shadow - Level 5 (Hardest)
 export default [
-  { file: 'all-might.webp', name: 'All Might' },
-  { file: 'todoroki.webp', name: 'Todoroki' },
-  { file: 'zenitsu.webp', name: 'Zenitsu' },
-  { file: 'sanji.webp', name: 'Sanji' },
-  { file: 'jotaro.webp', name: 'Jotaro' },
+  { file: 'jinwoo.webp', name: 'Jinwoo' },
+  { file: 'emilia.webp', name: 'Emilia' },
+  { file: 'natsu.webp', name: 'Natsu' },
+  { file: 'sailor-moon.webp', name: 'Sailor Moon' },
+  { file: 'zero-two.webp', name: 'Zero Two' },
+  { file: 'alucard.webp', name: 'Alucard' },
+  { file: 'kitagawa.webp', name: 'Kitagawa' },
+  { file: 'ryuk.webp', name: 'Ryuk' },
+  { file: 'l.webp', name: 'L' },
+  { file: 'ash.webp', name: 'Ash' },
 ];
