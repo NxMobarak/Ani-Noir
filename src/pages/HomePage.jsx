@@ -108,6 +108,20 @@ export default function HomePage() {
 
       <LatestYouTubeCard />
 
+      {/* DAILY CHALLENGE */}
+      <section className="card" aria-label="Daily Challenge">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }} aria-hidden="true">📅</span>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>Daily Challenge</span>
+            <span style={{ fontSize: 9, color: T.textDim, display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+              Resets in <DailyTimer />
+            </span>
+          </div>
+          <button className="btn btn-primary" style={{ fontSize: 10, padding: '6px 14px', borderRadius: 8 }} onClick={() => navigate('/daily')}>Play</button>
+        </div>
+      </section>
+
       {/* GAME MODES */}
       <section aria-label="Game Modes" style={{ marginBottom: 12 }}>
         <h2 className="card-title" style={{ color: '#94a3b8', fontSize: 12, padding: '0 2px 10px' }}>GAME MODES</h2>
@@ -129,25 +143,6 @@ export default function HomePage() {
               <span className="game-mode-play">PLAY &rarr;</span>
             </button>
           ))}
-        </div>
-      </section>
-
-      {/* ULTIMATE CHALLENGE - Survival + Daily */}
-      <section className="card" aria-label="Ultimate Challenge">
-        <h2 className="card-title" style={{ color: T.rose }}>ULTIMATE CHALLENGE</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }} role="group" aria-label="Challenge modes">
-          <button className="btn btn-secondary" style={{ flexDirection: 'column', gap: 6, padding: '14px 8px', fontSize: 11 }} onClick={() => navigate('/survival')}>
-            <span style={{ fontSize: 26 }} aria-hidden="true">💀</span>
-            <span style={{ fontWeight: 700 }}>Survival Mode</span>
-            <span style={{ fontSize: 9, color: T.textDim }}>How far can you go?</span>
-          </button>
-          <button className="btn btn-secondary" style={{ flexDirection: 'column', gap: 6, padding: '14px 8px', fontSize: 11 }} onClick={() => navigate('/daily')}>
-            <span style={{ fontSize: 26 }} aria-hidden="true">📅</span>
-            <span style={{ fontWeight: 700 }}>Daily Challenge</span>
-            <span style={{ fontSize: 9, color: T.textDim, display: 'flex', alignItems: 'center', gap: 4 }}>
-              Resets in <DailyTimer />
-            </span>
-          </button>
         </div>
       </section>
 
