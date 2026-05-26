@@ -217,9 +217,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .yt-sub { font-size:11px;color:#ff4444;margin-top:4px;font-weight:600; }
 
 .hero-banner { background-size:cover;background-position:center;background-repeat:no-repeat;border:1px solid rgba(244,63,94,0.2);border-radius:20px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden; }
-.hero-banner::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(7,8,15,0.7) 0%,rgba(7,8,15,0.35) 60%,rgba(7,8,15,0.15) 100%);pointer-events:none; }
-.hero-greeting { font-size:20px;font-weight:800;position:relative;z-index:1; }
-.hero-sub { font-size:13px;margin-top:4px;position:relative;z-index:1; }
+.hero-banner::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(7,8,15,0.75) 0%,rgba(7,8,15,0.4) 60%,rgba(7,8,15,0.2) 100%);pointer-events:none; }
+.hero-greeting { font-size:18px;font-weight:800;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,0.6); }
+.hero-sub { font-size:12px;margin-top:4px;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,0.5); }
 
 .hero-banner .btn { position:relative;z-index:1;width:fit-content; }
 

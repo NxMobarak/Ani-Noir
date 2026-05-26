@@ -76,8 +76,8 @@ function getHeroBannerData() {
       greeting: 'Good afternoon',
       tagline: 'Your Anime Knowledge Has Limits.',
       image: '/hero-character-2.webp',
-      greetingColor: '#fef3c7',
-      subColor: '#fde68a',
+      greetingColor: '#ffffff',
+      subColor: '#e2e8f0',
     };
   } else {
     return {
