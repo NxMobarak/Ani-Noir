@@ -3,6 +3,15 @@ import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
+import '../../styles/shadow-quiz.css';
+
+const BackspaceIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+    <line x1="18" y1="9" x2="12" y2="15"/>
+    <line x1="12" y1="9" x2="18" y2="15"/>
+  </svg>
+);
 
 // Audio files are in /public/audio/ with format: l{level}-{number}-{answer-with-hyphens}.mp3
 // Example: l1-01-naruto.mp3, l2-05-attack-on-titan.mp3
@@ -110,6 +119,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const [answered, setAnswered] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(null);
   const [hintUsed, setHintUsed] = useState(false);
+  const [hintLetters, setHintLetters] = useState([]);
   const [countdown, setCountdown] = useState(3);
   const [progress, setProgress] = useState(getProgress);
   const [totalStars, setTotalStars] = useState(0);
@@ -145,6 +155,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setAnswered(false);
     setWasCorrect(null);
     setHintUsed(false);
+    setHintLetters([]);
     setTimeLeft(TIMER_TOTAL);
     setAudioPlaying(true);
 
@@ -223,7 +234,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
 
   const submitGuess = () => {
     if (answered || !guess.trim()) return;
-    const normalized = guess.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    // Build full guess merging hinted letters with typed
+    const fullGuess = getFullGuess();
+    const normalized = fullGuess.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
     const correct = currentAnswer.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (normalized === correct) {
       handleCorrect();
@@ -231,6 +244,24 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       handleWrong();
     }
   };
+
+  // Build full answer by merging typed letters with hinted letters (like shadow game)
+  const getFullGuess = useCallback(() => {
+    const name = currentAnswer;
+    let typedIdx = 0;
+    let result = '';
+    for (let i = 0; i < name.length; i++) {
+      if (name[i] === ' ') {
+        result += ' ';
+      } else if (hintLetters.includes(i)) {
+        result += name[i];
+      } else {
+        result += (guess[typedIdx] || '');
+        typedIdx++;
+      }
+    }
+    return result;
+  }, [currentAnswer, guess, hintLetters]);
 
   const submitOption = (opt) => {
     if (answered) return;
@@ -260,10 +291,22 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   };
 
   const doHint = () => {
-    if (spades < HINT_COST || hintUsed || answered) return;
-    setSpades(s => s - HINT_COST);
+    if (spades < HINT_COST || answered) return;
+    const name = currentAnswer;
+    // Find unrevealed letter positions (skip spaces and already hinted)
+    const available = [];
+    for (let i = 0; i < name.length; i++) {
+      if (name[i] !== ' ' && !hintLetters.includes(i)) {
+        available.push(i);
+      }
+    }
+    if (available.length === 0) return;
+    // Reveal a random unrevealed letter
+    const randomIdx = available[Math.floor(Math.random() * available.length)];
+    setHintLetters(prev => [...prev, randomIdx]);
     setHintUsed(true);
-    showFeedback(`Hint! -${HINT_COST}♠ Choose from options`);
+    setSpades(s => s - HINT_COST);
+    showFeedback(`💡 Hint: letter "${name[randomIdx].toUpperCase()}" revealed! -${HINT_COST}♠`);
   };
 
   const startCountdown = () => {
@@ -327,9 +370,6 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       } else if (key === 'Enter') {
         e.preventDefault();
         submitGuess();
-      } else if (key === ' ') {
-        e.preventDefault();
-        addSpace();
       } else if (/^[a-zA-Z]$/.test(key)) {
         e.preventDefault();
         addLetter(key.toUpperCase());
@@ -455,54 +495,72 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         </div>
       </div>
 
-      {/* Answer Display */}
-      <div style={{ padding: '12px 14px', textAlign: 'center' }}>
-        <div style={{
-          minHeight: 40, padding: '8px 14px', background: T.surface,
-          borderRadius: 12, border: `1px solid ${T.border}`,
-          fontSize: 18, fontWeight: 700, color: T.text, letterSpacing: 1,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {guess || <span style={{ color: T.textDim, fontSize: 13, fontWeight: 400 }}>Type anime name...</span>}
-        </div>
+      {/* Letter Blanks — typing & hints appear here (like shadow game) */}
+      {!answered && currentAnswer && (
+        <div className="sg-hint-display" aria-label="Anime name letters">
+          {(() => {
+            const name = currentAnswer;
+            let typedIdx = 0;
+            return name.split('').map((letter, i) => {
+              const isSpace = letter === ' ';
+              const isHinted = hintLetters.includes(i);
+              let display = '_';
+              let className = 'sg-hint-letter';
 
-        {answered && (
-          <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: wasCorrect ? T.success : T.error }}>
-            {wasCorrect ? '✓ Correct!' : `✗ Answer: ${currentAnswer}`}
-          </div>
-        )}
-      </div>
+              if (isSpace) {
+                display = ' ';
+                className += ' space';
+              } else if (isHinted) {
+                display = letter.toUpperCase();
+                className += ' shown';
+              } else {
+                const typedChar = guess[typedIdx];
+                typedIdx++;
+                if (typedChar) {
+                  display = typedChar.toUpperCase();
+                  className += ' typed';
+                }
+              }
 
-      {/* Hint Options (when hint used) */}
-      {hintUsed && !answered && (
-        <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {currentOptions.map((opt, i) => (
-            <button key={i} className="option-btn" onClick={() => submitOption(opt)}
-              style={{ padding: '10px 14px', fontSize: 13 }}>
-              {opt}
-            </button>
-          ))}
+              return (
+                <span key={i} className={className}>
+                  {display}
+                </span>
+              );
+            });
+          })()}
         </div>
       )}
 
-      {/* Keyboard (when hint NOT used) */}
-      {!hintUsed && !answered && (
-        <div className="sg-keyboard" style={{ padding: '8px 10px 12px' }}>
+      {/* Reveal Info */}
+      {answered && (
+        <div className="sg-reveal-info" aria-live="polite">
+          <div className={`sg-reveal-name ${wasCorrect ? 'correct' : 'wrong'}`}>
+            {wasCorrect ? `✓ ${currentAnswer}` : `✗ Answer: ${currentAnswer}`}
+          </div>
+          <div className="sg-reveal-next">Next theme in 3s...</div>
+        </div>
+      )}
+
+      {/* Keyboard (like shadow game) */}
+      {!answered && (
+        <div className="sg-keyboard">
           <div className="sg-keyboard-main">
             {KEYBOARD_ROWS.map((row, ri) => (
               <div key={ri} className="sg-keyboard-row">
                 {row.map(letter => (
-                  <button key={letter} className="sg-key" onClick={() => addLetter(letter)}>{letter}</button>
+                  <button key={letter} className="sg-key" onClick={() => addLetter(letter)} aria-label={letter}>{letter}</button>
                 ))}
               </div>
             ))}
-            <div className="sg-keyboard-row" style={{ justifyContent: 'center' }}>
-              <button className="sg-key-space" onClick={addSpace}>SPACE</button>
-            </div>
           </div>
           <div className="sg-keyboard-actions">
-            <button className="sg-key-backspace" onClick={removeLetter}>⌫</button>
-            <button className="sg-key-enter" onClick={submitGuess}>GO</button>
+            <button className="sg-key-backspace" onClick={removeLetter} aria-label="Backspace">
+              <BackspaceIcon />
+            </button>
+            <button className="sg-key-enter" onClick={submitGuess} aria-label="Submit">
+              GO
+            </button>
           </div>
         </div>
       )}
@@ -513,11 +571,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
           <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
             ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
           </button>
-          {!hintUsed && (
-            <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
-              💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
-            </button>
-          )}
+          <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
+            💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
+          </button>
         </div>
       )}
     </div>
