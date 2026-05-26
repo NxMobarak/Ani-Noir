@@ -1,14 +1,39 @@
 import { useState, useEffect } from 'react';
 import T from '../constants/theme';
-import { questionBank } from '../questions/index';
 import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong } from '../utils/audio';
 import { addXP } from '../utils/xpSystem';
 import WordNinjaTiles from '../components/WordNinjaTiles';
 
+// Import level 5 from ALL game modes
+import quizL5 from '../games/anime-quiz/questions/level5';
+import wordNinjaL5 from '../games/word-ninja/questions/level5';
+import emojiL5 from '../games/emoji-wars/questions/level5';
+import shadowL5 from '../games/anime-shadow/questions/level5';
+import momentsL5 from '../games/anime-moments/questions/level5';
+import dialogueL5 from '../games/dialogue-clash/questions/level5';
+import openingL5 from '../games/opening-challenge/questions/level5';
+import endingL5 from '../games/ending-challenge/questions/level5';
+import frameGuessL5 from '../games/frame-guess/questions/level5';
+
 const DAILY_KEY = 'ani_daily';
 const DAILY_REWARD_SPADES = 50;
 const DAILY_REWARD_XP = 300;
+
+// Build daily question pool from all game modes level 5
+function buildDailyPool() {
+  const pool = [];
+  quizL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Quiz' }));
+  wordNinjaL5.forEach(q => pool.push({ ...q, type: 'anagram', mode: 'Word Ninja' }));
+  emojiL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Emoji Wars' }));
+  shadowL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Shadow' }));
+  momentsL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Anime Moments' }));
+  dialogueL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Dialogue Clash' }));
+  openingL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Opening Challenge' }));
+  endingL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Ending Challenge' }));
+  frameGuessL5.forEach(q => pool.push({ ...q, type: 'mcq', mode: 'Frame Guess' }));
+  return pool.filter(q => q.text || q.emoji);
+}
 
 function getDailyQuestion() {
   const now = new Date();
@@ -21,11 +46,12 @@ function getDailyQuestion() {
     return { question: stored.question, completed: true, answer: stored.answer, wasCorrect: stored.wasCorrect };
   }
 
-  // Select a level 2-4 question based on date seed
-  const eligible = questionBank.filter(q => q.level >= 2 && q.level <= 4);
+  // Select a question from all level 5 questions based on date seed
+  const pool = buildDailyPool();
+  if (pool.length === 0) return { question: null, completed: false, answer: null, wasCorrect: null };
   const seed = dateStr.split('-').join('');
-  const idx = parseInt(seed, 10) % eligible.length;
-  const question = eligible[idx];
+  const idx = parseInt(seed, 10) % pool.length;
+  const question = pool[idx];
 
   return { question, completed: false, answer: null, wasCorrect: null };
 }
@@ -45,7 +71,6 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     // For MCQ questions, 'correct' is an index number. For anagram, 'answer' is a string.
     let isCorrect = false;
     if (question.type === 'mcq' || (typeof question.correct === 'number' && question.options)) {
-      // Compare selected option with the option at the correct index
       isCorrect = option === question.options[question.correct];
     } else {
       isCorrect = option === question.answer || option === question.correct;
@@ -62,7 +87,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
       showFeedback(`+${DAILY_REWARD_SPADES} ♠ & +${DAILY_REWARD_XP} XP Daily Reward!`, 'success');
     } else {
       playWrong();
-      showFeedback('Better luck tomorrow!', 'error');
+      showFeedback('Wrong! Better luck tomorrow!', 'error');
     }
 
     localStorage.setItem(DAILY_KEY, JSON.stringify({
@@ -92,6 +117,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     ? question.options[question.correct]
     : (question.answer || question.correct);
   const isAnagram = question.type === 'anagram';
+  const wasWrong = answered && (storedResult === false || (selectedOption && selectedOption !== correctAnswer));
 
   return (
     <div style={{ padding: 20 }}>
@@ -102,6 +128,11 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
         <p style={{ color: T.textDim, fontSize: 12 }}>
           One question per day • +{DAILY_REWARD_SPADES} ♠ & +{DAILY_REWARD_XP} XP reward
         </p>
+        {question.mode && (
+          <span style={{ fontSize: 10, color: T.teal, background: 'rgba(20,184,166,0.1)', padding: '3px 10px', borderRadius: 6, marginTop: 6, display: 'inline-block' }}>
+            From: {question.mode} • Level 5
+          </span>
+        )}
       </div>
 
       {/* Reward Info */}
@@ -134,7 +165,20 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
               : "Better luck tomorrow!"}
           </p>
           <p style={{ color: T.textDim, fontSize: 12, marginTop: 4 }}>
-            Answer: <span style={{ color: T.success }}>{correctAnswer}</span>
+            Correct Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
+          </p>
+        </div>
+      )}
+
+      {/* Wrong answer - show correct answer immediately */}
+      {wasWrong && !completed && (
+        <div style={{
+          background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.25)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 16, textAlign: 'center',
+        }}>
+          <p style={{ color: T.error, fontSize: 13, fontWeight: 700, margin: '0 0 4px' }}>Wrong Answer!</p>
+          <p style={{ color: T.textMid, fontSize: 12, margin: 0 }}>
+            Correct Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
           </p>
         </div>
       )}
@@ -144,11 +188,8 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
         background: T.card, borderRadius: 12, padding: 16, marginBottom: 16,
         border: `1px solid ${T.border}`
       }}>
-        <div style={{ color: T.textDim, fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>
-          {question.type === 'mcq' ? 'Multiple Choice' : 'Word Ninja'} • Level {question.level}
-        </div>
         <p style={{ color: T.text, fontSize: 15, textAlign: 'center', margin: 0 }}>
-          {question.text || question.question || ''}
+          {question.text || question.emoji || question.question || ''}
         </p>
       </div>
 
