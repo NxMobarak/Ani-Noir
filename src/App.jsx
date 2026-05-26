@@ -161,11 +161,11 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/quiz" element={<AnimeQuiz spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/word-ninja" element={<WordNinja spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/ninja" element={<WordNinja spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/emoji" element={<EmojiWars spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/shadow" element={<AnimeShadow spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/frames" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/opening" element={<AnimeTheme spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/moments" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/theme" element={<AnimeTheme spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/sceneguess" element={<FrameGuess spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/dialogue" element={<DialogueClash spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />

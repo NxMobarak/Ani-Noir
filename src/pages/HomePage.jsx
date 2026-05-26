@@ -103,7 +103,7 @@ export default function HomePage() {
         <div className="hero-greeting" style={{ color: greetingColor }}>{greeting}, Otaku!</div>
         <p className="hero-sub" style={{ color: subColor }}>{tagline}</p>
         <button className="btn btn-primary" style={{ marginTop: 12, borderRadius: 10, fontSize: 12, padding: '8px 16px' }} onClick={() => {
-          const modes = ['/quiz', '/word-ninja', '/emoji', '/shadow', '/frames', '/sceneguess', '/opening', '/dialogue'];
+          const modes = ['/quiz', '/ninja', '/emoji', '/shadow', '/moments', '/sceneguess', '/theme', '/dialogue'];
           navigate(modes[Math.floor(Math.random() * modes.length)]);
         }}>
           Play Now
@@ -163,12 +163,12 @@ export default function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }} role="group" aria-label="Game modes">
           {[
             ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge', 'brain'],
-            ['/word-ninja', '🔤', 'Word Ninja', 'Guess the anime by words', 'brain'],
+            ['/ninja', '🔤', 'Word Ninja', 'Guess the anime by words', 'brain'],
             ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles', 'brain'],
             ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes', 'visual'],
-            ['/frames', '🖼️', 'Moments', 'Identify iconic anime scenes', 'visual'],
+            ['/moments', '🖼️', 'Moments', 'Identify iconic anime scenes', 'visual'],
             ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame', 'visual'],
-            ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!', 'audio'],
+            ['/theme', '🎵', 'Anime Theme', 'Name that opening or ending!', 'audio'],
             ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?', 'brain'],
           ].map(([path, ico, lbl, desc, glow]) => (
             <button key={path} className={`game-mode-card glow-${glow}`} onClick={() => navigate(path)}>
