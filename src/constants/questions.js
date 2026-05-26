@@ -1,15 +1,20 @@
-import level1Frames from '../questions/level1_frames';
-import level2Frames from '../questions/level2_frames';
-import level3Frames from '../questions/level3_frames';
-import level4Frames from '../questions/level4_frames';
-import level5Frames from '../questions/level5_frames';
-import level1Emoji from '../questions/level1_emoji';
-import level2Emoji from '../questions/level2_emoji';
-import level3Emoji from '../questions/level3_emoji';
-import level4Emoji from '../questions/level4_emoji';
-import level5Emoji from '../questions/level5_emoji';
+// ─── Legacy compatibility layer ─────────────────────────────
+// SurvivalPage imports ALL_EMOJI_QUESTIONS from here.
+// Actual data now lives in src/games/emoji-wars/questions/
 
-// ─── Anime Frames Questions (250 total, 50 per level) ───────
+import level1Emoji from '../games/emoji-wars/questions/level1';
+import level2Emoji from '../games/emoji-wars/questions/level2';
+import level3Emoji from '../games/emoji-wars/questions/level3';
+import level4Emoji from '../games/emoji-wars/questions/level4';
+import level5Emoji from '../games/emoji-wars/questions/level5';
+
+import level1Frames from '../games/anime-moments/questions/level1';
+import level2Frames from '../games/anime-moments/questions/level2';
+import level3Frames from '../games/anime-moments/questions/level3';
+import level4Frames from '../games/anime-moments/questions/level4';
+import level5Frames from '../games/anime-moments/questions/level5';
+
+// ─── Anime Frames Questions ─────────────────────────────────
 export const ANIME_FRAMES_QUESTIONS = [
   ...level1Frames,
   ...level2Frames,
@@ -18,7 +23,7 @@ export const ANIME_FRAMES_QUESTIONS = [
   ...level5Frames,
 ];
 
-// ─── Emoji Questions (250 total, 50 per level) ──────────────
+// ─── Emoji Questions ────────────────────────────────────────
 export const ALL_EMOJI_QUESTIONS = [
   ...level1Emoji,
   ...level2Emoji,

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { SHADOW_CHARACTERS } from '../constants/data';
-import { shuffle } from '../utils/helpers';
-import { playCorrect, playWrong, playCombo } from '../utils/audio';
-import BackButton from '../components/BackButton';
-import '../styles/shadow-quiz.css';
+import { SHADOW_CHARACTERS } from '../../constants/data';
+import { shuffle } from '../../utils/helpers';
+import { playCorrect, playWrong, playCombo } from '../../utils/audio';
+import BackButton from '../../components/BackButton';
+import '../../styles/shadow-quiz.css';
 
 /* ─── Shadow Image Component ─────────────────────────────────── */
 const ShadowImage = memo(function ShadowImage({ file, revealed }) {

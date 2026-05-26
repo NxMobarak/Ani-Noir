@@ -8,7 +8,7 @@ import {
   MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE,
   getStars, MIN_STARS_TO_UNLOCK, STARS_TO_UNLOCK_LEVEL,
   STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD
-} from '../questions/index';
+} from '../games/shared/config';
 import CircularTimer from './CircularTimer';
 import AnagramTiles from './AnagramTiles';
 import BackButton from './BackButton';

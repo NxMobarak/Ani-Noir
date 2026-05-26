@@ -1,14 +1,19 @@
-import T from '../constants/theme';
-import { shuffle } from '../utils/helpers';
-import { ALL_EMOJI_QUESTIONS } from '../constants/questions';
-import { MAIN_LEVELS, QUESTIONS_PER_STAGE } from '../questions/index';
-import StageQuizPage from '../components/StageQuizPage';
-import CircularTimer from '../components/CircularTimer';
+import T from '../../constants/theme';
+import { shuffle } from '../../utils/helpers';
+import { MAIN_LEVELS, QUESTIONS_PER_STAGE } from '../shared/config';
+import StageQuizPage from '../../components/StageQuizPage';
+import CircularTimer from '../../components/CircularTimer';
+import level1 from './questions/level1';
+import level2 from './questions/level2';
+import level3 from './questions/level3';
+import level4 from './questions/level4';
+import level5 from './questions/level5';
 
-export default function EmojiQuizPage({ spades, setSpades, showFeedback }) {
+const POOLS = [level1, level2, level3, level4, level5];
+
+export default function EmojiWarsPage({ spades, setSpades, showFeedback }) {
   const getQuestionPool = (mainLevelIdx, stageIdx) => {
-    const levelNum = mainLevelIdx + 1;
-    const pool = ALL_EMOJI_QUESTIONS.filter(q => q.level === levelNum);
+    const pool = POOLS[mainLevelIdx] || [];
     const start = stageIdx * QUESTIONS_PER_STAGE;
     const stageQuestions = pool.slice(start, start + QUESTIONS_PER_STAGE);
     return shuffle(stageQuestions).map(q => {
@@ -17,7 +22,6 @@ export default function EmojiQuizPage({ spades, setSpades, showFeedback }) {
       return { ...q, options: shuffledOptions, correct: shuffledOptions.indexOf(correctAnswer) };
     });
   };
-
 
   const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades: sp, skipUsed }) => (
     <div>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './styles/app.css';
-import T from './constants/theme';
 import NAV from './constants/nav';
 import { playClick } from './utils/audio';
 import { useSwipe } from './utils/swipe';
@@ -10,14 +9,20 @@ import SidebarContent from './components/SidebarContent';
 import SpadesModal from './components/SpadesModal';
 import RulesModal from './components/RulesModal';
 import ErrorBoundary from './components/ErrorBoundary';
-import BackButton from './components/BackButton';
+
+// ─── Code Splitting: Lazy-loaded game modes ─────────────────
+const AnimeQuiz = lazy(() => import('./games/anime-quiz'));
+const WordNinja = lazy(() => import('./games/word-ninja'));
+const EmojiWars = lazy(() => import('./games/emoji-wars'));
+const AnimeShadow = lazy(() => import('./games/anime-shadow'));
+const AnimeMoments = lazy(() => import('./games/anime-moments'));
+const OpeningChallenge = lazy(() => import('./games/opening-challenge'));
+const EndingChallenge = lazy(() => import('./games/ending-challenge'));
+const FrameGuess = lazy(() => import('./games/frame-guess'));
+const DialogueClash = lazy(() => import('./games/dialogue-clash'));
 
 // ─── Code Splitting: Lazy-loaded pages ──────────────────────
 const HomePage = lazy(() => import('./pages/HomePage'));
-const QuizPage = lazy(() => import('./pages/QuizPage'));
-const EmojiQuizPage = lazy(() => import('./pages/EmojiQuizPage'));
-const AnimeFramesPage = lazy(() => import('./pages/AnimeFramesPage'));
-const ShadowQuizPage = lazy(() => import('./pages/ShadowQuizPage'));
 const SurvivalPage = lazy(() => import('./pages/SurvivalPage'));
 const DailyPage = lazy(() => import('./pages/DailyPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
@@ -35,24 +40,6 @@ function PageLoader() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60 }}>
       <div className="skeleton" style={{ width: 120, height: 20 }} />
     </div>
-  );
-}
-
-// Coming Soon placeholder
-function ComingSoonPage({ title, icon }) {
-  return (
-    <section aria-label={`${title} - Coming Soon`} className="shadow-lock">
-      <BackButton />
-      <div style={{ fontSize: 72, marginBottom: 16 }} aria-hidden="true">{icon}</div>
-      <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{title}</h2>
-      <p style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.7 }}>
-        This mode is coming soon!
-      </p>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 14, padding: '12px 20px' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: T.gold }}>Coming Soon</div>
-        <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>Stay tuned for updates!</div>
-      </div>
-    </section>
   );
 }
 
@@ -171,15 +158,15 @@ export default function App() {
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
-                  <Route path="/quiz" element={<QuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} mcqOnly={true} mode="quiz" />} />
-                  <Route path="/anagram" element={<QuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} anagramOnly={true} mode="anagram" />} />
-                  <Route path="/emoji" element={<EmojiQuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/shadow" element={<ShadowQuizPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/frames" element={<AnimeFramesPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/opening" element={<ComingSoonPage title="Opening Challenge" icon="🎵" />} />
-                  <Route path="/ending" element={<ComingSoonPage title="Ending Challenge" icon="🎶" />} />
-                  <Route path="/sceneguess" element={<ComingSoonPage title="Frame Guess" icon="🎬" />} />
-                  <Route path="/dialogue" element={<ComingSoonPage title="Dialogue Clash" icon="💬" />} />
+                  <Route path="/quiz" element={<AnimeQuiz spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/anagram" element={<WordNinja spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/emoji" element={<EmojiWars spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/shadow" element={<AnimeShadow spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/frames" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/opening" element={<OpeningChallenge spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/ending" element={<EndingChallenge spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/sceneguess" element={<FrameGuess spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/dialogue" element={<DialogueClash spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/daily" element={<DailyPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/search" element={<SearchPage showFeedback={showFeedback} />} />
@@ -197,7 +184,6 @@ export default function App() {
         </main>
       </div>
 
-      </div>
     </div>
 
     {/* Bottom Navigation Bar - Outside app-shell for proper fixed positioning in PWA standalone mode */}
