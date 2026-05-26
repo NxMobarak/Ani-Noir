@@ -1,4 +1,123 @@
-// Dialogue Clash - Level 5 Questions
-// Format: { text: "Question?", options: ["A", "B", "C", "D"], correct: 0 }
-// Need 100 questions (20 stages × 5 questions)
-export default [];
+// Dialogue Clash - Level 5
+// Famous anime quotes - guess who said it
+export default [
+  // Stage 1
+  {"text":"Close your eyes. Feel the earth beneath you.","options":["Kino","Hermes","Shizu","Photo"],"correct":0,"hint":"From Kinos Journey"},
+  {"text":"The world is not beautiful. Therefore it is.","options":["Kino","Hermes","Sakura","Ti"],"correct":0,"hint":"From Kinos Journey"},
+  {"text":"Humans shed tears. That is what makes them different.","options":["Anti-Spiral","Lordgenome","Nia","Simon"],"correct":0,"hint":"From Gurren Lagann"},
+  {"text":"Life is something no one can steal from you.","options":["Rem Saverem","Vash","Knives","Wolfwood"],"correct":0,"hint":"From Trigun"},
+  {"text":"There is nothing left but to keep moving forward.","options":["Chito","Yuuri","Kanazawa","Ishii"],"correct":0,"hint":"From Girls Last Tour"},
+  // Stage 2
+  {"text":"Even meaningless things can be meaningful.","options":["Yuuri","Chito","Kanazawa","Nuko"],"correct":0,"hint":"From Girls Last Tour"},
+  {"text":"I may be small but I refuse to die quietly.","options":["Riko","Reg","Nanachi","Ozen"],"correct":0,"hint":"From Made in Abyss"},
+  {"text":"The curse of the Abyss is also its blessing.","options":["Bondrewd","Ozen","Nanachi","Riko"],"correct":0,"hint":"From Made in Abyss"},
+  {"text":"To know yourself is the beginning of wisdom.","options":["Decim","Nona","Oculus","Clavis"],"correct":0,"hint":"From Death Parade"},
+  {"text":"Memories are merely one interpretation of events.","options":["Ginko","Narrator","Tanyuu","Adashino"],"correct":0,"hint":"From Mushishi"},
+  // Stage 3
+  {"text":"What is lost is lost. Do not lose any more.","options":["Yang Wenli","Reinhard","Julian","Bucock"],"correct":0,"hint":"From Legend of Galactic Heroes"},
+  {"text":"Democracy is the worst form of government except all others.","options":["Yang Wenli","Reinhard","Trunicht","Bucock"],"correct":0,"hint":"From Legend of Galactic Heroes"},
+  {"text":"If you end up with a boring life because you listened to everyone else, you deserve it.","options":["Eikichi Onizuka","Uchiyamada","Fuyutsuki","Azusa"],"correct":0,"hint":"From Great Teacher Onizuka"},
+  {"text":"Nothing in this world is absolute.","options":["Victorique de Blois","Kujo","Grevil","Brian"],"correct":0,"hint":"From Gosick"},
+  {"text":"The truth you see is not necessarily real.","options":["Makishima Shogo","Kogami","Akane","Ginoza"],"correct":0,"hint":"From Psycho-Pass"},
+  // Stage 4
+  {"text":"Books contain the thoughts and feelings of the author.","options":["Myne/Main","Ferdinand","Lutz","Benno"],"correct":0,"hint":"From Ascendance of a Bookworm"},
+  {"text":"I would rather betray the world than let it betray me.","options":["Lelouch","Suzaku","Charles","Schneizel"],"correct":0,"hint":"From Code Geass (Cao Cao ref)"},
+  {"text":"You are not alone.","options":["Kaworu Nagisa","Rei","Shinji","Gendo"],"correct":0,"hint":"From Evangelion"},
+  {"text":"There is no one who cannot be replaced.","options":["Gendo Ikari","Fuyutsuki","Rei","Ritsuko"],"correct":0,"hint":"From Evangelion"},
+  {"text":"The universe is neither good nor evil. It does not care.","options":["Lain Iwakura","Eiri","Arisu","Alice"],"correct":0,"hint":"From Serial Experiments Lain"},
+  // Stage 5
+  {"text":"Every human relies on knowledge and experience to live.","options":["Itachi Uchiha","Pain","Obito","Madara"],"correct":0,"hint":"From Naruto (philosophical)"},
+  {"text":"Those who do not understand pain cannot understand peace.","options":["Pain/Nagato","Obito","Madara","Jiraiya"],"correct":0,"hint":"From Naruto Shippuden"},
+  {"text":"The night is long. I want to think clearly until morning.","options":["Ginko","Tanyuu","Adashino","Nui"],"correct":0,"hint":"From Mushishi"},
+  {"text":"Life goes on whether you move on or stay locked in the past.","options":["Ginko","Narrator","Adashino","Tanyuu"],"correct":0,"hint":"From Mushishi"},
+  {"text":"Are you afraid of being alone?","options":["Rei Ayanami","Kaworu","Shinji","Gendo"],"correct":0,"hint":"From Evangelion"},
+  // Stage 6
+  {"text":"How disgusting.","options":["Asuka Langley","Shinji","Rei","Misato"],"correct":0,"hint":"From End of Evangelion"},
+  {"text":"With kindness comes naivety. Courage becomes foolhardiness.","options":["Mami Tomoe","Homura","Kyubey","Madoka"],"correct":0,"hint":"From Madoka Magica"},
+  {"text":"I am going to create a world where everyone smiles.","options":["Madoka Kaname","Homura","Sayaka","Mami"],"correct":0,"hint":"From Madoka Magica"},
+  {"text":"Time heals all wounds. But wounds can reopen.","options":["Homura Akemi","Madoka","Kyouko","Mami"],"correct":0,"hint":"From Madoka Rebellion"},
+  {"text":"I will never let Madoka fight alone again.","options":["Homura Akemi","Sayaka","Mami","Kyouko"],"correct":0,"hint":"From Madoka Magica"},
+  // Stage 7
+  {"text":"A king who leads no one is no king at all.","options":["Rider/Iskandar","Saber","Gilgamesh","Waver"],"correct":0,"hint":"From Fate/Zero"},
+  {"text":"All the evils of this world? Bring them on.","options":["Kiritsugu Emiya","Kirei","Saber","Irisviel"],"correct":0,"hint":"From Fate/Zero"},
+  {"text":"This is reality. Cruel and unfair. No happy endings.","options":["Kiritsugu Emiya","Kirei","Saber","Irisviel"],"correct":0,"hint":"From Fate/Zero"},
+  {"text":"Do you have a reason to fight?","options":["Saber","Kiritsugu","Gilgamesh","Lancer"],"correct":0,"hint":"From Fate/Zero"},
+  {"text":"The sin of being born a god.","options":["Kotomine Kirei","Gilgamesh","Archer","Zouken"],"correct":0,"hint":"From Fate/Zero"},
+  // Stage 8
+  {"text":"Don't look back. Live beautifully until the end.","options":["Gintoki Sakata","Takasugi","Shouyou","Katsura"],"correct":0,"hint":"From Gintama"},
+  {"text":"The world is full of monsters with friendly faces.","options":["Johan Liebert","Tenma","Nina","Roberto"],"correct":0,"hint":"From Monster"},
+  {"text":"In the end, the strong devour the weak.","options":["Makishima Shogo","Kogami","Akane","Kasei"],"correct":0,"hint":"From Psycho-Pass"},
+  {"text":"Can you keep a secret?","options":["Makishima Shogo","Kogami","Akane","Ginoza"],"correct":0,"hint":"From Psycho-Pass"},
+  {"text":"Pain is the proof that you are alive.","options":["Rider/Iskandar","Waver","Gilgamesh","Saber"],"correct":0,"hint":"From Fate/Zero"},
+  // Stage 9
+  {"text":"The deeds of the fathers are visited on the sons.","options":["Reinhard von Lohengramm","Yang","Kircheis","Oberstein"],"correct":0,"hint":"From Legend of Galactic Heroes"},
+  {"text":"Is it wrong to pick up girls in a dungeon?","options":["Bell Cranel","Hestia","Ais","Lili"],"correct":0,"hint":"From DanMachi (title quote)"},
+  {"text":"Even if I am to carry all the sins of this world.","options":["Archer/EMIYA","Shirou","Saber","Rin"],"correct":0,"hint":"From Fate/Stay Night"},
+  {"text":"People are not born to be alone.","options":["Kaworu Nagisa","Shinji","Rei","Misato"],"correct":0,"hint":"From Evangelion"},
+  {"text":"Living means to take responsibility for your existence.","options":["Meruem","Netero","Komugi","Pitou"],"correct":0,"hint":"From Hunter x Hunter"},
+  // Stage 10
+  {"text":"If you cannot find it in yourself to forgive, then keep hating.","options":["Itachi Uchiha","Sasuke","Madara","Obito"],"correct":0,"hint":"From Naruto"},
+  {"text":"Kindness is not weakness. Cruelty is not strength.","options":["Thors","Thorfinn","Askeladd","Canute"],"correct":0,"hint":"From Vinland Saga"},
+  {"text":"A true warrior has no need for a blade.","options":["Thors","Thorfinn","Askeladd","Canute"],"correct":0,"hint":"From Vinland Saga"},
+  {"text":"Have you no shame? No honor?","options":["Askeladd","Thorfinn","Thors","Canute"],"correct":0,"hint":"From Vinland Saga"},
+  {"text":"You have no enemies.","options":["Thors","Thorfinn","Canute","Priest"],"correct":0,"hint":"From Vinland Saga"},
+  // Stage 11
+  {"text":"I think therefore you are.","options":["C.C.","Lelouch","Charles","Marianne"],"correct":0,"hint":"From Code Geass"},
+  {"text":"One who fails to recognize their darkness has no right to the light.","options":["Zeref","Natsu","Mavis","Acnologia"],"correct":0,"hint":"From Fairy Tail"},
+  {"text":"If you only take and never give back, the world takes everything.","options":["Greed (FMA)","Ling","Father","Bradley"],"correct":0,"hint":"From FMA Brotherhood"},
+  {"text":"People live to protect something.","options":["Kenshin Himura","Hiko","Kaoru","Saito"],"correct":0,"hint":"From Rurouni Kenshin"},
+  {"text":"A blade is a weapon. Kendo nurtures the human spirit.","options":["Saito Hajime","Kenshin","Kaoru","Aoshi"],"correct":0,"hint":"From Rurouni Kenshin"},
+  // Stage 12
+  {"text":"If you let the fly live, the spider dies.","options":["Kiritsugu Emiya","Kirei","Irisviel","Saber"],"correct":0,"hint":"From Fate/Zero"},
+  {"text":"It is not possible to save everyone. But trying is worthwhile.","options":["Emiya Shirou","Archer","Saber","Rin"],"correct":0,"hint":"From Fate/Stay Night"},
+  {"text":"Devotion too deep will sometimes drive you mad.","options":["Griffith","Guts","Charlotte","Casca"],"correct":0,"hint":"From Berserk"},
+  {"text":"I don't want to be forgiven. I will keep living anyway.","options":["Guts","Griffith","Casca","Skull Knight"],"correct":0,"hint":"From Berserk"},
+  {"text":"If you still can stand, if your hands can grip the sword, keep fighting.","options":["Guts","Zodd","Skull Knight","Griffith"],"correct":0,"hint":"From Berserk"},
+  // Stage 13
+  {"text":"All these memories will be lost in time, like tears in rain.","options":["Spike Spiegel","Jet","Faye","Vicious"],"correct":0,"hint":"From Cowboy Bebop (ref)"},
+  {"text":"I am not going there to die. I am going to find if I am alive.","options":["Spike Spiegel","Jet","Julia","Faye"],"correct":0,"hint":"From Cowboy Bebop"},
+  {"text":"See you space cowboy.","options":["Narrator/Spike","Jet","Faye","Ed"],"correct":0,"hint":"From Cowboy Bebop"},
+  {"text":"The past is the past. It does not define who you are now.","options":["Vash the Stampede","Wolfwood","Rem","Knives"],"correct":0,"hint":"From Trigun"},
+  {"text":"Love and Peace!","options":["Vash the Stampede","Wolfwood","Milly","Meryl"],"correct":0,"hint":"From Trigun"},
+  // Stage 14
+  {"text":"I am the sting that races through your veins.","options":["Orochimaru","Kabuto","Sasuke","Anko"],"correct":0,"hint":"From Naruto"},
+  {"text":"The flower that blooms in adversity is the rarest of all.","options":["Mulan (anime ref)","Boa Hancock","Robin","Nami"],"correct":0,"hint":"From One Piece (paraphrase)"},
+  {"text":"We still don't know the name of the flower we saw that day.","options":["Narrator (Anohana)","Jinta","Menma","Anaru"],"correct":0,"hint":"From Anohana (title)"},
+  {"text":"Forgetting is like a wound. The wound may heal but it has already changed.","options":["Kaori Miyazono","Kousei","Tsubaki","Watari"],"correct":0,"hint":"From Your Lie in April"},
+  {"text":"I want to eat your pancreas.","options":["Haruki Shiga","Sakura","Kyoko","Teacher"],"correct":0,"hint":"From I Want to Eat Your Pancreas"},
+  // Stage 15
+  {"text":"Was I able to live inside your heart?","options":["Kaori Miyazono","Kousei","Tsubaki","Watari"],"correct":0,"hint":"From Your Lie in April"},
+  {"text":"Let me hear you play one more time.","options":["Kaori Miyazono","Kousei","Tsubaki","Watari"],"correct":0,"hint":"From Your Lie in April"},
+  {"text":"The moment you wish to be with someone forever never ends.","options":["Isla","Tsukasa","Michiru","Kazuki"],"correct":0,"hint":"From Plastic Memories"},
+  {"text":"I hope someone picks up the pieces of your heart.","options":["Isla","Tsukasa","Constance","Eru"],"correct":0,"hint":"From Plastic Memories"},
+  {"text":"Do you like this school? I really really love it.","options":["Nagisa Furukawa","Tomoya","Kyou","Tomoyo"],"correct":0,"hint":"From Clannad"},
+  // Stage 16
+  {"text":"Life is random and unfair. That makes it interesting.","options":["Izaya Orihara","Celty","Shizuo","Mikado"],"correct":0,"hint":"From Durarara!!"},
+  {"text":"IZAAAAYAAA!","options":["Shizuo Heiwajima","Izaya","Simon","Celty"],"correct":0,"hint":"From Durarara!!"},
+  {"text":"A person grows up when they overcome hardships.","options":["Jiraiya","Naruto","Kakashi","Iruka"],"correct":0,"hint":"From Naruto"},
+  {"text":"Wherever someone thinks of you, that is where home is.","options":["Jiraiya","Naruto","Minato","Iruka"],"correct":0,"hint":"From Naruto"},
+  {"text":"The lives of the ones left behind are forever changed.","options":["Narrator (Clannad)","Tomoya","Nagisa","Ushio"],"correct":0,"hint":"From Clannad After Story"},
+  // Stage 17
+  {"text":"I just wanted to hear you say I love you one more time.","options":["Tomoya Okazaki","Nagisa","Ushio","Akio"],"correct":0,"hint":"From Clannad After Story"},
+  {"text":"You know nothing of the depths to which humans can sink.","options":["Johan Liebert","Tenma","Roberto","Nina"],"correct":0,"hint":"From Monster"},
+  {"text":"The real monster is the one staring back from the mirror.","options":["Johan Liebert","Tenma","Anna","Grimmer"],"correct":0,"hint":"From Monster"},
+  {"text":"Only those prepared to fire should be fired upon.","options":["Lelouch","Suzaku","Cornelia","Charles"],"correct":0,"hint":"From Code Geass"},
+  {"text":"Death smiles at us all. All a man can do is smile back.","options":["Whitebeard","Roger","Shanks","Rayleigh"],"correct":0,"hint":"From One Piece"},
+  // Stage 18
+  {"text":"A man dies when he is forgotten.","options":["Dr. Hiriluk","Chopper","Brook","Kureha"],"correct":0,"hint":"From One Piece"},
+  {"text":"I will inherit your will, your dream, and your age.","options":["Monkey D. Luffy","Ace","Sabo","Shanks"],"correct":0,"hint":"From One Piece"},
+  {"text":"To die smiling... that is the ultimate freedom.","options":["Gol D. Roger","Luffy","Ace","Whitebeard"],"correct":0,"hint":"From One Piece"},
+  {"text":"What will you do when everything you built is taken away?","options":["Pain/Nagato","Konan","Jiraiya","Hanzo"],"correct":0,"hint":"From Naruto Shippuden"},
+  {"text":"In this world, winning is everything.","options":["Ayanokoji Kiyotaka","Horikita","Ryuen","Sakayanagi"],"correct":0,"hint":"From Classroom of the Elite"},
+  // Stage 19
+  {"text":"Every tool is a weapon if you hold it right.","options":["Ayanokoji Kiyotaka","Ryuen","Horikita","Koenji"],"correct":0,"hint":"From Classroom of the Elite"},
+  {"text":"Talent you do not use is no talent at all.","options":["Ayanokoji Kiyotaka","Sakayanagi","Horikita","Chabashira"],"correct":0,"hint":"From Classroom of the Elite"},
+  {"text":"I will show the world my power... quietly.","options":["Ayanokoji Kiyotaka","Ryuen","Koenji","Horikita"],"correct":0,"hint":"From Classroom of the Elite"},
+  {"text":"I was created to be the perfect human.","options":["Ayanokoji Kiyotaka","Sakayanagi","Nagumo","Chairman"],"correct":0,"hint":"From Classroom of the Elite"},
+  {"text":"There is no absolute justice in this world.","options":["Donquixote Doflamingo","Akainu","Sengoku","Fujitora"],"correct":0,"hint":"From One Piece"},
+  {"text":"The real voyage of discovery is not seeking new landscapes but having new eyes.","options":["Ginko (Mushishi)","Kino","Yang Wenli","Decim"],"correct":0,"hint":"From Mushishi"},
+  {"text":"Mankind must put an end to war before war puts an end to mankind.","options":["Yang Wenli","Reinhard","Bucock","Julian"],"correct":0,"hint":"From Legend of Galactic Heroes"},
+  {"text":"Only the dead have seen the end of war.","options":["Yang Wenli","Reinhard","Oberstein","Kircheis"],"correct":0,"hint":"From Legend of Galactic Heroes"},
+  {"text":"The loneliest moment is when you are watching your world fall apart.","options":["Ciel Phantomhive","Sebastian","Alois","Claude"],"correct":0,"hint":"From Black Butler"},
+  {"text":"I am simply one hell of a butler.","options":["Sebastian Michaelis","Ciel","Tanaka","Agni"],"correct":0,"hint":"From Black Butler"},
+];
