@@ -291,22 +291,10 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   };
 
   const doHint = () => {
-    if (spades < HINT_COST || answered) return;
-    const name = currentAnswer;
-    // Find unrevealed letter positions (skip spaces and already hinted)
-    const available = [];
-    for (let i = 0; i < name.length; i++) {
-      if (name[i] !== ' ' && !hintLetters.includes(i)) {
-        available.push(i);
-      }
-    }
-    if (available.length === 0) return;
-    // Reveal a random unrevealed letter
-    const randomIdx = available[Math.floor(Math.random() * available.length)];
-    setHintLetters(prev => [...prev, randomIdx]);
-    setHintUsed(true);
+    if (spades < HINT_COST || hintUsed || answered) return;
     setSpades(s => s - HINT_COST);
-    showFeedback(`💡 Hint: letter "${name[randomIdx].toUpperCase()}" revealed! -${HINT_COST}♠`);
+    setHintUsed(true);
+    showFeedback(`Hint! -${HINT_COST}♠ Choose from options`);
   };
 
   const startCountdown = () => {
@@ -496,7 +484,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       </div>
 
       {/* Letter Blanks — typing & hints appear here (like shadow game) */}
-      {!answered && currentAnswer && (
+      {!hintUsed && !answered && currentAnswer && (
         <div className="sg-hint-display" aria-label="Anime name letters">
           {(() => {
             const name = currentAnswer;
@@ -542,8 +530,20 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Keyboard (like shadow game) */}
-      {!answered && (
+      {/* Hint Options (when hint used) — keyboard hides, 4 MCQ options show */}
+      {hintUsed && !answered && (
+        <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {currentOptions.map((opt, i) => (
+            <button key={i} className="option-btn" onClick={() => submitOption(opt)}
+              style={{ padding: '10px 14px', fontSize: 13 }}>
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Keyboard (like shadow game — only when hint NOT used) */}
+      {!hintUsed && !answered && (
         <div className="sg-keyboard">
           <div className="sg-keyboard-main">
             {KEYBOARD_ROWS.map((row, ri) => (
@@ -571,9 +571,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
           <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
             ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
           </button>
-          <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
-            💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
-          </button>
+          {!hintUsed && (
+            <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
+              💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
+            </button>
+          )}
         </div>
       )}
     </div>
