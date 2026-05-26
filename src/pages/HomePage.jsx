@@ -103,7 +103,7 @@ export default function HomePage() {
         <div className="hero-greeting" style={{ color: greetingColor }}>{greeting}, Otaku!</div>
         <p className="hero-sub" style={{ color: subColor }}>{tagline}</p>
         <button className="btn btn-primary" style={{ marginTop: 12, borderRadius: 10, fontSize: 12, padding: '8px 16px' }} onClick={() => {
-          const modes = ['/quiz', '/ninja', '/emoji', '/shadow', '/moments', '/frameguess', '/theme', '/dialogue'];
+          const modes = ['/quiz', '/ninja', '/emoji', '/shadow', '/moments', '/frame', '/theme', '/dialogue'];
           navigate(modes[Math.floor(Math.random() * modes.length)]);
         }}>
           Play Now
@@ -167,7 +167,7 @@ export default function HomePage() {
             ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles', 'brain'],
             ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes', 'visual'],
             ['/moments', '🖼️', 'Moments', 'Identify iconic anime scenes', 'visual'],
-            ['/frameguess', '🎬', 'Frame Guess', 'Guess from a single frame', 'visual'],
+            ['/frame', '🎬', 'Frame Guess', 'Guess from a single frame', 'visual'],
             ['/theme', '🎵', 'Anime Theme', 'Name that opening or ending!', 'audio'],
             ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?', 'brain'],
           ].map(([path, ico, lbl, desc, glow]) => (
