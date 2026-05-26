@@ -117,7 +117,7 @@ export default function HomePage() {
             ['/word-ninja', '🔤', 'Word Ninja', 'Guess the anime by words'],
             ['/emoji', '🎯', 'Emoji Wars', 'Decode anime emoji puzzles'],
             ['/shadow', '🕵️', 'Anime Shadow', 'Guess anime from silhouettes'],
-            ['/frames', '🖼️', 'Anime Moments', 'Identify iconic anime scenes'],
+            ['/frames', '🖼️', 'Moments', 'Identify iconic anime scenes'],
             ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame'],
             ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!'],
             ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?'],
