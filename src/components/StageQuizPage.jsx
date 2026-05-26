@@ -10,7 +10,7 @@ import {
   STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD
 } from '../games/shared/config';
 import CircularTimer from './CircularTimer';
-import AnagramTiles from './AnagramTiles';
+import WordNinjaTiles from './WordNinjaTiles';
 import BackButton from './BackButton';
 
 
@@ -302,7 +302,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         <BackButton />
         <div className="card" style={{ marginBottom: 16 }}>
           <h2 className="card-title" style={{ color: T.rose }}>
-            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'anagram' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : '🖼️ ANIME MOMENTS'}
+            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'word-ninja' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : '🖼️ ANIME MOMENTS'}
           </h2>
           <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
           <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
@@ -443,7 +443,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
           {q.type === 'anagram' ? '🔤 ANIME SCRAMBLE' : q.text}
         </div>
         {q.type === 'anagram' ? (
-          <AnagramTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
+          <WordNinjaTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
         ) : (
           <div className="question-options-enter">
             {hintRevealed && q.hint && (

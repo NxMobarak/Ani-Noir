@@ -19,7 +19,7 @@ export default function WordNinjaPage({ spades, setSpades, showFeedback }) {
 
   return (
     <StageQuizPage
-      mode="anagram"
+      mode="word-ninja"
       getQuestionPool={getQuestionPool}
       spades={spades}
       setSpades={setSpades}

@@ -2,7 +2,7 @@
 const NAV = [
   { id: 'home', icon: '🏠', label: 'Home', path: '/' },
   { id: 'quiz', icon: '🧠', label: 'Anime Quiz', path: '/quiz' },
-  { id: 'anagram', icon: '🔤', label: 'Word Ninja', path: '/anagram' },
+  { id: 'word-ninja', icon: '🔤', label: 'Word Ninja', path: '/word-ninja' },
   { id: 'emoji', icon: '🎯', label: 'Emoji Wars', path: '/emoji' },
   { id: 'shadow', icon: '🕵️', label: 'Anime Shadow', path: '/shadow' },
   { id: 'frames', icon: '🖼️', label: 'Anime Moments', path: '/frames' },

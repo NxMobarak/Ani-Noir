@@ -3,7 +3,7 @@ import T from '../constants/theme';
 import { questionBank } from '../questions/index';
 import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong } from '../utils/audio';
-import AnagramTiles from '../components/AnagramTiles';
+import WordNinjaTiles from '../components/WordNinjaTiles';
 
 const DAILY_KEY = 'ani_daily';
 const DAILY_REWARD = 30;
@@ -127,7 +127,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
         border: `1px solid ${T.border}`
       }}>
         <div style={{ color: T.textDim, fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>
-          {question.type === 'mcq' ? 'Multiple Choice' : 'Anagram'} • Level {question.level}
+          {question.type === 'mcq' ? 'Multiple Choice' : 'Word Ninja'} • Level {question.level}
         </div>
         <p style={{ color: T.text, fontSize: 15, textAlign: 'center', margin: 0 }}>
           {question.text || question.question || ''}
@@ -136,7 +136,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
 
       {/* Answer section */}
       {isAnagram ? (
-        <AnagramTiles
+        <WordNinjaTiles
           scrambled={question.scrambled || (question.answer || '').split('').sort(() => Math.random() - 0.5)}
           onSolve={handleAnagramSolve}
           hintRevealed={false}

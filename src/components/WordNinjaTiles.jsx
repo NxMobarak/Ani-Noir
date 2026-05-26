@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import T from '../constants/theme';
 import { playClick } from '../utils/audio';
 
-export default function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, answered, correctAnswer }) {
+export default function WordNinjaTiles({ scrambled, onSolve, hintRevealed, hint, answered, correctAnswer }) {
   const [tiles, setTiles] = useState(() => scrambled.map((l, i) => ({ id: i, letter: l, used: false })));
   const [answer, setAnswer] = useState([]);
 
@@ -37,7 +37,7 @@ export default function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, a
   };
 
   return (
-    <div className="anagram-display">
+    <div className="word-ninja-display">
       <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Your Answer</div>
       <div className="answer-slots">
         {answer.length === 0
@@ -65,7 +65,7 @@ export default function AnagramTiles({ scrambled, onSolve, hintRevealed, hint, a
           Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
         </div>
       )}
-      <div className="anagram-actions">
+      <div className="word-ninja-actions">
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={removeLast} disabled={!answer.length || answered}>&#9003;</button>
         <button className="btn btn-secondary" style={{ fontSize: 12, padding: '8px 12px' }} onClick={clearAll} disabled={!answer.length || answered}>Clear</button>
         <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={submit} disabled={!answer.length || answered}>Submit &#10003;</button>

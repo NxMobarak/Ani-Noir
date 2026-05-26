@@ -156,7 +156,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .option-btn.wrong { border-color:#f43f5e;background:rgba(244,63,94,0.12);color:#f43f5e;transition:none; }
 .option-btn.selected { border-color:#8b5cf6;background:rgba(139,92,246,0.12); }
 
-.anagram-display { text-align:center;margin:16px 0;padding:16px;background:#0e1018;border-radius:16px;border:1px solid rgba(255,255,255,0.08); }
+.word-ninja-display { text-align:center;margin:16px 0;padding:16px;background:#0e1018;border-radius:16px;border:1px solid rgba(255,255,255,0.08); }
 .tile-pool { display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px;min-height:44px; }
 .letter-tile { width:38px;height:44px;background:linear-gradient(145deg,#13161f,#0e1018);border:1.5px solid #f43f5e;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#f43f5e;cursor:pointer;transition:all 0.15s;user-select:none;flex-shrink:0;box-shadow:0 2px 8px rgba(244,63,94,0.15); }
 .letter-tile:hover { transform:translateY(-3px);box-shadow:0 6px 16px rgba(244,63,94,0.3); }
@@ -165,7 +165,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .answer-slot { width:38px;height:44px;background:#0e1018;border:1.5px dashed rgba(255,255,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#f1f5f9;cursor:pointer;transition:all 0.15s; }
 .answer-slot.filled { border-style:solid;border-color:#8b5cf6;background:rgba(139,92,246,0.1); }
 .answer-slot.filled:hover { border-color:#f43f5e;background:rgba(244,63,94,0.08); }
-.anagram-actions { display:flex;gap:8px;justify-content:center;margin-top:8px; }
+.word-ninja-actions { display:flex;gap:8px;justify-content:center;margin-top:8px; }
 
 .power-btns { display:flex;gap:8px;margin-top:12px; }
 .power-btn { flex:1;background:#0e1018;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:9px 6px;font-size:11px;text-align:center;cursor:pointer;color:#94a3b8;transition:all 0.2s; }

@@ -86,7 +86,7 @@ export default function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
           {[
             ['/quiz', '🧠', 'Anime Quiz'],
-            ['/anagram', '🔤', 'Word Ninja'],
+            ['/word-ninja', '🔤', 'Word Ninja'],
             ['/emoji', '🎯', 'Emoji Wars'],
             ['/shadow', '🕵️', 'Anime Shadow'],
             ['/frames', '🖼️', 'Anime Moments'],

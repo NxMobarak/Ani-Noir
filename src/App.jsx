@@ -159,7 +159,7 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/quiz" element={<AnimeQuiz spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/anagram" element={<WordNinja spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/word-ninja" element={<WordNinja spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/emoji" element={<EmojiWars spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/shadow" element={<AnimeShadow spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/frames" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />

@@ -3,7 +3,7 @@
  * Ensures data integrity across app versions.
  */
 
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 // Schema definitions for validation
 const schemas = {
@@ -102,6 +102,17 @@ export function migrateData() {
           localStorage.removeItem(key);
         }
       }
+    }
+  }
+
+  // Migration v2 -> v3: rename anagram -> word-ninja storage keys
+  if (version < 3) {
+    const oldKey = 'ani_stages_anagram';
+    const newKey = 'ani_stages_word-ninja';
+    const oldData = localStorage.getItem(oldKey);
+    if (oldData && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, oldData);
+      localStorage.removeItem(oldKey);
     }
   }
 

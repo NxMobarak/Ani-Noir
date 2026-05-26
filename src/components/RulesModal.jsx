@@ -54,7 +54,7 @@ export default function RulesModal({ onClose }) {
           <ul style={{ listStyle:'none', fontSize:13, color:T.textMid, lineHeight:2 }}>
             <li>Hint: 30&#9824;</li>
             <li>Skip: 50&#9824;</li>
-            <li>Shuffle (anagram): 20&#9824;</li>
+            <li>Shuffle (word ninja): 20&#9824;</li>
           </ul>
         </div>
       </div>

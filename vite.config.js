@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         short_name: 'AniNoir',
         name: 'AniNoir – Anime Quiz Universe',
-        description: 'Your ultimate anime quiz, discovery and trivia app. Test your anime knowledge with shadow quizzes, emoji challenges, anagram puzzles and more!',
+        description: 'Your ultimate anime quiz, discovery and trivia app. Test your anime knowledge with shadow quizzes, emoji challenges, word ninja puzzles and more!',
         start_url: '/',
         scope: '/',
         display: 'standalone',
