@@ -141,7 +141,6 @@ export default function App() {
           <button className="menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" aria-expanded={sidebarOpen}>☰</button>
           <h1 className="topbar-title" style={{ fontSize: 16, fontWeight: 700 }}>{pageTitle}</h1>
           <div className="topbar-chips" role="toolbar" aria-label="Quick actions">
-            <button className="chip" onClick={() => navigate('/profile')} aria-label="Profile" style={{ padding: '4px 8px' }}>👤</button>
             <button className={`chip ${showChipHint ? 'chip-pulse' : ''}`} onClick={() => { setSpadesModal(true); if (showChipHint) { setShowChipHint(false); localStorage.setItem('ani_chip_hint_shown', '1'); } }} aria-label={`${spades} spades`}>
               ♠ {spades}
               {showChipHint && <span className="chip-tooltip">Tap for info</span>}
