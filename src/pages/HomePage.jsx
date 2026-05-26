@@ -151,28 +151,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ANIME OF THE DAY */}
-      <section style={{ marginBottom: 6 }} aria-label="Anime of the Day">
-        <h2 className="card-title" style={{ color: T.rose, padding: '0 2px 8px', fontSize: 11 }}>ANIME OF THE DAY</h2>
-        <div className="daily-anime-card">
-          <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" onError={e => { e.target.style.display = 'none'; }} loading="lazy" />
-          <div className="daily-anime-overlay">
-            <h3 className="daily-anime-title">{dailyAnime.title}</h3>
-            <div className="daily-anime-meta">⭐ {dailyAnime.rating} · {dailyAnime.genre}</div>
+      {/* ANIME OF THE DAY + QUOTE OF THE DAY - Side by Side */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        <section aria-label="Anime of the Day">
+          <div className="daily-anime-card" style={{ marginBottom: 0 }}>
+            <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" onError={e => { e.target.style.display = 'none'; }} loading="lazy" />
+            <div className="daily-anime-overlay">
+              <h3 className="daily-anime-title" style={{ fontSize: 13 }}>{dailyAnime.title}</h3>
+              <div className="daily-anime-meta" style={{ fontSize: 10 }}>⭐ {dailyAnime.rating}</div>
+            </div>
           </div>
-        </div>
-        <div className="card" style={{ marginTop: 0 }}>
-          <p style={{ fontSize: 13, color: T.textMid, lineHeight: 1.6 }}>{dailyAnime.desc}</p>
-        </div>
-      </section>
+        </section>
 
-      <section className="card" aria-label="Quote of the Day">
-        <h2 className="card-title" style={{ color: T.gold }}>QUOTE OF THE DAY</h2>
-        <blockquote className="quote-card">
-          <p className="quote-text">"{dailyQuote.text}"</p>
-          <cite className="quote-attr" style={{ fontStyle: 'normal' }}>— {dailyQuote.char} · {dailyQuote.anime}</cite>
-        </blockquote>
-      </section>
+        <section className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} aria-label="Quote of the Day">
+          <h2 className="card-title" style={{ color: T.gold, fontSize: 10, marginBottom: 6 }}>QUOTE OF THE DAY</h2>
+          <blockquote className="quote-card" style={{ paddingLeft: 10, borderLeftWidth: 2 }}>
+            <p className="quote-text" style={{ fontSize: 11 }}>"{dailyQuote.text}"</p>
+            <cite className="quote-attr" style={{ fontStyle: 'normal', fontSize: 10 }}>— {dailyQuote.char}</cite>
+          </blockquote>
+        </section>
+      </div>
     </div>
   );
 }
