@@ -50,6 +50,11 @@ export function playClick() {
   playTone(880, 'sine', 0.05, 0.1);
 }
 
+export function playKeyTap() {
+  playTone(1200, 'sine', 0.03, 0.08);
+  vibrate(10);
+}
+
 export function playCombo() {
   [523,659,784,1046].forEach((f,i) => playTone(f,'sine',0.1,0.3,i*0.07));
   vibrate([20, 30, 20, 30, 20]);

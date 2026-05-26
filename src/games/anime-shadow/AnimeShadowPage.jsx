@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { playCorrect, playWrong } from '../../utils/audio';
+import { playCorrect, playWrong, playKeyTap } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
 import '../../styles/shadow-quiz.css';
@@ -263,8 +263,8 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setPhase('playing');
   };
 
-  const addLetter = (letter) => { if (!revealed) setGuess(g => g + letter); };
-  const removeLetter = () => { if (!revealed) setGuess(g => g.slice(0, -1)); };
+  const addLetter = (letter) => { if (!revealed) { setGuess(g => g + letter); playKeyTap(); } };
+  const removeLetter = () => { if (!revealed) { setGuess(g => g.slice(0, -1)); playKeyTap(); } };
 
   // Physical keyboard support
   useEffect(() => {
