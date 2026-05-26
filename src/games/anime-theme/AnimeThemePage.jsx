@@ -326,6 +326,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       if (passed) addXP(XP_REWARDS.LEVEL_COMPLETE);
       setPhase('result');
     } else {
+      setAnswered(false);
       setCurrentClip(nextClip);
       setPhase('playing');
     }
