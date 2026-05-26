@@ -23,9 +23,7 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
     // When hint is revealed, pick one wrong option to blacken/disable
     let blackenedIdx = null;
     if (hintRevealed) {
-      // Find a wrong option to blacken (not the correct one)
       const wrongIndices = q.options.map((_, i) => i).filter(i => i !== q.correct);
-      // Use question index as seed for consistency
       blackenedIdx = wrongIndices[qIndex % wrongIndices.length];
     }
 
@@ -48,7 +46,7 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
             "{q.text}"
           </div>
           {hintRevealed && q.hint && (
-            <div style={{ marginBottom: 12, fontSize: 12, color: T.teal, textAlign: 'center' }}>📺 {q.hint}</div>
+            <div style={{ display: 'none' }}>{q.hint}</div>
           )}
           <div className="question-options-enter">
           {q.options.map((opt, idx) => {
