@@ -151,24 +151,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ANIME OF THE DAY + QUOTE OF THE DAY - Side by Side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-        <section className="card" style={{ marginBottom: 0, padding: 0, overflow: 'hidden' }} aria-label="Anime of the Day">
-          <div className="daily-anime-card" style={{ marginBottom: 0, minHeight: 140 }}>
-            <img src={dailyAnime.image} alt={dailyAnime.title} className="daily-anime-img" style={{ height: '100%' }} onError={e => { e.target.style.display = 'none'; }} loading="lazy" />
-            <div className="daily-anime-overlay">
-              <h3 className="daily-anime-title" style={{ fontSize: 12 }}>{dailyAnime.title}</h3>
-              <div className="daily-anime-meta" style={{ fontSize: 10 }}>⭐ {dailyAnime.rating} · {dailyAnime.genre}</div>
-            </div>
+      {/* ANIME OF THE DAY */}
+      <section className="card" aria-label="Anime of the Day">
+        <h2 className="card-title" style={{ color: T.rose }}>ANIME OF THE DAY</h2>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <img src={dailyAnime.image} alt={dailyAnime.title} style={{ width: 70, height: 100, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} onError={e => { e.target.style.display = 'none'; }} loading="lazy" />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.3 }}>{dailyAnime.title}</h3>
+            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 3 }}>⭐ {dailyAnime.rating} · {dailyAnime.genre}</div>
+            <button className="btn btn-primary" style={{ marginTop: 8, fontSize: 10, padding: '5px 12px', borderRadius: 8, width: 'fit-content' }} onClick={() => navigate('/search')}>View More</button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 14 }} aria-label="Quote of the Day">
-          <span style={{ fontSize: 24, color: T.gold, lineHeight: 1, marginBottom: 4 }}>"</span>
-          <p style={{ fontSize: 11, fontStyle: 'italic', color: '#f1f5f9', lineHeight: 1.5 }}>{dailyQuote.text}</p>
-          <cite style={{ fontSize: 10, color: T.gold, marginTop: 8, fontStyle: 'normal', display: 'block' }}>— {dailyQuote.char} • {dailyQuote.anime}</cite>
-        </section>
-      </div>
+      {/* QUOTE OF THE DAY */}
+      <section className="card" aria-label="Quote of the Day">
+        <h2 className="card-title" style={{ color: T.gold }}>QUOTE OF THE DAY</h2>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <span style={{ fontSize: 32, color: T.gold, lineHeight: 1, flexShrink: 0 }}>"</span>
+          <div>
+            <p style={{ fontSize: 13, fontStyle: 'italic', color: '#f1f5f9', lineHeight: 1.6 }}>{dailyQuote.text}</p>
+            <cite style={{ fontSize: 11, color: T.gold, marginTop: 8, fontStyle: 'normal', display: 'block' }}>— {dailyQuote.char} • {dailyQuote.anime}</cite>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
