@@ -3,29 +3,63 @@ import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
-import level1 from './questions/level1';
-import level2 from './questions/level2';
-import level3 from './questions/level3';
-import level4 from './questions/level4';
-import level5 from './questions/level5';
 
-const LEVELS = [level1, level2, level3, level4, level5];
+// Audio files are in /public/audio/ with format: l{level}-{number}-{answer-with-hyphens}.mp3
+// Example: l1-01-naruto.mp3, l2-05-attack-on-titan.mp3
+
 const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const CLIPS_PER_LEVEL = 10;
-const AUDIO_PLAY_DURATION = 10; // seconds audio plays
-const TIMER_TOTAL = 30; // seconds to guess
+const AUDIO_PLAY_DURATION = 10;
+const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
 const HINT_COST = 100;
 const MAX_SKIPS = 3;
 const MAX_HINT_WRONG = 3;
-const PASS_THRESHOLD = 8; // need 8/10 to unlock next
+const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_theme_progress';
+const CLIPS_KEY = 'ani_theme_clips';
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
 ];
+
+// Parse filename to extract answer
+// l1-01-naruto.mp3 → "Naruto"
+// l2-03-attack-on-titan.mp3 → "Attack On Titan"
+function parseFilename(filename) {
+  const withoutExt = filename.replace('.mp3', '');
+  const parts = withoutExt.split('-');
+  // First part is level (l1), second is number (01), rest is answer
+  const answerParts = parts.slice(2);
+  return answerParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+}
+
+// Parse level from filename
+function parseLevel(filename) {
+  const match = filename.match(/^l(\d+)-/);
+  return match ? parseInt(match[1], 10) : 1;
+}
+
+// Generate random wrong options from other answers in same level
+function generateOptions(correctAnswer, allAnswers) {
+  const others = allAnswers.filter(a => a !== correctAnswer);
+  const shuffled = others.sort(() => Math.random() - 0.5);
+  const wrongOptions = shuffled.slice(0, 3);
+  const options = [...wrongOptions, correctAnswer].sort(() => Math.random() - 0.5);
+  return options;
+}
+
+// Scan for audio files - uses a manifest approach
+// Since we can't dynamically scan folders in browser, we use a clips list
+// User adds filenames to this list OR we detect from pre-built manifest
+function getClipsForLevel(level, allClips) {
+  return allClips
+    .filter(f => parseLevel(f) === level)
+    .sort()
+    .slice(0, CLIPS_PER_LEVEL);
+}
 
 function getProgress() {
   try {
@@ -37,8 +71,39 @@ function saveProgress(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+// Get clips manifest from localStorage or use default
+function getClipsManifest() {
+  try {
+    const stored = localStorage.getItem(CLIPS_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  // Default placeholder clips - will be replaced when user uploads
+  return [
+    'l1-01-naruto.mp3', 'l1-02-attack-on-titan.mp3', 'l1-03-one-piece.mp3',
+    'l1-04-dragon-ball-z.mp3', 'l1-05-death-note.mp3', 'l1-06-demon-slayer.mp3',
+    'l1-07-my-hero-academia.mp3', 'l1-08-tokyo-ghoul.mp3', 'l1-09-jujutsu-kaisen.mp3',
+    'l1-10-bleach.mp3',
+    'l2-01-fullmetal-alchemist.mp3', 'l2-02-sword-art-online.mp3', 'l2-03-hunter-x-hunter.mp3',
+    'l2-04-chainsaw-man.mp3', 'l2-05-spy-x-family.mp3', 'l2-06-haikyuu.mp3',
+    'l2-07-black-clover.mp3', 'l2-08-one-punch-man.mp3', 'l2-09-naruto-shippuden.mp3',
+    'l2-10-fairy-tail.mp3',
+    'l3-01-steins-gate.mp3', 'l3-02-mob-psycho-100.mp3', 'l3-03-vinland-saga.mp3',
+    'l3-04-re-zero.mp3', 'l3-05-solo-leveling.mp3', 'l3-06-frieren.mp3',
+    'l3-07-fire-force.mp3', 'l3-08-parasyte.mp3', 'l3-09-dr-stone.mp3',
+    'l3-10-mushoku-tensei.mp3',
+    'l4-01-cowboy-bebop.mp3', 'l4-02-violet-evergarden.mp3', 'l4-03-neon-genesis-evangelion.mp3',
+    'l4-04-code-geass.mp3', 'l4-05-jojos-bizarre-adventure.mp3', 'l4-06-samurai-champloo.mp3',
+    'l4-07-made-in-abyss.mp3', 'l4-08-your-lie-in-april.mp3', 'l4-09-psycho-pass.mp3',
+    'l4-10-dororo.mp3',
+    'l5-01-serial-experiments-lain.mp3', 'l5-02-ping-pong-the-animation.mp3',
+    'l5-03-texhnolyze.mp3', 'l5-04-tatami-galaxy.mp3', 'l5-05-paranoia-agent.mp3',
+    'l5-06-flcl.mp3', 'l5-07-baccano.mp3', 'l5-08-ergo-proxy.mp3',
+    'l5-09-samurai-x-trust-and-betrayal.mp3', 'l5-10-mononoke.mp3',
+  ];
+}
+
 export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
-  const [phase, setPhase] = useState('levels'); // levels, playing, countdown, result, gameover
+  const [phase, setPhase] = useState('levels');
   const [currentLevel, setCurrentLevel] = useState(0);
   const [currentClip, setCurrentClip] = useState(0);
   const [score, setScore] = useState(0);
@@ -52,17 +117,20 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const [hintUsed, setHintUsed] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [progress, setProgress] = useState(getProgress);
-  const [stars, setStars] = useState(0);
+  const [totalStars, setTotalStars] = useState(0);
+  const [clips] = useState(getClipsManifest);
 
   const timerRef = useRef(null);
   const audioRef = useRef(null);
   const audioTimerRef = useRef(null);
   const countdownRef = useRef(null);
 
-  const questions = LEVELS[currentLevel] || [];
-  const currentQ = questions[currentClip];
+  const levelClips = getClipsForLevel(currentLevel + 1, clips);
+  const currentFilename = levelClips[currentClip];
+  const currentAnswer = currentFilename ? parseFilename(currentFilename) : '';
+  const allLevelAnswers = levelClips.map(f => parseFilename(f));
+  const currentOptions = currentFilename ? generateOptions(currentAnswer, allLevelAnswers) : [];
 
-  // Clear all timers
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
     clearTimeout(audioTimerRef.current);
@@ -73,7 +141,6 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     }
   };
 
-  // Start a clip
   const startClip = useCallback(() => {
     setGuess('');
     setAnswered(false);
@@ -82,10 +149,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setTimeLeft(TIMER_TOTAL);
     setAudioPlaying(true);
 
-    // Play audio for 10 sec
-    const q = LEVELS[currentLevel]?.[currentClip];
-    if (q?.audio) {
-      const audio = new Audio(`/audio/${q.audio}`);
+    // Play audio
+    if (currentFilename) {
+      const audio = new Audio(`/audio/${currentFilename}`);
       audioRef.current = audio;
       audio.play().catch(() => {});
       audioTimerRef.current = setTimeout(() => {
@@ -93,13 +159,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         setAudioPlaying(false);
       }, AUDIO_PLAY_DURATION * 1000);
     } else {
-      // No audio file yet - simulate
       audioTimerRef.current = setTimeout(() => {
         setAudioPlaying(false);
       }, AUDIO_PLAY_DURATION * 1000);
     }
 
-    // Start answer timer
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) {
@@ -109,16 +173,14 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         return t - 1;
       });
     }, 1000);
-  }, [currentLevel, currentClip]);
+  }, [currentFilename]);
 
-  // Handle timeout
   useEffect(() => {
     if (timeLeft === 0 && !answered && phase === 'playing') {
       handleWrong();
     }
   }, [timeLeft, answered, phase]);
 
-  // Start clip when playing phase begins
   useEffect(() => {
     if (phase === 'playing' && !answered) {
       startClip();
@@ -140,7 +202,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         return;
       }
     }
-    showFeedback(`Wrong! Answer: ${currentQ.answer}`);
+    showFeedback(`Wrong! Answer: ${currentAnswer}`);
     setTimeout(() => startCountdown(), 1500);
   };
 
@@ -150,12 +212,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setWasCorrect(true);
     playCorrect();
 
-    // Calculate stars based on time
     const elapsed = TIMER_TOTAL - timeLeft;
     let earnedStars = 1;
     if (elapsed <= 10) earnedStars = 3;
     else if (elapsed <= 20) earnedStars = 2;
-    setStars(s => s + earnedStars);
+    setTotalStars(s => s + earnedStars);
     setScore(s => s + 1);
     showFeedback(`Correct! +${earnedStars} star${earnedStars > 1 ? 's' : ''}`);
     setTimeout(() => startCountdown(), 1500);
@@ -164,8 +225,17 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const submitGuess = () => {
     if (answered || !guess.trim()) return;
     const normalized = guess.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const correct = currentQ.answer.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const correct = currentAnswer.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (normalized === correct) {
+      handleCorrect();
+    } else {
+      handleWrong();
+    }
+  };
+
+  const submitOption = (opt) => {
+    if (answered) return;
+    if (opt === currentAnswer) {
       handleCorrect();
     } else {
       handleWrong();
@@ -214,8 +284,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
 
   const advanceToNext = () => {
     const nextClip = currentClip + 1;
-    if (nextClip >= CLIPS_PER_LEVEL || nextClip >= questions.length) {
-      // Level complete
+    if (nextClip >= CLIPS_PER_LEVEL || nextClip >= levelClips.length) {
       const passed = score >= PASS_THRESHOLD;
       const updated = { ...progress };
       if (!updated[currentLevel] || score > (updated[currentLevel]?.score || 0)) {
@@ -238,24 +307,13 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setScore(0);
     setSkipsUsed(0);
     setHintWrong(0);
-    setStars(0);
+    setTotalStars(0);
     setPhase('playing');
   };
 
-  const addLetter = (letter) => {
-    if (answered) return;
-    setGuess(g => g + letter);
-  };
-
-  const removeLetter = () => {
-    if (answered) return;
-    setGuess(g => g.slice(0, -1));
-  };
-
-  const addSpace = () => {
-    if (answered) return;
-    setGuess(g => g + ' ');
-  };
+  const addLetter = (letter) => { if (!answered) setGuess(g => g + letter); };
+  const removeLetter = () => { if (!answered) setGuess(g => g.slice(0, -1)); };
+  const addSpace = () => { if (!answered) setGuess(g => g + ' '); };
 
   // ─── Level Select ─────────────────────────────────────────
   if (phase === 'levels') {
@@ -270,17 +328,18 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         {LEVEL_NAMES.map((name, idx) => {
           const unlocked = idx === 0 || progress[idx - 1]?.passed;
           const levelData = progress[idx];
+          const hasClips = getClipsForLevel(idx + 1, clips).length > 0;
           return (
-            <button key={idx} className="level-card" onClick={() => startLevel(idx)}
-              style={{ opacity: unlocked ? 1 : 0.5, cursor: unlocked ? 'pointer' : 'not-allowed' }}>
+            <button key={idx} className="level-card" onClick={() => hasClips && startLevel(idx)}
+              style={{ opacity: unlocked && hasClips ? 1 : 0.5, cursor: unlocked && hasClips ? 'pointer' : 'not-allowed' }}>
               <span className="level-icon">{unlocked ? '🎵' : '🔒'}</span>
               <div className="level-info">
                 <div className="level-name">{name}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Need 8/10 on previous level' : levelData ? `${levelData.score}/10 correct` : '10 audio clips · 30s timer'}
+                  {!unlocked ? 'Need 8/10 on previous level' : !hasClips ? 'No clips uploaded yet' : levelData ? `${levelData.score}/10 correct` : '10 audio clips · 30s timer'}
                 </div>
               </div>
-              <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
+              <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked && hasClips ? '›' : ''}</span>
             </button>
           );
         })}
@@ -304,7 +363,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       <div className="result-screen">
         <span className="result-emoji">💀</span>
         <div className="result-title">Game Over</div>
-        <div className="result-sub">You got {score}/{Math.min(CLIPS_PER_LEVEL, questions.length)} correct</div>
+        <div className="result-sub">You got {score}/{Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct</div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
           <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
           <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>
@@ -320,8 +379,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       <div className="result-screen">
         <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
         <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">{score}/{Math.min(CLIPS_PER_LEVEL, questions.length)} correct</div>
-        <div style={{ fontSize: 24, marginBottom: 16 }}>{'★'.repeat(Math.min(stars, 30))}{'☆'.repeat(Math.max(0, 30 - stars))}</div>
+        <div className="result-sub">{score}/{Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct</div>
         {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 16 }}>Next level unlocked!</div>}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
@@ -333,7 +391,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   }
 
   // ─── Playing ──────────────────────────────────────────────
-  if (!currentQ) return <div className="card"><p>No clips available for this level yet!</p></div>;
+  if (!currentFilename) return <div className="card"><p>No clips available for this level yet! Upload audio files to /public/audio/</p></div>;
 
   return (
     <div className="shadow-game" style={{ height: 'auto', minHeight: '70vh' }}>
@@ -355,7 +413,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 800, color: timeLeft <= 10 ? T.error : T.text }}>{timeLeft}s</div>
-          <div style={{ fontSize: 10, color: T.textMid }}>Q{currentClip + 1}/{Math.min(CLIPS_PER_LEVEL, questions.length)}</div>
+          <div style={{ fontSize: 10, color: T.textMid }}>Q{currentClip + 1}/{Math.min(CLIPS_PER_LEVEL, levelClips.length)}</div>
         </div>
         <div style={{ fontSize: 14, fontWeight: 700, color: T.success }}>✓ {score}</div>
       </div>
@@ -384,19 +442,18 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
           {guess || <span style={{ color: T.textDim, fontSize: 13, fontWeight: 400 }}>Type anime name...</span>}
         </div>
 
-        {/* Answered feedback */}
         {answered && (
           <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: wasCorrect ? T.success : T.error }}>
-            {wasCorrect ? '✓ Correct!' : `✗ Answer: ${currentQ.answer}`}
+            {wasCorrect ? '✓ Correct!' : `✗ Answer: ${currentAnswer}`}
           </div>
         )}
       </div>
 
       {/* Hint Options (when hint used) */}
-      {hintUsed && !answered && currentQ.options && (
+      {hintUsed && !answered && (
         <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {currentQ.options.map((opt, i) => (
-            <button key={i} className="option-btn" onClick={() => { setGuess(opt); setTimeout(submitGuess, 100); }}
+          {currentOptions.map((opt, i) => (
+            <button key={i} className="option-btn" onClick={() => submitOption(opt)}
               style={{ padding: '10px 14px', fontSize: 13 }}>
               {opt}
             </button>
