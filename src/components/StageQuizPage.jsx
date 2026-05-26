@@ -310,12 +310,12 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     return (
       <section aria-label="Level Selection">
         <BackButton />
-        <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card" style={{ marginBottom: 14 }}>
           <h2 className="card-title" style={{ color: T.rose }}>
             {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'word-ninja' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : '🖼️ ANIME MOMENTS'}
           </h2>
           <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 6 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 4 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
         </div>
         {MAIN_LEVELS.map((ml, idx) => {
           const unlocked = isMainLevelUnlocked(idx);
@@ -350,10 +350,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     const nextLevelName = MAIN_LEVELS[selectedMainLevel + 1]?.name;
     return (
       <section aria-label={`${ml.name} Stages`}>
-        <button className="btn btn-secondary" style={{ marginBottom: 14, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
+        <button className="btn btn-secondary" style={{ marginBottom: 12, fontSize: 13 }} onClick={() => setPhase('mainLevels')}>
           ← Back to Levels
         </button>
-        <div className="card" style={{ marginBottom: 14 }}>
+        <div className="card" style={{ marginBottom: 12 }}>
           <div className="card-title" style={{ color: T.gold }}>{ml.icon} {ml.name}</div>
           <p style={{ fontSize: 12, color: T.textMid }}>{ml.tagline} · {ml.timeSeconds}s per question</p>
           <div style={{ marginTop: 10, padding: '10px 12px', background: T.surface, borderRadius: 12, border: `1px solid ${T.border}` }}>
@@ -445,7 +445,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
           {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
         <CircularTimer timeLeft={timeLeft} maxTime={maxTime} />
       </div>
       <div className="card" key={qIndex}>
