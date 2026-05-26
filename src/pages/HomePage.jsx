@@ -175,12 +175,20 @@ export default function HomePage() {
               <span className="game-mode-play">PLAY &rarr;</span>
             </button>
           ))}
-          <button className="game-mode-card glow-brain" onClick={() => navigate('/survival')} style={{ gridColumn: '1 / -1' }}>
-            <span className="game-mode-icon" aria-hidden="true">💀</span>
-            <span className="game-mode-name">Survival Mode</span>
-            <span className="game-mode-desc">3 lives, no timer, how far can you go?</span>
-            <span className="game-mode-play">PLAY &rarr;</span>
-          </button>
+        </div>
+      </section>
+
+      {/* SURVIVAL MODE */}
+      <section className="card" aria-label="Survival Mode">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }} aria-hidden="true">💀</span>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>Survival Mode</span>
+            <div style={{ fontSize: 9, color: T.textDim, display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+              <span>❤️❤️❤️</span> <span>3 Lives · No Timer</span>
+            </div>
+          </div>
+          <button className="btn btn-primary" style={{ fontSize: 10, padding: '6px 14px', borderRadius: 8 }} onClick={() => navigate('/survival')}>Play</button>
         </div>
       </section>
 
