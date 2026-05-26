@@ -47,7 +47,7 @@ export default [
   { text: "Which anime features Anti-Magic?", options: ["Bleach", "Fairy Tail", "Black Clover", "Dragon Ball"], correct: 2 },
   { text: "Which Straw Hat uses a slingshot?", options: ["Brook", "Franky", "Usopp", "Jinbe"], correct: 2 },
   { text: "What is Tanjiro's sword called?", options: ["Excalibur", "Nichirin Blade", "Zanpakuto", "Demon Edge"], correct: 1 },
-  { text: "Which anime features Quirks?", options: ["Bleach", "Naruto", "My Hero Academia", "Black Clover"], correct: 2 },
+  { text: "Which anime features the UA Sports Festival?", options: ["Blue Lock", "Naruto", "My Hero Academia", "Black Clover"], correct: 2 },
   { text: "Which Hunter x Hunter arc introduced Meruem?", options: ["Yorknew Arc", "Election Arc", "Chimera Ant Arc", "Greed Island Arc"], correct: 2 },
   { text: "Which Akatsuki member is immortal?", options: ["Kisame", "Deidara", "Hidan", "Sasori"], correct: 2 },
   { text: "What is the name of Zoro's strongest sword in Wano?", options: ["Sandai Kitetsu", "Wado Ichimonji", "Enma", "Shusui"], correct: 2 },

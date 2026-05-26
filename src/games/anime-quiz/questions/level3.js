@@ -28,7 +28,7 @@ export default [
   { text: "Which anime features SEELE?", options: ["Evangelion", "Psycho-Pass", "Akira", "Ergo Proxy"], correct: 0 },
   { text: "Which Bleach captain became a Visored leader?", options: ["Rose", "Love", "Shinji", "Kensei"], correct: 2 },
   { text: "Which JoJo villain used King Crimson?", options: ["Kira", "Dio", "Pucci", "Diavolo"], correct: 3 },
-  { text: "Which Hunter x Hunter arc introduced Meruem?", options: ["Yorknew City Arc", "Election Arc", "Greed Island Arc", "Chimera Ant Arc"], correct: 3 },
+  { text: "Which Hunter x Hunter character is known as the 'Chain User'?", options: ["Gon", "Killua", "Kurapika", "Leorio"], correct: 2 },
   { text: "Which Titan is Reiner Braun?", options: ["Beast Titan", "Cart Titan", "Jaw Titan", "Armored Titan"], correct: 3 },
   { text: "Which Studio Ghibli movie won an Oscar?", options: ["Ponyo", "Spirited Away", "Princess Mononoke", "Howl's Moving Castle"], correct: 1 },
   { text: "Which Naruto character could naturally use all five chakra natures?", options: ["Kakashi", "Naruto", "Hiruzen", "Sasuke"], correct: 2 },
