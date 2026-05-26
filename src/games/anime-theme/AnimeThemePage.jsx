@@ -516,10 +516,10 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
 
       {/* Hint Options (when hint used) — keyboard hides, 4 MCQ options show */}
       {hintUsed && !answered && (
-        <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ padding: '12px 14px 10px', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
           {currentOptions.map((opt, i) => (
             <button key={i} className="option-btn" onClick={() => submitOption(opt)}
-              style={{ padding: '10px 14px', fontSize: 13 }}>
+              style={{ padding: '12px 14px', fontSize: 14 }}>
               {opt}
             </button>
           ))}
