@@ -530,36 +530,43 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       {!hintUsed && !answered && (
         <div className="sg-keyboard">
           <div className="sg-keyboard-main">
-            {KEYBOARD_ROWS.map((row, ri) => (
+            {KEYBOARD_ROWS.slice(0, 2).map((row, ri) => (
               <div key={ri} className="sg-keyboard-row">
                 {row.map(letter => (
                   <button key={letter} className="sg-key" onClick={() => addLetter(letter)} aria-label={letter}>{letter}</button>
                 ))}
               </div>
             ))}
-          </div>
-          <div className="sg-keyboard-actions">
-            <button className="sg-key-backspace" onClick={removeLetter} aria-label="Backspace">
-              <BackspaceIcon />
-            </button>
-            <button className="sg-key-enter" onClick={submitGuess} aria-label="Submit">
-              GO
-            </button>
+            <div className="sg-keyboard-row">
+              {KEYBOARD_ROWS[2].map(letter => (
+                <button key={letter} className="sg-key" onClick={() => addLetter(letter)} aria-label={letter}>{letter}</button>
+              ))}
+              <button className="sg-key-backspace" onClick={removeLetter} aria-label="Backspace">
+                <BackspaceIcon />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Action Buttons */}
       {!answered && (
-        <div style={{ display: 'flex', gap: 8, padding: '0 14px 10px' }}>
-          <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
-            ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 14px 10px' }}>
           {!hintUsed && (
-            <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
-              💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
+            <button className="sg-key-enter" onClick={submitGuess} style={{ width: '100%', height: 44, borderRadius: 10, fontSize: 14, fontWeight: 800, letterSpacing: 2 }}>
+              GO
             </button>
           )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
+              ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
+            </button>
+            {!hintUsed && (
+              <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
+                💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -439,23 +439,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .sg-keyboard-row {
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .sg-key {
-  min-width: 32px;
-  height: 44px;
+  min-width: 34px;
+  height: 48px;
   border-radius: 8px;
   border: none;
   background: var(--sg-card);
   color: var(--sg-text);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -464,7 +464,7 @@
   transition: all 0.1s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   flex: 1;
-  max-width: 42px;
+  max-width: 46px;
   text-transform: uppercase;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -523,6 +523,8 @@
 
 .sg-key-backspace {
   flex: 1;
+  min-width: 48px;
+  height: 48px;
   border-radius: 8px;
   border: none;
   background: var(--sg-card);
@@ -857,7 +859,7 @@
   }
   
   .sg-key {
-    height: 40px;
+    height: 42px;
   }
 }
 
