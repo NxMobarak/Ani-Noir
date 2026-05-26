@@ -109,11 +109,8 @@ export default function HomePage() {
       <LatestYouTubeCard />
 
       {/* GAME MODES */}
-      <section aria-label="Game Modes">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px 10px' }}>
-          <h2 className="card-title" style={{ color: '#94a3b8', marginBottom: 0, fontSize: 12 }}>GAME MODES</h2>
-          <button className="btn" style={{ background: 'none', padding: 0, fontSize: 12, color: '#f43f5e', fontWeight: 600, gap: 4 }} onClick={() => navigate('/quiz')}>SEE ALL &rarr;</button>
-        </div>
+      <section aria-label="Game Modes" style={{ marginBottom: 12 }}>
+        <h2 className="card-title" style={{ color: '#94a3b8', fontSize: 12, padding: '0 2px 10px' }}>GAME MODES</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
           {[
             ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge'],
