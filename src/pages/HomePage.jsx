@@ -167,6 +167,7 @@ export default function HomePage() {
             ['/sceneguess', '🎬', 'Frame Guess', 'Guess from a single frame', 'visual'],
             ['/opening', '🎵', 'Anime Theme', 'Name that opening or ending!', 'audio'],
             ['/dialogue', '💬', 'Dialogue Clash', 'Who said this dialogue?', 'brain'],
+            ['/survival', '💀', 'Survival', '3 lives, no timer, how far?', 'brain'],
           ].map(([path, ico, lbl, desc, glow]) => (
             <button key={path} className={`game-mode-card glow-${glow}`} onClick={() => navigate(path)}>
               <span className="game-mode-icon" aria-hidden="true">{ico}</span>
