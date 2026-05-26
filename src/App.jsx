@@ -166,7 +166,7 @@ export default function App() {
                   <Route path="/shadow" element={<AnimeShadow spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/moments" element={<AnimeMoments spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/theme" element={<AnimeTheme spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
-                  <Route path="/sceneguess" element={<FrameGuess spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
+                  <Route path="/frameguess" element={<FrameGuess spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/dialogue" element={<DialogueClash spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/survival" element={<SurvivalPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />
                   <Route path="/daily" element={<DailyPage spades={spades} setSpades={memoizedSetSpades} showFeedback={showFeedback} />} />

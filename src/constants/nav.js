@@ -7,7 +7,7 @@ const NAV = [
   { id: 'shadow', icon: '🕵️', label: 'Anime Shadow', path: '/shadow' },
   { id: 'moments', icon: '🖼️', label: 'Anime Moments', path: '/moments' },
   { id: 'theme', icon: '🎵', label: 'Anime Theme', path: '/theme' },
-  { id: 'sceneguess', icon: '🎬', label: 'Frame Guess', path: '/sceneguess' },
+  { id: 'frameguess', icon: '🎬', label: 'Frame Guess', path: '/frameguess' },
   { id: 'dialogue', icon: '💬', label: 'Dialogue Clash', path: '/dialogue' },
   { id: 'survival', icon: '💀', label: 'Survival Mode', path: '/survival' },
   { id: 'daily', icon: '📅', label: 'Daily Challenge', path: '/daily' },
