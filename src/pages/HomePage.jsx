@@ -68,18 +68,24 @@ function getHeroBannerData() {
       greeting: 'Good morning',
       tagline: 'Think you know Anime?',
       image: '/hero-character-1.webp',
+      greetingColor: '#ffffff',
+      subColor: '#e2e8f0',
     };
   } else if (hour < 17) {
     return {
       greeting: 'Good afternoon',
       tagline: 'Your Anime Knowledge Has Limits.',
       image: '/hero-character-2.webp',
+      greetingColor: '#fef3c7',
+      subColor: '#fde68a',
     };
   } else {
     return {
       greeting: 'Good evening',
       tagline: 'Can You Survive the Anime Gauntlet?',
       image: '/hero-character-3.webp',
+      greetingColor: '#fecdd3',
+      subColor: '#fda4af',
     };
   }
 }
@@ -88,14 +94,14 @@ export default function HomePage() {
   const navigate = useNavigate();
   const dailyAnime = getDailyAnime();
   const dailyQuote = getDailyQuote();
-  const { greeting, tagline, image } = getHeroBannerData();
+  const { greeting, tagline, image, greetingColor, subColor } = getHeroBannerData();
 
   return (
     <div>
       <section className="hero-banner" style={{ backgroundImage: `url(${image})` }} aria-label="Welcome">
-        <div className="hero-greeting">{greeting}, Otaku!</div>
-        <p className="hero-sub">{tagline}</p>
-        <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10 }} onClick={() => navigate('/quiz')}>
+        <div className="hero-greeting" style={{ color: greetingColor }}>{greeting}, Otaku!</div>
+        <p className="hero-sub" style={{ color: subColor }}>{tagline}</p>
+        <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10, fontSize: 13, padding: '10px 18px' }} onClick={() => navigate('/quiz')}>
           Start Anime Quiz
         </button>
       </section>
