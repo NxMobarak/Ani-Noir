@@ -164,10 +164,17 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         </div>
       </div>
 
-      {/* Rules hint */}
-      <div style={{ fontSize: 9, color: T.textDim, textAlign: 'center', marginBottom: 10 }}>
-        3 lives • No timer • Every 5 correct = +100 ♠ • Streak = combo bonus
-      </div>
+      {/* Rules hint - styled like Word Ninja */}
+      {currentIdx === 0 && !answered && (
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: '8px 12px', marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.teal, marginBottom: 4 }}>Rules</div>
+          <ul style={{ listStyle: 'none', fontSize: 10, color: T.textMid, lineHeight: 1.8, padding: 0, margin: 0 }}>
+            <li>❤️ <strong style={{ color: T.text }}>3 lives</strong> — no timer</li>
+            <li>🎯 Every <strong style={{ color: T.text }}>5 correct</strong> = +100 ♠</li>
+            <li>🔥 Build <strong style={{ color: T.text }}>streaks</strong> for combo bonus</li>
+          </ul>
+        </div>
+      )}
 
       {/* Streak */}
       {streak >= 2 && (
