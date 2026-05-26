@@ -67,19 +67,16 @@ function getHeroBannerData() {
     return {
       greeting: 'Good morning',
       tagline: 'Think you know Anime?',
-      image: '/hero-character-1.webp',
     };
   } else if (hour < 17) {
     return {
       greeting: 'Good afternoon',
       tagline: 'Your Anime Knowledge Has Limits.',
-      image: '/hero-character-2.webp',
     };
   } else {
     return {
       greeting: 'Good evening',
       tagline: 'Can You Survive the Anime Gauntlet?',
-      image: '/hero-character-3.webp',
     };
   }
 }
@@ -88,22 +85,16 @@ export default function HomePage() {
   const navigate = useNavigate();
   const dailyAnime = getDailyAnime();
   const dailyQuote = getDailyQuote();
-  const { greeting, tagline, image } = getHeroBannerData();
+  const { greeting, tagline } = getHeroBannerData();
 
   return (
     <div>
       <section className="hero-banner" aria-label="Welcome">
-        <div className="hero-content">
-          <div className="hero-greeting">{greeting},</div>
-          <div className="hero-otaku">OTAKU!</div>
-          <p className="hero-sub">{tagline}</p>
-          <button className="btn hero-cta" onClick={() => navigate('/quiz')}>
-            START ANIME QUIZ <span className="hero-cta-arrow">&rarr;</span>
-          </button>
-        </div>
-        <div className="hero-character">
-          <img src={image} alt="Anime character" loading="eager" />
-        </div>
+        <div className="hero-greeting">{greeting}, Otaku!</div>
+        <p className="hero-sub">{tagline}</p>
+        <button className="btn btn-primary" style={{ marginTop: 14, borderRadius: 10 }} onClick={() => navigate('/quiz')}>
+          Start Anime Quiz
+        </button>
       </section>
 
       <LatestYouTubeCard />
