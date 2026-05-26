@@ -3,11 +3,12 @@ import T from '../constants/theme';
 import { questionBank } from '../questions/index';
 import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong } from '../utils/audio';
-import { addXP, XP_REWARDS } from '../utils/xpSystem';
+import { addXP } from '../utils/xpSystem';
 import WordNinjaTiles from '../components/WordNinjaTiles';
 
 const DAILY_KEY = 'ani_daily';
-const DAILY_REWARD = 30;
+const DAILY_REWARD_SPADES = 50;
+const DAILY_REWARD_XP = 300;
 
 function getDailyQuestion() {
   const now = new Date();
@@ -56,9 +57,9 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
 
     if (isCorrect) {
       playCorrect();
-      setSpades(s => s + DAILY_REWARD);
-      addXP(XP_REWARDS.DAILY_CHALLENGE);
-      showFeedback(`+${DAILY_REWARD} ♠ Daily Reward!`, 'success');
+      setSpades(s => s + DAILY_REWARD_SPADES);
+      addXP(DAILY_REWARD_XP);
+      showFeedback(`+${DAILY_REWARD_SPADES} ♠ & +${DAILY_REWARD_XP} XP Daily Reward!`, 'success');
     } else {
       playWrong();
       showFeedback('Better luck tomorrow!', 'error');
@@ -99,9 +100,24 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
         <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
         <h2 style={{ color: T.text, marginBottom: 4, fontSize: 18 }}>Daily Challenge</h2>
         <p style={{ color: T.textDim, fontSize: 12 }}>
-          One question per day • +{DAILY_REWARD} ♠ reward
+          One question per day • +{DAILY_REWARD_SPADES} ♠ & +{DAILY_REWARD_XP} XP reward
         </p>
       </div>
+
+      {/* Reward Info */}
+      {!completed && (
+        <div style={{
+          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 16,
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <span style={{ fontSize: 22 }}>🎁</span>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: T.gold }}>Reward</div>
+            <div style={{ fontSize: 11, color: T.textMid }}>+{DAILY_REWARD_SPADES} ♠ Spades & +{DAILY_REWARD_XP} XP on correct answer</div>
+          </div>
+        </div>
+      )}
 
       {/* Already completed */}
       {completed && answered && (
