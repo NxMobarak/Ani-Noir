@@ -102,8 +102,11 @@ export default function HomePage() {
       <section className="hero-banner" style={{ backgroundImage: `url(${image})` }} aria-label="Welcome">
         <div className="hero-greeting" style={{ color: greetingColor }}>{greeting}, Otaku!</div>
         <p className="hero-sub" style={{ color: subColor }}>{tagline}</p>
-        <button className="btn btn-primary" style={{ marginTop: 12, borderRadius: 10, fontSize: 12, padding: '8px 16px' }} onClick={() => navigate('/survival')}>
-          Survival Mode
+        <button className="btn btn-primary" style={{ marginTop: 12, borderRadius: 10, fontSize: 12, padding: '8px 16px' }} onClick={() => {
+          const modes = ['/quiz', '/word-ninja', '/emoji', '/shadow', '/frames', '/sceneguess', '/opening', '/dialogue'];
+          navigate(modes[Math.floor(Math.random() * modes.length)]);
+        }}>
+          Play Now
         </button>
       </section>
 
