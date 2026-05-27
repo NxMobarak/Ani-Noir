@@ -1,6 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }
-body { background: #07080f; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; overscroll-behavior: none; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+body { background: #07080f; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; overscroll-behavior: none; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 button { color: #f1f5f9; cursor: pointer; font-family: inherit; }
 input { font-family: inherit; }
 ::-webkit-scrollbar { width: 4px; }
@@ -99,7 +99,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .sidebar-footer-card-sub { font-size:10px;opacity:0.8;margin-top:2px; }
 
 .main { flex:1;display:flex;flex-direction:column;overflow:hidden;width:100%;min-width:0; }
-.topbar { display:flex;align-items:center;padding:12px 14px;padding-top:max(12px, env(safe-area-inset-top));gap:10px;border-bottom:1px solid rgba(255,255,255,0.08);background:#0e1018;flex-shrink:0; }
+.topbar { display:flex;align-items:center;padding:12px 14px;gap:10px;border-bottom:1px solid rgba(255,255,255,0.08);background:#0e1018;flex-shrink:0; }
 .menu-btn { background:none;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 10px;font-size:16px;line-height:1;flex-shrink:0; }
 .topbar-title { font-size:16px;font-weight:700;flex:1; }
 .topbar-chips { display:flex;gap:8px; }
