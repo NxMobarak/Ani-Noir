@@ -89,20 +89,60 @@ function getClipsManifest() {
   // Actual uploaded clips - add new filenames here when uploading more levels
   return [
     // Level 1
-    'l1-01-demon-slayer.mp3',
-    'l1-02-naruto.mp3',
-    'l1-03-tokyo-ghoul.mp3',
-    'l1-04-attack-on-titan.mp3',
-    'l1-05-jujutsu-kaisen.mp3',
-    'l1-06-naruto-shippuden.mp3',
-    'l1-07-fullmetal-alchemist-brotherhood.mp3',
-    'l1-08-oshi-no-ko.mp3',
-    'l1-09-cowboy-bebop.mp3',
-    'l1-10-dragon-ball-z.mp3',
-    // Level 2 - add clips here
-    // Level 3 - add clips here
-    // Level 4 - add clips here
-    // Level 5 - add clips here
+    'l1-01-my-hero-academia.m4a',
+    'l1-02-one-piece.m4a',
+    'l1-03-hunter-x-hunter.m4a',
+    'l1-04-your-name.m4a',
+    'l1-05-tokyo-ghoul.m4a',
+    'l1-06-naruto-shippuden.m4a',
+    'l1-07-fairy-tail.m4a',
+    'l1-08-one-punch-man.m4a',
+    'l1-09-demon-slayer.m4a',
+    'l1-10-parasyte-the-maxim.m4a',
+    // Level 2
+    'l2-01-kaguya-sama-love-is-war.m4a',
+    'l2-02-tower-of-god.m4a',
+    'l2-03-dragon-ball-z.m4a',
+    'l2-04-jojo-bizarre-adventure.m4a',
+    'l2-05-domestic-girlfriend.m4a',
+    'l2-06-wotakoi-love-hard-for-otaku.m4a',
+    'l2-07-tokyo-revengers.m4a',
+    'l2-08-code-geass.m4a',
+    'l2-09-jujutsu-kaisen.m4a',
+    'l2-10-neon-genesis-evangelion.m4a',
+    // Level 3
+    'l3-01-attack-on-titan.m4a',
+    'l3-02-blue-exorcist.m4a',
+    'l3-03-overlord.m4a',
+    'l3-04-lucky-star.m4a',
+    'l3-05-hyouka.m4a',
+    'l3-06-attack-on-titan.m4a',
+    'l3-07-ya-boy-kongming.m4a',
+    'l3-08-the-seven-deadly-sins.m4a',
+    'l3-09-the-promised-neverland.m4a',
+    'l3-10-violet-evergarden.m4a',
+    // Level 4
+    'l4-01-assassination-classroom.m4a',
+    'l4-02-teasing-master-takagi-san.m4a',
+    'l4-03-dr-stone.m4a',
+    'l4-04-bna-brand-new-animal.m4a',
+    'l4-05-stein-gates.m4a',
+    'l4-06-spy-x-family.m4a',
+    'l4-07-spice-and-wolf.m4a',
+    'l4-08-uzaki-chan-wants-to-hang-out.m4a',
+    'l4-09-black-clover.m4a',
+    'l4-10-plastic-memories.m4a',
+    // Level 5
+    'l5-01-food-wars.m4a',
+    'l5-02-beyond-the-boundary.m4a',
+    'l5-03-the-quintessential-quintuplets.m4a',
+    'l5-04-free.m4a',
+    'l5-05-samurai-champloo.m4a',
+    'l5-06-kokoro-connect.m4a',
+    'l5-07-assassins-pride.m4a',
+    'l5-08-bleach.m4a',
+    'l5-09-gintama.m4a',
+    'l5-10-fairy-tail.m4a',
   ];
 }
 
