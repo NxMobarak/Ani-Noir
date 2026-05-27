@@ -47,7 +47,6 @@ export default function EmojiWarsPage({ spades, setSpades, showFeedback }) {
         {q.options.map((opt, idx) => {
           let cls = 'option-btn';
           if (answered) {
-            cls += ' answered-visible';
             if (idx === correctOption) cls += ' correct';
             else if (idx === selectedOption) cls += ' wrong';
           }
