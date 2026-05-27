@@ -323,16 +323,41 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     showFeedback(`Shuffled! -${SHUFFLE_COST}♠`);
   };
 
-  const shareResult = () => {
+  const shareResult = async () => {
     const lvlName = MAIN_LEVELS[currentMainLevel].name;
     const stars = getStars(finalScore);
     const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
     const text = `AniNoir ${mode} - ${lvlName} Stage ${currentStage + 1}: ${finalScore}/${QUESTIONS_PER_STAGE} ${starStr} #AniNoir`;
+
+    // Try Web Share API first
     if (navigator.share) {
-      navigator.share({ title: 'AniNoir', text }).catch(()=>{});
-    } else {
-      navigator.clipboard?.writeText(text);
-      showFeedback('Copied to clipboard!');
+      try {
+        await navigator.share({ title: 'AniNoir', text });
+        return;
+      } catch (e) {
+        // User cancelled or share failed — fall through to clipboard
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        showFeedback('Result copied to clipboard!');
+      } else {
+        // Final fallback: use hidden textarea for copy
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showFeedback('Result copied to clipboard!');
+      }
+    } catch (e) {
+      showFeedback('Result copied to clipboard!');
     }
   };
 

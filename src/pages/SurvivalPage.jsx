@@ -186,6 +186,24 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     const mins = Math.floor(gameElapsed / 60);
     const secs = gameElapsed % 60;
     const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+    const shareSurvivalResult = async () => {
+      const text = `AniNoir Survival Mode: ${score} correct, ${bestStreak}x best streak 💀 #AniNoir`;
+      if (navigator.share) {
+        try { await navigator.share({ title: 'AniNoir', text }); return; } catch (e) {}
+      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        showFeedback('Result copied to clipboard!');
+      } catch (e) { showFeedback('Result copied to clipboard!'); }
+    };
+
     return (
       <ResultScreen
         passed={score >= 10}
@@ -196,6 +214,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         timeTaken={timeStr}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
+        onShare={shareSurvivalResult}
         stats={[
           { icon: '🔥', label: 'Best Streak', value: bestStreak > 0 ? `${bestStreak}x` : 'N/A' },
           { icon: '🎯', label: 'Questions', value: `${score} correct` },
