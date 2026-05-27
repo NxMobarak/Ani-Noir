@@ -215,7 +215,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       startClip();
     }
     return () => clearAllTimers();
-  }, [phase, currentClip]);
+  }, [phase, currentClip, currentLevel]);
 
   const handleWrong = (selected) => {
     clearAllTimers();
