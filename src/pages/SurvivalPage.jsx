@@ -5,6 +5,7 @@ import { playCorrect, playWrong, playCombo } from '../utils/audio';
 import { questionBank } from '../questions/index';
 import { ALL_EMOJI_QUESTIONS } from '../constants/questions';
 import { addXP, XP_REWARDS } from '../utils/xpSystem';
+import ResultScreen from '../components/ResultScreen';
 
 const SURVIVAL_UNLOCK_KEY = 'ani_survival_unlocked';
 const SURVIVAL_TRIALS_KEY = 'ani_survival_trials';
@@ -128,21 +129,18 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   // ─── Result ────────────────────────────────────────────────
   if (phase === 'result') {
     return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>
-          {score >= 30 ? '🏆' : score >= 15 ? '⭐' : '💀'}
-        </div>
-        <h2 style={{ color: T.text, marginBottom: 8 }}>Game Over</h2>
-        <p style={{ color: T.gold, fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
-          Score: {score}
-        </p>
-        <p style={{ color: T.textMid, fontSize: 14, marginBottom: 20 }}>
-          Best streak: {streak > 0 ? streak : 'N/A'}
-        </p>
-        <button className="btn btn-primary" onClick={startGame}>
-          Play Again
-        </button>
-      </div>
+      <ResultScreen
+        passed={score >= 15}
+        gameOver={true}
+        title="Game Over"
+        subtitle={`Final Score: ${score}`}
+        stats={[
+          { icon: '🔥', label: 'Best Streak', value: streak > 0 ? `${streak}x` : 'N/A' },
+        ]}
+        buttons={[
+          { label: 'Play Again', onClick: startGame, variant: 'primary' },
+        ]}
+      />
     );
   }
 

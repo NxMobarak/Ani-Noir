@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './styles/app.css';
+import './styles/result-screen.css';
 import NAV from './constants/nav';
 import { playClick } from './utils/audio';
 import { useSwipe } from './utils/swipe';

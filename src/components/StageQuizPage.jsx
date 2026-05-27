@@ -13,6 +13,7 @@ import { addXP, XP_REWARDS } from '../utils/xpSystem';
 import CircularTimer from './CircularTimer';
 import WordNinjaTiles from './WordNinjaTiles';
 import BackButton from './BackButton';
+import ResultScreen from './ResultScreen';
 
 
 export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades, showFeedback, renderQuestion }) {
@@ -395,29 +396,31 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   if (phase === 'result') {
     const stars = getStars(finalScore);
     const passed = stars >= MIN_STARS_TO_UNLOCK;
-    const starDisplay = Array(3).fill(0).map((_, i) => i < stars ? '\u2605' : '\u2606').join(' ');
     const hasNext = currentStage < STAGES_PER_LEVEL - 1;
+
+    const buttons = [];
+    buttons.push({ label: '\u2190 Stages', onClick: () => { setSelectedMainLevel(currentMainLevel); setPhase('stages'); }, variant: 'secondary' });
+    if (passed && hasNext) {
+      buttons.push({ label: 'Next Stage \u2192', onClick: () => startStage(currentMainLevel, currentStage + 1), variant: 'primary' });
+    }
+    if (passed && !hasNext && currentMainLevel < MAIN_LEVELS.length - 1) {
+      buttons.push({ label: 'Next Level \u2192', onClick: () => { setSelectedMainLevel(currentMainLevel + 1); setPhase('stages'); }, variant: 'primary' });
+    }
+    if (!passed) {
+      buttons.push({ label: 'Retry', onClick: () => startStage(currentMainLevel, currentStage), variant: 'primary' });
+    }
+
     return (
-      <div className="result-screen">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Stage Cleared!' : 'Stage Failed'}</div>
-        <div className="result-sub">You scored {finalScore}/{QUESTIONS_PER_STAGE}</div>
-        <div style={{ fontSize: 28, marginBottom: 16, letterSpacing: 4 }}>{starDisplay}</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 20 }}>+{STAGE_REWARD}♠ earned!</div>}
-        <button className="share-btn" onClick={shareResult}>Share Result</button>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8 }}>
-          <button className="btn btn-secondary" onClick={() => { setSelectedMainLevel(currentMainLevel); setPhase('stages'); }}>← Stages</button>
-          {passed && hasNext && (
-            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage + 1)}>Next Stage →</button>
-          )}
-          {passed && !hasNext && currentMainLevel < MAIN_LEVELS.length - 1 && (
-            <button className="btn btn-primary" onClick={() => { setSelectedMainLevel(currentMainLevel + 1); setPhase('stages'); }}>Next Level →</button>
-          )}
-          {!passed && (
-            <button className="btn btn-primary" onClick={() => startStage(currentMainLevel, currentStage)}>Retry</button>
-          )}
-        </div>
-      </div>
+      <ResultScreen
+        passed={passed}
+        title={passed ? 'Stage Cleared!' : 'Stage Failed'}
+        subtitle={`You scored ${finalScore}/${QUESTIONS_PER_STAGE}`}
+        stars={stars}
+        reward={passed ? String(STAGE_REWARD) : ''}
+        rewardIcon="\u2660"
+        onShare={shareResult}
+        buttons={buttons}
+      />
     );
   }
 

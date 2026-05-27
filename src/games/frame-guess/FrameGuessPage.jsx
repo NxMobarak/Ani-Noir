@@ -3,6 +3,7 @@ import T from '../../constants/theme';
 import { playCorrect, playWrong, playCombo } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
+import ResultScreen from '../../components/ResultScreen';
 
 import level1 from './questions/level1';
 import level2 from './questions/level2';
@@ -247,33 +248,36 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
     return (
-      <div className="result-screen">
-        <span className="result-emoji">💀</span>
-        <div className="result-title">Game Over</div>
-        <div className="result-sub">You got {score}/{Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct</div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
-          <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>
-        </div>
-      </div>
+      <ResultScreen
+        passed={false}
+        gameOver={true}
+        title="Game Over"
+        subtitle={`You got ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
+        buttons={[
+          { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
+          { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
+        ]}
+      />
     );
   }
 
   // ─── Result ───────────────────────────────────────────────
   if (phase === 'result') {
     const passed = score >= PASS_THRESHOLD;
+    const buttons = [
+      { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
+    ];
+    if (!passed) buttons.push({ label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' });
+    if (passed && currentLevel < 4) buttons.push({ label: 'Next Level \u2192', onClick: () => startLevel(currentLevel + 1), variant: 'primary' });
+
     return (
-      <div className="result-screen">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Level Failed'}</div>
-        <div className="result-sub">{score}/{Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 16 }}>Next level unlocked!</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
-          {!passed && <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>}
-          {passed && currentLevel < 4 && <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>}
-        </div>
-      </div>
+      <ResultScreen
+        passed={passed}
+        title={passed ? 'Level Cleared!' : 'Level Failed'}
+        subtitle={`${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
+        reward={passed ? '' : ''}
+        buttons={buttons}
+      />
     );
   }
 

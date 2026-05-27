@@ -3,6 +3,7 @@ import T from '../../constants/theme';
 import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
+import ResultScreen from '../../components/ResultScreen';
 import '../../styles/shadow-quiz.css';
 
 const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
@@ -297,34 +298,35 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
     return (
-      <div className="result-screen phase-enter">
-        <span className="result-emoji">💀</span>
-        <div className="result-title">Game Over</div>
-        <div className="result-sub">You scored {score}/{Math.min(CLIPS_PER_LEVEL, levelClips.length)}</div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
-          <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>
-        </div>
-      </div>
+      <ResultScreen
+        passed={false}
+        gameOver={true}
+        title="Game Over"
+        subtitle={`You scored ${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)}`}
+        buttons={[
+          { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
+          { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
+        ]}
+      />
     );
   }
 
   // ─── Result ───────────────────────────────────────────────
   if (phase === 'result') {
     const passed = score >= PASS_THRESHOLD;
+    const buttons = [
+      { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
+    ];
+    if (!passed) buttons.push({ label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' });
+    if (passed && currentLevel < 4) buttons.push({ label: 'Next Level \u2192', onClick: () => startLevel(currentLevel + 1), variant: 'primary' });
+
     return (
-      <div className="result-screen phase-enter">
-        <span className="result-emoji">{passed ? '🏆' : '😓'}</span>
-        <div className="result-title">{passed ? 'Level Cleared!' : 'Not Quite!'}</div>
-        <div className="result-sub">{score}/{Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct</div>
-        {passed && <div style={{ color: T.gold, fontSize: 14, marginBottom: 16 }}>Next level unlocked!</div>}
-        {!passed && <div style={{ color: T.textMid, fontSize: 13, marginBottom: 16 }}>Need {PASS_THRESHOLD}/10 to pass. Keep trying!</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setPhase('levels')}>← Levels</button>
-          {!passed && <button className="btn btn-primary" onClick={() => startLevel(currentLevel)}>Retry</button>}
-          {passed && currentLevel < 4 && <button className="btn btn-primary" onClick={() => startLevel(currentLevel + 1)}>Next Level →</button>}
-        </div>
-      </div>
+      <ResultScreen
+        passed={passed}
+        title={passed ? 'Level Cleared!' : 'Not Quite!'}
+        subtitle={`${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct`}
+        buttons={buttons}
+      />
     );
   }
 
