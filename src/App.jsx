@@ -49,7 +49,15 @@ migrateData();
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [spades, setSpades] = useState(() => safeGet('ani_spades', 100));
+  const [spades, setSpades] = useState(() => {
+    // TESTING: Force 10000 spades for all accounts
+    const current = safeGet('ani_spades', 10000);
+    if (current < 10000) {
+      safeSet('ani_spades', '10000');
+      return 10000;
+    }
+    return current;
+  });
   const [badges, setBadges] = useState(() => safeGet('ani_badges', []));
   const [feedback, setFeedback] = useState('');
   const [spadesModal, setSpadesModal] = useState(false);
