@@ -189,15 +189,11 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
 
     const shareSurvivalResult = (() => {
       const lines = [
-        `\uD83C\uDFAE AniNoir \u2014 Survival Mode`,
-        `\uD83D\uDC80 Game Over`,
-        '',
-        `\uD83C\uDFAF Score: ${score}`,
-        `\uD83D\uDD25 Best Streak: ${bestStreak}x`,
+        `\uD83C\uDFAE AniNoir \u2022 Survival Mode`,
+        `\uD83D\uDC80 Score: ${score} \u2022 \uD83D\uDD25 ${bestStreak}x Streak`,
         `\u23F1\uFE0F ${timeStr}`,
         '',
-        'Can you survive longer? \uD83D\uDCAA',
-        '#AniNoir #SurvivalMode',
+        'Can you survive longer? \uD83D\uDCAA #AniNoir',
       ];
       return lines.join('\n');
     })();

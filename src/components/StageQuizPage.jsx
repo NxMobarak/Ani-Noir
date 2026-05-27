@@ -328,19 +328,15 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     const stars = getStars(finalScore);
     const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
     const pct = Math.round((finalScore / QUESTIONS_PER_STAGE) * 100);
-    const bar = '\u2588'.repeat(Math.round(pct / 10)) + '\u2591'.repeat(10 - Math.round(pct / 10));
     const modeName = mode === 'quiz' ? 'Anime Quiz' : mode === 'word-ninja' ? 'Word Ninja' : mode === 'emoji' ? 'Emoji Wars' : mode === 'frames' ? 'Anime Moments' : mode === 'dialogue' ? 'Dialogue Clash' : mode;
     const lines = [
-      `\uD83C\uDFAE AniNoir \u2014 ${modeName}`,
-      `\uD83C\uDFAF ${lvlName} \u2022 Stage ${currentStage + 1}`,
-      '',
-      `${starStr}  ${finalScore}/${QUESTIONS_PER_STAGE}`,
-      `[${bar}] ${pct}%`,
+      `\uD83C\uDFAE AniNoir \u2022 ${modeName}`,
+      `${starStr} ${finalScore}/${QUESTIONS_PER_STAGE} (${pct}%)`,
+      `${lvlName} \u2022 Stage ${currentStage + 1}`,
     ];
-    if (streak >= 3) lines.push(`\uD83D\uDD25 Best Streak: ${streak}x`);
+    if (streak >= 3) lines.push(`\uD83D\uDD25 ${streak}x Streak`);
     lines.push('');
-    lines.push('Can you beat my score? \uD83D\uDCAA');
-    lines.push('#AniNoir #AnimeQuiz');
+    lines.push('Beat my score? \uD83D\uDCAA #AniNoir');
     return lines.join('\n');
   };
 

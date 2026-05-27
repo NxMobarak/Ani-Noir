@@ -298,16 +298,12 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     const shareFrameResult = (() => {
       const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
       const pct = accuracyPct;
-      const bar = '\u2588'.repeat(Math.round(pct / 10)) + '\u2591'.repeat(10 - Math.round(pct / 10));
       const lines = [
-        `\uD83C\uDFAE AniNoir \u2014 Frame Guess`,
-        `\uD83C\uDFAF ${LEVEL_NAMES[currentLevel]}`,
+        `\uD83C\uDFAE AniNoir \u2022 Frame Guess`,
+        `${starStr} ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} (${pct}%)`,
+        `${LEVEL_NAMES[currentLevel]}`,
         '',
-        `${starStr}  ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)}`,
-        `[${bar}] ${pct}%`,
-        '',
-        'Can you beat my score? \uD83D\uDCAA',
-        '#AniNoir #AnimeQuiz',
+        'Beat my score? \uD83D\uDCAA #AniNoir',
       ];
       return lines.join('\n');
     })();

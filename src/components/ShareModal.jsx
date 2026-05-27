@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { copyToClipboard, getShareURLs } from '../utils/share';
 
 const SHARE_TARGETS = [
-  { key: 'whatsapp', label: 'WhatsApp', icon: '\uD83D\uDCAC', color: '#25D366' },
-  { key: 'twitter', label: 'X / Twitter', icon: '\uD83D\uDC26', color: '#1DA1F2' },
-  { key: 'telegram', label: 'Telegram', icon: '\u2708\uFE0F', color: '#0088cc' },
+  { key: 'whatsapp', label: 'WhatsApp', icon: '💬', color: '#25D366' },
+  { key: 'instagram', label: 'Instagram', icon: '📷', color: '#E4405F' },
+  { key: 'facebook', label: 'Facebook', icon: '👤', color: '#1877F2' },
 ];
 
 export default function ShareModal({ text, onClose, showFeedback }) {
@@ -21,46 +21,50 @@ export default function ShareModal({ text, onClose, showFeedback }) {
   };
 
   const handleShareTarget = (key) => {
+    if (key === 'instagram') {
+      // Instagram doesn't support direct text share via URL — copy text and notify
+      copyToClipboard(text);
+      showFeedback('Text copied! Paste in Instagram Story/DM');
+      return;
+    }
     const url = urls[key];
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 340 }}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 340, padding: 20 }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>Share Result</h3>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
 
-        {/* Preview */}
+        {/* Preview - compact, no scroll */}
         <div style={{
           background: '#0a0b0f',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 12,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 12,
-          lineHeight: 1.6,
-          color: '#94a3b8',
+          padding: '10px 12px',
+          marginBottom: 14,
+          fontSize: 11,
+          lineHeight: 1.5,
+          color: '#e2e8f0',
           whiteSpace: 'pre-line',
-          fontFamily: 'monospace',
-          maxHeight: 160,
-          overflowY: 'auto',
+          fontFamily: 'system-ui, sans-serif',
         }}>
           {text}
         </div>
 
         {/* Share Targets */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
           {SHARE_TARGETS.map(t => (
             <button
               key={t.key}
               onClick={() => handleShareTarget(t.key)}
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                padding: '12px 8px', borderRadius: 12,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                padding: '10px 6px', borderRadius: 12,
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 cursor: 'pointer', color: '#f1f5f9', transition: 'all 0.2s',
@@ -68,8 +72,8 @@ export default function ShareModal({ text, onClose, showFeedback }) {
               onMouseEnter={e => { e.currentTarget.style.borderColor = t.color; e.currentTarget.style.background = `${t.color}15`; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
             >
-              <span style={{ fontSize: 22 }}>{t.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8' }}>{t.label}</span>
+              <span style={{ fontSize: 20 }}>{t.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>{t.label}</span>
             </button>
           ))}
         </div>
@@ -79,7 +83,7 @@ export default function ShareModal({ text, onClose, showFeedback }) {
           onClick={handleCopy}
           style={{
             width: '100%',
-            padding: '12px 16px',
+            padding: '11px 16px',
             borderRadius: 12,
             border: copied ? '1.5px solid #22c55e' : '1.5px solid rgba(244,63,94,0.4)',
             background: copied ? 'rgba(34,197,94,0.12)' : 'linear-gradient(135deg, rgba(244,63,94,0.15), rgba(139,92,246,0.15))',

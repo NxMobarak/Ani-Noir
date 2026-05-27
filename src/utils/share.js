@@ -76,7 +76,7 @@ export function getShareURLs(text) {
   const encoded = encodeURIComponent(text);
   return {
     whatsapp: `https://wa.me/?text=${encoded}`,
-    twitter: `https://twitter.com/intent/tweet?text=${encoded}`,
-    telegram: `https://t.me/share/url?text=${encoded}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?quote=${encoded}`,
+    instagram: null, // Instagram doesn't support direct text share URLs
   };
 }
