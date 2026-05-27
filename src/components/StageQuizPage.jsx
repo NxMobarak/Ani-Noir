@@ -323,42 +323,25 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     showFeedback(`Shuffled! -${SHUFFLE_COST}♠`);
   };
 
-  const shareResult = async () => {
+  const shareResult = () => {
     const lvlName = MAIN_LEVELS[currentMainLevel].name;
     const stars = getStars(finalScore);
     const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
-    const text = `AniNoir ${mode} - ${lvlName} Stage ${currentStage + 1}: ${finalScore}/${QUESTIONS_PER_STAGE} ${starStr} #AniNoir`;
-
-    // Try Web Share API first
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'AniNoir', text });
-        return;
-      } catch (e) {
-        // User cancelled or share failed — fall through to clipboard
-      }
-    }
-
-    // Fallback: copy to clipboard
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        showFeedback('Result copied to clipboard!');
-      } else {
-        // Final fallback: use hidden textarea for copy
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showFeedback('Result copied to clipboard!');
-      }
-    } catch (e) {
-      showFeedback('Result copied to clipboard!');
-    }
+    const pct = Math.round((finalScore / QUESTIONS_PER_STAGE) * 100);
+    const bar = '\u2588'.repeat(Math.round(pct / 10)) + '\u2591'.repeat(10 - Math.round(pct / 10));
+    const modeName = mode === 'quiz' ? 'Anime Quiz' : mode === 'word-ninja' ? 'Word Ninja' : mode === 'emoji' ? 'Emoji Wars' : mode === 'frames' ? 'Anime Moments' : mode === 'dialogue' ? 'Dialogue Clash' : mode;
+    const lines = [
+      `\uD83C\uDFAE AniNoir \u2014 ${modeName}`,
+      `\uD83C\uDFAF ${lvlName} \u2022 Stage ${currentStage + 1}`,
+      '',
+      `${starStr}  ${finalScore}/${QUESTIONS_PER_STAGE}`,
+      `[${bar}] ${pct}%`,
+    ];
+    if (streak >= 3) lines.push(`\uD83D\uDD25 Best Streak: ${streak}x`);
+    lines.push('');
+    lines.push('Can you beat my score? \uD83D\uDCAA');
+    lines.push('#AniNoir #AnimeQuiz');
+    return lines.join('\n');
   };
 
 
@@ -481,7 +464,8 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
-        onShare={shareResult}
+        shareText={shareResult()}
+        showFeedback={showFeedback}
         buttons={buttons}
       />
     );

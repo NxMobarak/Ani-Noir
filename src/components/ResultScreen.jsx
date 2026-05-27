@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import T from '../constants/theme';
+import ShareModal from './ShareModal';
 
 // Floating particle component
 function FloatingParticles() {
@@ -69,10 +70,13 @@ export default function ResultScreen({
   stats = [],
   buttons = [],
   onShare,
+  shareText,
+  showFeedback: showFeedbackProp,
   gameOver = false,
   compact = false,
 }) {
   const [showContent, setShowContent] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
@@ -149,14 +153,29 @@ export default function ResultScreen({
         )}
 
         {/* Share button */}
-        {onShare && (
-          <button className="result-share-btn" onClick={onShare}>
+        {(onShare || shareText) && (
+          <button className="result-share-btn" onClick={() => {
+            if (shareText) {
+              setShowShareModal(true);
+            } else if (onShare) {
+              onShare();
+            }
+          }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
             </svg>
             Share Result
           </button>
+        )}
+
+        {/* Share Modal */}
+        {showShareModal && shareText && (
+          <ShareModal
+            text={shareText}
+            onClose={() => setShowShareModal(false)}
+            showFeedback={showFeedbackProp || (() => {})}
+          />
         )}
 
         {/* Action buttons */}

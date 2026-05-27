@@ -295,23 +295,22 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     if (!passed) buttons.push({ label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' });
     if (passed && currentLevel < 4) buttons.push({ label: 'Next Level \u2192', onClick: () => startLevel(currentLevel + 1), variant: 'primary' });
 
-    const shareFrameResult = async () => {
+    const shareFrameResult = (() => {
       const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
-      const text = `AniNoir Frame Guess - ${LEVEL_NAMES[currentLevel]}: ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} ${starStr} #AniNoir`;
-      if (navigator.share) {
-        try { await navigator.share({ title: 'AniNoir', text }); return; } catch (e) {}
-      }
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        }
-        showFeedback('Result copied to clipboard!');
-      } catch (e) { showFeedback('Result copied to clipboard!'); }
-    };
+      const pct = accuracyPct;
+      const bar = '\u2588'.repeat(Math.round(pct / 10)) + '\u2591'.repeat(10 - Math.round(pct / 10));
+      const lines = [
+        `\uD83C\uDFAE AniNoir \u2014 Frame Guess`,
+        `\uD83C\uDFAF ${LEVEL_NAMES[currentLevel]}`,
+        '',
+        `${starStr}  ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)}`,
+        `[${bar}] ${pct}%`,
+        '',
+        'Can you beat my score? \uD83D\uDCAA',
+        '#AniNoir #AnimeQuiz',
+      ];
+      return lines.join('\n');
+    })();
 
     return (
       <ResultScreen
@@ -323,7 +322,8 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
-        onShare={shareFrameResult}
+        shareText={shareFrameResult}
+        showFeedback={showFeedback}
         buttons={buttons}
       />
     );
