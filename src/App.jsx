@@ -50,13 +50,7 @@ migrateData();
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [spades, setSpades] = useState(() => {
-    // TESTING: Force 10000 spades for all accounts
-    const current = safeGet('ani_spades', 10000);
-    if (current < 10000) {
-      safeSet('ani_spades', '10000');
-      return 10000;
-    }
-    return current;
+    return safeGet('ani_spades', 1000);
   });
   const [badges, setBadges] = useState(() => safeGet('ani_badges', []));
   const [feedback, setFeedback] = useState('');
