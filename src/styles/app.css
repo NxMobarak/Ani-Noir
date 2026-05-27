@@ -152,6 +152,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 
 .option-btn { display:block;width:100%;text-align:left;background:#0e1018;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:14px;cursor:pointer;transition:all 0.15s;color:#f1f5f9; }
 .option-btn:hover:not(:disabled):not(.correct):not(.wrong) { border-color:#f43f5e;background:rgba(244,63,94,0.06); }
+.option-btn:focus-visible { outline:none; }
 .option-btn.correct { border-color:#22c55e;background:rgba(34,197,94,0.12);color:#22c55e;transition:none; }
 .option-btn.wrong { border-color:#f43f5e;background:rgba(244,63,94,0.12);color:#f43f5e;transition:none; }
 .option-btn.selected { border-color:#8b5cf6;background:rgba(139,92,246,0.12); }

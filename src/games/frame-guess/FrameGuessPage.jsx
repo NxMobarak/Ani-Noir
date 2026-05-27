@@ -77,6 +77,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const [shuffledData, setShuffledData] = useState({ shuffled: [], correctIndex: 0 });
   const [earnedSpades, setEarnedSpades] = useState(0);
   const [earnedXP, setEarnedXP] = useState(0);
+  const [levelStartTime, setLevelStartTime] = useState(null);
+  const [levelElapsed, setLevelElapsed] = useState(0);
+  const levelStartTimeRef = useRef(null);
 
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
@@ -193,6 +196,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
       }
       setProgress(updated);
       saveProgress(updated);
+      setLevelElapsed(Math.round((Date.now() - levelStartTimeRef.current) / 1000));
       setPhase('result');
     } else {
       setCurrentIdx(nextIdx);
@@ -234,6 +238,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     setSelectedOption(null);
     setEarnedSpades(0);
     setEarnedXP(0);
+    setLevelStartTime(Date.now());
+    levelStartTimeRef.current = Date.now();
+    setLevelElapsed(0);
     setPhase('playing');
   };
 
@@ -279,6 +286,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     const stars = getStars(score);
     const passed = stars >= 1;
     const accuracyPct = Math.round((score / Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)) * 100);
+    const mins = Math.floor(levelElapsed / 60);
+    const secs = levelElapsed % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
     ];
@@ -291,6 +301,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         title={passed ? 'Level Cleared!' : 'Level Failed'}
         subtitle={`${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
         stars={stars}
+        timeTaken={timeStr}
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}

@@ -15,6 +15,11 @@
   overflow: hidden;
 }
 
+.result-screen-v2.result-screen-compact {
+  min-height: auto;
+  padding: 16px 12px;
+}
+
 /* ─── Background Gradient ─────────────────────────────────── */
 .result-bg-gradient {
   position: absolute;
@@ -358,11 +363,14 @@
 
 .result-stat-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
+  text-align: center;
 }
 
 .result-stat-icon {
@@ -374,6 +382,7 @@
 .result-stat-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1px;
   min-width: 0;
 }

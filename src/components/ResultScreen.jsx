@@ -70,6 +70,7 @@ export default function ResultScreen({
   buttons = [],
   onShare,
   gameOver = false,
+  compact = false,
 }) {
   const [showContent, setShowContent] = useState(false);
 
@@ -98,7 +99,7 @@ export default function ResultScreen({
   allStats.push(...stats);
 
   return (
-    <div className="result-screen-v2">
+    <div className={`result-screen-v2 ${compact ? 'result-screen-compact' : ''}`}>
       {/* Background effects */}
       <div className="result-bg-gradient" aria-hidden="true" />
       <FloatingParticles />

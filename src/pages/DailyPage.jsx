@@ -157,6 +157,7 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
             spadesEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_SPADES : 0}
             xpEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_XP : 0}
             buttons={[]}
+            compact
           />
         </div>
       )}

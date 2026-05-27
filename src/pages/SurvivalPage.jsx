@@ -24,6 +24,9 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [earnedSpades, setEarnedSpades] = useState(0);
   const [earnedXP, setEarnedXP] = useState(0);
+  const [gameStartTime, setGameStartTime] = useState(null);
+  const [gameElapsed, setGameElapsed] = useState(0);
+  const gameStartTimeRef = useRef(null);
 
   const isUnlocked = () => localStorage.getItem(SURVIVAL_UNLOCK_KEY) === 'true';
   const getTrials = () => parseInt(localStorage.getItem(SURVIVAL_TRIALS_KEY) || '0', 10);
@@ -92,6 +95,9 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     setSelectedOption(null);
     setEarnedSpades(0);
     setEarnedXP(0);
+    setGameStartTime(Date.now());
+    gameStartTimeRef.current = Date.now();
+    setGameElapsed(0);
     setPhase('playing');
   };
 
@@ -143,6 +149,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
           addXP(xp);
           setEarnedXP(xp);
         }
+        setGameElapsed(Math.round((Date.now() - gameStartTimeRef.current) / 1000));
         setTimeout(() => setPhase('result'), 1500);
         return;
       }
@@ -156,6 +163,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
           addXP(xp);
           setEarnedXP(xp);
         }
+        setGameElapsed(Math.round((Date.now() - gameStartTimeRef.current) / 1000));
         setPhase('result');
       } else {
         setCurrentIdx(i => i + 1);
@@ -175,6 +183,9 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   // ─── Result ────────────────────────────────────────────────
   if (phase === 'result') {
     const { stars, xp } = getStarsAndXP(score);
+    const mins = Math.floor(gameElapsed / 60);
+    const secs = gameElapsed % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     return (
       <ResultScreen
         passed={score >= 10}
@@ -182,6 +193,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         title="Game Over"
         subtitle={`Final Score: ${score}`}
         stars={stars}
+        timeTaken={timeStr}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
         stats={[
