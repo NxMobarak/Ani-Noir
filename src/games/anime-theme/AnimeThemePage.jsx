@@ -314,6 +314,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setCurrentClip(0);
     setScore(0);
     setStreak(0);
+    setAnswered(false);
+    setWasCorrect(null);
+    setSelectedOption(null);
+    setHintUsed(false);
+    setHiddenOption(null);
     setEarnedSpades(0);
     setEarnedXP(0);
     setLevelStartTime(Date.now());
