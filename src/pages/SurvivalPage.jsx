@@ -4,7 +4,7 @@ import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong, playCombo } from '../utils/audio';
 import { questionBank } from '../questions/index';
 import { ALL_EMOJI_QUESTIONS } from '../constants/questions';
-import { addXP, XP_REWARDS } from '../utils/xpSystem';
+import { addXP } from '../utils/xpSystem';
 import ResultScreen from '../components/ResultScreen';
 
 const SURVIVAL_UNLOCK_KEY = 'ani_survival_unlocked';
@@ -19,17 +19,49 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [earnedSpades, setEarnedSpades] = useState(0);
+  const [earnedXP, setEarnedXP] = useState(0);
 
   const isUnlocked = () => localStorage.getItem(SURVIVAL_UNLOCK_KEY) === 'true';
   const getTrials = () => parseInt(localStorage.getItem(SURVIVAL_TRIALS_KEY) || '0', 10);
 
   const canPlay = () => isUnlocked() || getTrials() < FREE_TRIALS;
 
+  // Get spade reward based on streak
+  const getStreakReward = (currentStreak) => {
+    if (currentStreak >= 15) return 150;
+    if (currentStreak >= 10 && currentStreak % 10 === 0) return 50;
+    if (currentStreak >= 5 && currentStreak % 5 === 0) return 20;
+    if (currentStreak >= 3 && currentStreak % 3 === 0) return 10;
+    return 5;
+  };
+
+  // Get stars and XP based on total correct
+  const getStarsAndXP = (totalCorrect) => {
+    let stars = 0;
+    let xp = 0;
+    if (totalCorrect >= 20) { stars = 3; xp = 30; }
+    else if (totalCorrect >= 15) { stars = 2; xp = 20; }
+    else if (totalCorrect >= 10) { stars = 1; xp = 10; }
+
+    // Bonus XP for every correct after 20
+    if (totalCorrect > 20) {
+      xp += (totalCorrect - 20) * 10;
+    }
+
+    // Stage clear bonus XP based on stars
+    if (stars >= 3) xp += 30;
+    else if (stars >= 2) xp += 20;
+    else if (stars >= 1) xp += 10;
+
+    return { stars, xp };
+  };
+
   const startGame = () => {
     if (!canPlay()) {
-      // Need to pay to unlock
       if (spades < UNLOCK_COST) {
         showFeedback(`Need ${UNLOCK_COST} ♠ to unlock! (Have ${spades})`, 'error');
         return;
@@ -44,9 +76,9 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
       localStorage.setItem(SURVIVAL_TRIALS_KEY, String(trials + 1));
     }
 
-    // Combine all MCQ questions + emoji MCQ questions
+    // Questions from level 4 and 5 only, from every game
     const allQ = [
-      ...questionBank.filter(q => q.type === 'mcq'),
+      ...questionBank.filter(q => q.type === 'mcq' && (q.level === 4 || q.level === 5)),
       ...ALL_EMOJI_QUESTIONS.map(q => ({ ...q, type: 'emoji' })),
     ];
     const shuffled = shuffle(allQ);
@@ -55,8 +87,11 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     setLives(3);
     setScore(0);
     setStreak(0);
+    setBestStreak(0);
     setAnswered(false);
     setSelectedOption(null);
+    setEarnedSpades(0);
+    setEarnedXP(0);
     setPhase('playing');
   };
 
@@ -67,7 +102,6 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setSelectedOption(option);
 
-    // For MCQ/emoji questions, 'correct' is an index number
     let correct = false;
     if (typeof currentQ.correct === 'number' && currentQ.options) {
       correct = option === currentQ.options[currentQ.correct];
@@ -80,18 +114,22 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
       setScore(newScore);
       const newStreak = streak + 1;
       setStreak(newStreak);
+      if (newStreak > bestStreak) setBestStreak(newStreak);
 
-      if (newScore % 5 === 0) {
-        setSpades(s => s + 100);
-        addXP(XP_REWARDS.SURVIVAL_PER_5);
-        showFeedback('+100 ♠ Milestone!', 'success');
-      }
+      // Spade reward based on streak
+      const reward = getStreakReward(newStreak);
+      setSpades(s => s + reward);
+      setEarnedSpades(prev => prev + reward);
 
-      if (newStreak % 3 === 0) {
+      if (newStreak >= 10 && newStreak % 5 === 0) {
         playCombo();
-        showFeedback(`🔥 ${newStreak}x Combo!`, 'success');
+        showFeedback(`🔥 ${newStreak}x Streak! +${reward}♠`, 'success');
+      } else if (newStreak >= 3 && newStreak % 3 === 0) {
+        playCombo();
+        showFeedback(`🔥 ${newStreak}x Combo! +${reward}♠`, 'success');
       } else {
         playCorrect();
+        showFeedback(`Correct! +${reward}♠`);
       }
     } else {
       playWrong();
@@ -99,13 +137,25 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
       const newLives = lives - 1;
       setLives(newLives);
       if (newLives <= 0) {
+        // Game over - calculate final rewards
+        const { stars, xp } = getStarsAndXP(score);
+        if (xp > 0) {
+          addXP(xp);
+          setEarnedXP(xp);
+        }
         setTimeout(() => setPhase('result'), 1500);
         return;
       }
+      showFeedback('Wrong! -1 ❤️');
     }
 
     setTimeout(() => {
       if (currentIdx + 1 >= questions.length) {
+        const { stars, xp } = getStarsAndXP(score + (correct ? 0 : 0));
+        if (xp > 0) {
+          addXP(xp);
+          setEarnedXP(xp);
+        }
         setPhase('result');
       } else {
         setCurrentIdx(i => i + 1);
@@ -115,27 +165,27 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
     }, 1500);
   };
 
-  const trialsLeft = FREE_TRIALS - getTrials();
-  const unlocked = isUnlocked();
-
   // Auto-start game on mount
   useEffect(() => {
     if (phase === 'intro') {
       startGame();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── Result ────────────────────────────────────────────────
   if (phase === 'result') {
+    const { stars, xp } = getStarsAndXP(score);
     return (
       <ResultScreen
-        passed={score >= 15}
+        passed={score >= 10}
         gameOver={true}
         title="Game Over"
         subtitle={`Final Score: ${score}`}
+        stars={stars}
+        spadesEarned={earnedSpades}
+        xpEarned={earnedXP}
         stats={[
-          { icon: '🔥', label: 'Best Streak', value: streak > 0 ? `${streak}x` : 'N/A' },
+          { icon: '🔥', label: 'Best Streak', value: bestStreak > 0 ? `${bestStreak}x` : 'N/A' },
           { icon: '🎯', label: 'Questions', value: `${score} correct` },
         ]}
         buttons={[
@@ -165,17 +215,15 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         </div>
       </div>
 
-      {/* Rules hint - styled like Word Ninja */}
-      {currentIdx === 0 && !answered && (
-        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: '8px 12px', marginBottom: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.teal, marginBottom: 4 }}>Rules</div>
-          <ul style={{ listStyle: 'none', fontSize: 10, color: T.textMid, lineHeight: 1.8, padding: 0, margin: 0 }}>
-            <li>❤️ <strong style={{ color: T.text }}>3 lives</strong> — no timer</li>
-            <li>🎯 Every <strong style={{ color: T.text }}>5 correct</strong> = +100 ♠</li>
-            <li>🔥 Build <strong style={{ color: T.text }}>streaks</strong> for combo bonus</li>
-          </ul>
-        </div>
-      )}
+      {/* Rules - Always visible */}
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: '8px 12px', marginBottom: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: T.teal, marginBottom: 4 }}>Rules</div>
+        <ul style={{ listStyle: 'none', fontSize: 10, color: T.textMid, lineHeight: 1.8, padding: 0, margin: 0 }}>
+          <li>❤️ <strong style={{ color: T.text }}>3 lives</strong> — no timer</li>
+          <li>🔥 Build <strong style={{ color: T.text }}>streaks</strong> for combo bonus</li>
+          <li>🎯 How far <strong style={{ color: T.text }}>you can go</strong></li>
+        </ul>
+      </div>
 
       {/* Streak */}
       {streak >= 2 && (

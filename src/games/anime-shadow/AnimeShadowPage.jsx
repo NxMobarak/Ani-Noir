@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { playCorrect, playWrong, playKeyTap } from '../../utils/audio';
-import { addXP, XP_REWARDS } from '../../utils/xpSystem';
+import { playCorrect, playWrong, playCombo, playKeyTap } from '../../utils/audio';
+import { addXP } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
 import ResultScreen from '../../components/ResultScreen';
+import CircularTimer from '../../components/CircularTimer';
 import '../../styles/shadow-quiz.css';
 
 import level1 from './questions/level1';
@@ -15,12 +16,19 @@ const LEVELS = [level1, level2, level3, level4, level5];
 const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const CHARS_PER_LEVEL = 10;
 const TIMER_TOTAL = 30;
-const SKIP_COST = 50;
 const HINT_COST = 100;
-const MAX_SKIPS = 3;
-const MAX_HINT_WRONG = 3;
-const PASS_THRESHOLD = 8; // 8/10 to unlock next
+const PASS_THRESHOLD_1_STAR = 5;
+const PASS_THRESHOLD_2_STAR = 8;
+const PASS_THRESHOLD_3_STAR = 10;
+const STARS_TO_UNLOCK = 2; // Need 2 stars to unlock next level
 const STORAGE_KEY = 'ani_shadow_progress';
+
+// Spade rewards
+const SPADES_PER_CORRECT = 5;
+const SPADES_STREAK_3 = 10;
+const SPADES_STREAK_5 = 20;
+const SPADES_LEVEL_BONUS = 50;
+const SPADES_WRONG_PENALTY = -5;
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -57,6 +65,20 @@ const ShadowImage = memo(function ShadowImage({ file, revealed }) {
 });
 
 /* ─── Helper ──────────────────────────────────────────────────── */
+function getStars(correct) {
+  if (correct >= PASS_THRESHOLD_3_STAR) return 3;
+  if (correct >= PASS_THRESHOLD_2_STAR) return 2;
+  if (correct >= PASS_THRESHOLD_1_STAR) return 1;
+  return 0;
+}
+
+function getStageXP(stars) {
+  if (stars >= 3) return 30;
+  if (stars >= 2) return 20;
+  if (stars >= 1) return 10;
+  return 0;
+}
+
 function getProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
   catch { return {}; }
@@ -71,8 +93,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
-  const [skipsUsed, setSkipsUsed] = useState(0);
-  const [hintWrong, setHintWrong] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [guess, setGuess] = useState('');
   const [timeLeft, setTimeLeft] = useState(TIMER_TOTAL);
   const [revealed, setRevealed] = useState(false);
@@ -80,7 +101,8 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [hintUsed, setHintUsed] = useState(false);
   const [hintLetters, setHintLetters] = useState([]);
   const [progress, setProgress] = useState(getProgress);
-  const [totalStars, setTotalStars] = useState(0);
+  const [earnedSpades, setEarnedSpades] = useState(0);
+  const [earnedXP, setEarnedXP] = useState(0);
 
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
@@ -92,6 +114,13 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
     clearTimeout(advanceRef.current);
+  };
+
+  // Get streak reward
+  const getStreakReward = (currentStreak) => {
+    if (currentStreak >= 5 && currentStreak % 5 === 0) return SPADES_STREAK_5;
+    if (currentStreak >= 3 && currentStreak % 3 === 0) return SPADES_STREAK_3;
+    return SPADES_PER_CORRECT;
   };
 
   // Timer countdown
@@ -120,17 +149,12 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     clearAllTimers();
     setRevealed(true);
     setWasCorrect(false);
+    setStreak(0);
     playWrong();
-    if (hintUsed) {
-      const newHintWrong = hintWrong + 1;
-      setHintWrong(newHintWrong);
-      if (newHintWrong >= MAX_HINT_WRONG) {
-        showFeedback('Game Over! 3 wrong after hints');
-        setTimeout(() => setPhase('gameover'), 1500);
-        return;
-      }
-    }
-    showFeedback(`Wrong! Answer: ${currentAnswer}`);
+    // Wrong penalty
+    setSpades(s => Math.max(0, s + SPADES_WRONG_PENALTY));
+    setEarnedSpades(prev => prev + SPADES_WRONG_PENALTY);
+    showFeedback(`Wrong! Answer: ${currentAnswer} · ${SPADES_WRONG_PENALTY}♠`);
     advanceRef.current = setTimeout(() => advanceToNext(), 3000);
   };
 
@@ -138,15 +162,24 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     clearAllTimers();
     setRevealed(true);
     setWasCorrect(true);
+    const newStreak = streak + 1;
+    setStreak(newStreak);
+    setScore(s => s + 1);
     playCorrect();
 
-    const elapsed = TIMER_TOTAL - timeLeft;
-    let earnedStars = 1;
-    if (elapsed <= 10) earnedStars = 3;
-    else if (elapsed <= 20) earnedStars = 2;
-    setTotalStars(s => s + earnedStars);
-    setScore(s => s + 1);
-    showFeedback(`Correct! +${earnedStars} star${earnedStars > 1 ? 's' : ''}`);
+    const reward = getStreakReward(newStreak);
+    setSpades(s => s + reward);
+    setEarnedSpades(prev => prev + reward);
+
+    if (newStreak >= 5 && newStreak % 5 === 0) {
+      playCombo();
+      showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
+    } else if (newStreak >= 3 && newStreak % 3 === 0) {
+      playCombo();
+      showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
+    } else {
+      showFeedback(`Correct! +${reward}♠`);
+    }
     advanceRef.current = setTimeout(() => advanceToNext(), 2500);
   };
 
@@ -154,15 +187,25 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     const nextIdx = currentIdx + 1;
     if (nextIdx >= CHARS_PER_LEVEL || nextIdx >= levelChars.length) {
       // Level complete
-      const passed = score + (wasCorrect ? 0 : 0) >= PASS_THRESHOLD; // score already updated
-      const finalScore = score; // score is already correct from handleCorrect
+      const finalScore = score;
+      const stars = getStars(finalScore);
       const updated = { ...progress };
       if (!updated[currentLevel] || finalScore > (updated[currentLevel]?.score || 0)) {
-        updated[currentLevel] = { score: finalScore, passed: finalScore >= PASS_THRESHOLD };
+        updated[currentLevel] = { score: finalScore, stars, passed: stars >= 1 };
+      }
+      // Level bonus
+      if (stars >= 1) {
+        const wasAlreadyPassed = progress[currentLevel] && progress[currentLevel].stars >= 1;
+        if (!wasAlreadyPassed) {
+          setSpades(s => s + SPADES_LEVEL_BONUS);
+          setEarnedSpades(prev => prev + SPADES_LEVEL_BONUS);
+          const xpReward = getStageXP(stars);
+          addXP(xpReward);
+          setEarnedXP(prev => prev + xpReward);
+        }
       }
       setProgress(updated);
       saveProgress(updated);
-      if (finalScore >= PASS_THRESHOLD) addXP(XP_REWARDS.LEVEL_COMPLETE);
       setPhase('result');
     } else {
       setCurrentIdx(nextIdx);
@@ -206,30 +249,11 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     }
   };
 
-  const doSkip = () => {
-    if (spades < SKIP_COST || revealed) return;
-    const newSkips = skipsUsed + 1;
-    setSkipsUsed(newSkips);
-    setSpades(s => s - SKIP_COST);
-    showFeedback(`Skipped! -${SKIP_COST}♠ (${newSkips}/${MAX_SKIPS})`);
-    if (newSkips >= MAX_SKIPS) {
-      clearAllTimers();
-      setRevealed(true);
-      showFeedback('Game Over! 3 skips used');
-      setTimeout(() => setPhase('gameover'), 1500);
-      return;
-    }
-    clearAllTimers();
-    setRevealed(true);
-    setWasCorrect(false);
-    advanceRef.current = setTimeout(() => advanceToNext(), 800);
-  };
-
   const doHint = () => {
     if (spades < HINT_COST || hintUsed || revealed || !currentChar) return;
     setSpades(s => s - HINT_COST);
     setHintUsed(true);
-    // Reveal 2 random letters as hint
+    // Reveal 1 random letter as hint
     const name = currentChar.name;
     const available = [];
     for (let i = 0; i < name.length; i++) {
@@ -237,30 +261,27 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         available.push(i);
       }
     }
-    const toReveal = [];
-    const count = Math.min(2, available.length);
-    const shuffled = [...available].sort(() => Math.random() - 0.5);
-    for (let i = 0; i < count; i++) {
-      toReveal.push(shuffled[i]);
+    if (available.length > 0) {
+      const randomIdx = available[Math.floor(Math.random() * available.length)];
+      setHintLetters(prev => [...prev, randomIdx]);
     }
-    setHintLetters(prev => [...prev, ...toReveal]);
-    showFeedback(`💡 Hint! -${HINT_COST}♠ — 2 letters revealed`);
+    showFeedback(`💡 Hint! -${HINT_COST}♠ — 1 letter revealed`);
   };
 
   const startLevel = (levelIdx) => {
-    if (levelIdx > 0 && !progress[levelIdx - 1]?.passed) return;
+    if (levelIdx > 0 && !(progress[levelIdx - 1]?.stars >= STARS_TO_UNLOCK)) return;
     setCurrentLevel(levelIdx);
     setCurrentIdx(0);
     setScore(0);
-    setSkipsUsed(0);
-    setHintWrong(0);
-    setTotalStars(0);
+    setStreak(0);
     setTimeLeft(TIMER_TOTAL);
     setRevealed(false);
     setWasCorrect(null);
     setGuess('');
     setHintUsed(false);
     setHintLetters([]);
+    setEarnedSpades(0);
+    setEarnedXP(0);
     setPhase('playing');
   };
 
@@ -293,13 +314,6 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     return () => clearAllTimers();
   }, []);
 
-  // Timer visual calculations
-  const timerRadius = 21;
-  const timerCircumference = 2 * Math.PI * timerRadius;
-  const timerProgress = Math.max(0, timeLeft / TIMER_TOTAL);
-  const timerOffset = timerCircumference * (1 - timerProgress);
-  const isUrgent = timeLeft <= 5;
-
   // ═══════════════════════════════════════════════════════════════
   // LEVEL SELECT SCREEN
   // ═══════════════════════════════════════════════════════════════
@@ -310,12 +324,13 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         <div className="card" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: 'var(--sg-crimson-bright, #c62839)' }}>🕶️ ANIME SHADOW</h2>
           <p style={{ fontSize: 12, color: '#7a7873' }}>Identify the anime character from their silhouette!</p>
-          <p style={{ fontSize: 11, color: '#c4953a', marginTop: 4 }}>10 shadows per level · Need 8/10 to unlock next</p>
+          <p style={{ fontSize: 11, color: '#c4953a', marginTop: 4 }}>10 shadows per level · Need {STARS_TO_UNLOCK}★ to unlock next</p>
         </div>
         {LEVEL_NAMES.map((name, idx) => {
-          const unlocked = idx === 0 || progress[idx - 1]?.passed;
+          const unlocked = idx === 0 || (progress[idx - 1]?.stars >= STARS_TO_UNLOCK);
           const levelData = progress[idx];
           const hasChars = LEVELS[idx] && LEVELS[idx].length > 0;
+          const prevStars = idx > 0 ? (progress[idx - 1]?.stars || 0) : 0;
           return (
             <button key={idx} className="level-card" onClick={() => hasChars && unlocked && startLevel(idx)}
               style={{ opacity: unlocked && hasChars ? 1 : 0.5, cursor: unlocked && hasChars ? 'pointer' : 'not-allowed' }}>
@@ -323,7 +338,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
               <div className="level-info">
                 <div className="level-name">{name}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Need 8/10 on previous level' : !hasChars ? 'Coming soon' : levelData ? `${levelData.score}/10 correct` : '10 shadows · 30s timer'}
+                  {!unlocked ? `Need ${STARS_TO_UNLOCK}★ on ${LEVEL_NAMES[idx-1]} (${prevStars}/${STARS_TO_UNLOCK}★)` : !hasChars ? 'Coming soon' : levelData ? `${levelData.score}/10 correct · ${levelData.stars || 0}★` : '10 shadows · 30s timer'}
                 </div>
               </div>
               <span style={{ color: '#4a4844', fontSize: 20 }}>{unlocked && hasChars ? '›' : ''}</span>
@@ -335,30 +350,11 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // GAME OVER SCREEN
-  // ═══════════════════════════════════════════════════════════════
-  if (phase === 'gameover') {
-    const accuracyPct = Math.round((score / Math.min(CHARS_PER_LEVEL, levelChars.length)) * 100);
-    return (
-      <ResultScreen
-        passed={false}
-        gameOver={true}
-        title="Game Over"
-        subtitle={`You got ${score}/${Math.min(CHARS_PER_LEVEL, levelChars.length)} correct`}
-        accuracy={`${accuracyPct}%`}
-        buttons={[
-          { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
-          { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
-        ]}
-      />
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════
   // RESULT SCREEN
   // ═══════════════════════════════════════════════════════════════
   if (phase === 'result') {
-    const passed = score >= PASS_THRESHOLD;
+    const stars = getStars(score);
+    const passed = stars >= 1;
     const accuracyPct = Math.round((score / Math.min(CHARS_PER_LEVEL, levelChars.length)) * 100);
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
@@ -371,7 +367,10 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         passed={passed}
         title={passed ? 'Level Cleared!' : 'Level Failed'}
         subtitle={`${score}/${Math.min(CHARS_PER_LEVEL, levelChars.length)} correct`}
+        stars={stars}
         accuracy={`${accuracyPct}%`}
+        spadesEarned={earnedSpades}
+        xpEarned={earnedXP}
         buttons={buttons}
       />
     );
@@ -388,31 +387,22 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       {/* ─── Header ───────────────────────────────────────────── */}
       <div className="sg-header">
         <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ background: 'none', border: 'none', color: 'var(--sg-text)', fontSize: 18 }}>←</button>
+        <div style={{ flex: 1 }} />
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sg-success)' }}>✓ {score}</div>
       </div>
 
       {/* ─── Stats ────────────────────────────────────────────── */}
       <div className="sg-stats">
-        <div style={{ display: 'flex', gap: 4 }}>
-          {Array.from({ length: MAX_SKIPS }).map((_, i) => (
-            <span key={i} style={{ fontSize: 16, opacity: i < (MAX_SKIPS - skipsUsed) ? 1 : 0.2 }}>⏩</span>
-          ))}
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div className={`sg-timer-ring ${isUrgent ? 'urgent' : ''}`}>
-            <svg viewBox="0 0 48 48">
-              <circle className="track" cx="24" cy="24" r={timerRadius} />
-              <circle
-                className="progress"
-                cx="24" cy="24" r={timerRadius}
-                strokeDasharray={timerCircumference}
-                strokeDashoffset={timerOffset}
-              />
-            </svg>
-            <div className="sg-timer-number">{timeLeft}</div>
+        {streak >= 3 && (
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: 10 }}>🔥 {streak}x</span>
+        )}
+        <div style={{ textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+            <CircularTimer timeLeft={timeLeft} maxTime={TIMER_TOTAL} />
           </div>
           <div style={{ fontSize: 10, color: 'var(--sg-text-mid)', marginTop: 2 }}>Q{currentIdx + 1}/{Math.min(CHARS_PER_LEVEL, levelChars.length)}</div>
         </div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sg-success)' }}>✓ {score}</div>
+        <div style={{ width: 40 }} />
       </div>
 
       {/* ─── Shadow Card ──────────────────────────────────────── */}
@@ -498,16 +488,13 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* ─── Action Buttons (GO + Skip + Hint) ────────────────── */}
+      {/* ─── Action Buttons (GO + Hint) ───────────────────────── */}
       {!revealed && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 14px 10px' }}>
           <button className="power-btn" onClick={submitGuess} style={{ width: '100%', background: 'var(--sg-crimson)', color: 'var(--sg-text)', fontSize: 16, fontWeight: 800, letterSpacing: 2 }}>
             GO
           </button>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
-              ⏩ SKIP<br /><span style={{ color: '#c4953a' }}>{SKIP_COST}♠</span>
-            </button>
             <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST || hintUsed} style={{ flex: 1, opacity: hintUsed ? 0.4 : 1 }}>
               💡 HINT<br /><span style={{ color: '#c4953a' }}>{HINT_COST}♠</span>
             </button>

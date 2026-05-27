@@ -7,7 +7,9 @@ import { getStageProgress, saveStageProgress } from '../utils/storage';
 import {
   MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE,
   getStars, MIN_STARS_TO_UNLOCK, STARS_TO_UNLOCK_LEVEL,
-  STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD
+  STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD,
+  getStageXP, SPADES_PER_CORRECT, SPADES_STREAK_3, SPADES_STREAK_5,
+  SPADES_STAGE_BONUS, SPADES_WRONG_PENALTY, HINT_COST, SHUFFLE_COST
 } from '../games/shared/config';
 import { addXP, XP_REWARDS } from '../utils/xpSystem';
 import CircularTimer from './CircularTimer';
@@ -25,11 +27,11 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [maxTime, setMaxTime] = useState(30);
   const [timerActive, setTimerActive] = useState(false);
   const [hintRevealed, setHintRevealed] = useState(false);
-  const [skipUsed, setSkipUsed] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [correctOption, setCorrectOption] = useState(null);
@@ -101,8 +103,8 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     setQIndex(0);
     setScore(0);
     setCombo(0);
+    setStreak(0);
     setHintRevealed(false);
-    setSkipUsed(false);
     setAnswered(false);
     setSelectedOption(null);
     setCorrectOption(null);
@@ -125,17 +127,26 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     const q = questions[qIndex];
     if (q?.type === 'mcq' || q?.correct !== undefined) setCorrectOption(q.correct);
     playWrong();
-    showFeedback('Time is up!');
+    setStreak(0);
+    // Wrong answer penalty
+    setSpades(s => Math.max(0, s + SPADES_WRONG_PENALTY));
+    setEarnedSpades(prev => prev + SPADES_WRONG_PENALTY);
+    showFeedback(`Time's up! ${SPADES_WRONG_PENALTY}♠`);
     setTimeout(() => advance(false, score), 1200);
   };
 
+  // Calculate spade reward based on streak
+  const getStreakReward = (currentStreak) => {
+    if (currentStreak >= 5 && currentStreak % 5 === 0) return SPADES_STREAK_5;
+    if (currentStreak >= 3 && currentStreak % 3 === 0) return SPADES_STREAK_3;
+    return SPADES_PER_CORRECT;
+  };
 
   const advance = (wasCorrect, currentScore) => {
     const nextIdx = qIndex + 1;
     if (nextIdx < questions.length) {
       setQIndex(nextIdx);
       setHintRevealed(false);
-      setSkipUsed(false);
       setAnswered(false);
       setSelectedOption(null);
       setCorrectOption(null);
@@ -155,16 +166,13 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       if (passed) {
         const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= MIN_STARS_TO_UNLOCK;
         if (!wasAlreadyPassed) {
-          setSpades(s => s + STAGE_REWARD);
-          setEarnedSpades(prev => prev + STAGE_REWARD);
-          // Award XP for stage completion
-          if (fs >= QUESTIONS_PER_STAGE) {
-            addXP(XP_REWARDS.STAGE_PERFECT);
-            setEarnedXP(prev => prev + XP_REWARDS.STAGE_PERFECT);
-          } else {
-            addXP(XP_REWARDS.STAGE_COMPLETE);
-            setEarnedXP(prev => prev + XP_REWARDS.STAGE_COMPLETE);
-          }
+          // Stage clear bonus spades
+          setSpades(s => s + SPADES_STAGE_BONUS);
+          setEarnedSpades(prev => prev + SPADES_STAGE_BONUS);
+          // XP based on stars
+          const xpReward = getStageXP(stars);
+          addXP(xpReward);
+          setEarnedXP(prev => prev + xpReward);
         }
         let newTotalStars = 0;
         for (let s = 0; s < STAGES_PER_LEVEL; s++) {
@@ -228,26 +236,33 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     setCorrectOption(q.correct);
     setAnswered(true);
     if (isCorrect) {
-      const newCombo = combo + 1;
+      const newStreak = streak + 1;
       setScore(s => s + 1);
-      setCombo(newCombo);
+      setStreak(newStreak);
+      setCombo(c => c + 1);
       playCorrect();
-      if (newCombo >= 3) {
-        const bonus = Math.floor(newCombo / 3) * 5;
-        setSpades(s => s + bonus);
-        setEarnedSpades(prev => prev + bonus);
-        addXP(XP_REWARDS.COMBO_BONUS);
-        setEarnedXP(prev => prev + XP_REWARDS.COMBO_BONUS);
+      // Spade reward based on streak
+      const reward = getStreakReward(newStreak);
+      setSpades(s => s + reward);
+      setEarnedSpades(prev => prev + reward);
+      if (newStreak >= 5 && newStreak % 5 === 0) {
         playCombo();
-        showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
+        showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
+      } else if (newStreak >= 3 && newStreak % 3 === 0) {
+        playCombo();
+        showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
       } else {
-        showFeedback('Correct!');
+        showFeedback(`Correct! +${reward}♠`);
       }
       setTimeout(() => advance(true, score + 1), 1000);
     } else {
+      setStreak(0);
       setCombo(0);
       playWrong();
-      showFeedback('Wrong!');
+      // Wrong answer penalty
+      setSpades(s => Math.max(0, s + SPADES_WRONG_PENALTY));
+      setEarnedSpades(prev => prev + SPADES_WRONG_PENALTY);
+      showFeedback(`Wrong! ${SPADES_WRONG_PENALTY}♠`);
       setTimeout(() => advance(false, score), 1000);
     }
   };
@@ -261,54 +276,49 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     const isCorrect = norm === correct;
     setAnswered(true);
     if (isCorrect) {
-      const newCombo = combo + 1;
+      const newStreak = streak + 1;
       setScore(s => s + 1);
-      setCombo(newCombo);
+      setStreak(newStreak);
+      setCombo(c => c + 1);
       playCorrect();
-      if (newCombo >= 3) {
-        const bonus = Math.floor(newCombo / 3) * 5;
-        setSpades(s => s + bonus);
-        setEarnedSpades(prev => prev + bonus);
-        addXP(XP_REWARDS.COMBO_BONUS);
-        setEarnedXP(prev => prev + XP_REWARDS.COMBO_BONUS);
+      const reward = getStreakReward(newStreak);
+      setSpades(s => s + reward);
+      setEarnedSpades(prev => prev + reward);
+      if (newStreak >= 5 && newStreak % 5 === 0) {
         playCombo();
-        showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
+        showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
+      } else if (newStreak >= 3 && newStreak % 3 === 0) {
+        playCombo();
+        showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
       } else {
-        showFeedback('Correct!');
+        showFeedback(`Correct! +${reward}♠`);
       }
       setTimeout(() => advance(true, score + 1), 1200);
     } else {
+      setStreak(0);
       setCombo(0);
       playWrong();
-      showFeedback(`Wrong! Answer: ${q.answer}`);
+      setSpades(s => Math.max(0, s + SPADES_WRONG_PENALTY));
+      setEarnedSpades(prev => prev + SPADES_WRONG_PENALTY);
+      showFeedback(`Wrong! Answer: ${q.answer} · ${SPADES_WRONG_PENALTY}♠`);
       setTimeout(() => advance(false, score), 1400);
     }
   };
 
   const doHint = () => {
-    if (spades < 30 || hintRevealed || answered) return;
-    setSpades(s => s - 30);
+    if (spades < HINT_COST || hintRevealed || answered) return;
+    setSpades(s => s - HINT_COST);
     setHintRevealed(true);
-    showFeedback('Hint revealed! -30 spades');
-  };
-
-  const doSkip = () => {
-    if (spades < 50 || skipUsed || answered) return;
-    setSpades(s => s - 50);
-    setSkipUsed(true);
-    clearTimer();
-    setAnswered(true);
-    showFeedback('Skipped! -50 spades');
-    setTimeout(() => advance(false, score), 800);
+    showFeedback(`Hint revealed! -${HINT_COST}♠`);
   };
 
   const doShuffle = () => {
-    if (spades < 20 || answered) return;
+    if (spades < SHUFFLE_COST || answered) return;
     const q = questions[qIndex];
     const letters = q.text.replace(/\s/g, '').toUpperCase().split('');
     setScrambled(shuffle(letters));
-    setSpades(s => s - 20);
-    showFeedback('Shuffled! -20 spades');
+    setSpades(s => s - SHUFFLE_COST);
+    showFeedback(`Shuffled! -${SHUFFLE_COST}♠`);
   };
 
   const shareResult = () => {
@@ -332,10 +342,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         <BackButton />
         <div className="card" style={{ marginBottom: 14 }}>
           <h2 className="card-title" style={{ color: T.rose }}>
-            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'word-ninja' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : '🖼️ ANIME MOMENTS'}
+            {mode === 'quiz' ? '🧠 ANIME QUIZ' : mode === 'word-ninja' ? '🔤 WORD NINJA' : mode === 'emoji' ? '🎯 EMOJI WARS' : mode === 'shadow' ? '🕵️ ANIME SHADOW' : mode === 'frames' ? '🖼️ ANIME MOMENTS' : '💬 DIALOGUE CLASH'}
           </h2>
-          <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, 10 stages each. Earn stars to progress!</p>
-          <p style={{ fontSize: 12, color: T.gold, marginTop: 4 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need 2★ per stage</p>
+          <p style={{ fontSize: 13, color: T.textMid }}>5 main levels, {STAGES_PER_LEVEL} stages each. Earn stars to progress!</p>
+          <p style={{ fontSize: 12, color: T.gold, marginTop: 4 }}>Need {STARS_TO_UNLOCK_LEVEL}★ per level to unlock next · Need {MIN_STARS_TO_UNLOCK}★ per stage</p>
         </div>
         {MAIN_LEVELS.map((ml, idx) => {
           const unlocked = isMainLevelUnlocked(idx);
@@ -399,7 +409,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
               <div className="level-info">
                 <div className="level-name">Stage {stageIdx + 1}</div>
                 <div className="level-meta">
-                  {!unlocked ? `Need 2★ on Stage ${stageIdx}` : stageDone ? `${starDisplay}` : `${QUESTIONS_PER_STAGE} questions · ${ml.timeSeconds}s`}
+                  {!unlocked ? `Need ${MIN_STARS_TO_UNLOCK}★ on Stage ${stageIdx}` : stageDone ? `${starDisplay}` : `${QUESTIONS_PER_STAGE} questions · ${ml.timeSeconds}s`}
                 </div>
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked ? '›' : ''}</span>
@@ -457,10 +467,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
 
   if (renderQuestion) {
     return renderQuestion({
-      q, qIndex, questions, progress, timeLeft, maxTime, score, combo,
+      q, qIndex, questions, progress, timeLeft, maxTime, score, combo, streak,
       answered, selectedOption, correctOption, hintRevealed, currentMainLevel,
-      currentStage, submitMCQ, submitAnagram, doHint, doSkip, doShuffle,
-      scrambled, spades, skipUsed
+      currentStage, submitMCQ, submitAnagram, doHint, doShuffle,
+      scrambled, spades
     });
   }
 
@@ -471,7 +481,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontSize: 13, color: T.success }}>✓ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+          {streak >= 3 && <span className="combo-badge">🔥 {streak}x</span>}
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
@@ -479,7 +489,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       </div>
       <div className="card" key={qIndex}>
         <div className="question-text question-enter">
-          {q.type === 'anagram' ? '🔤 ANIME SCRAMBLE' : q.text}
+          {q.type === 'anagram' ? q.text : q.text}
         </div>
         {q.type === 'anagram' ? (
           <WordNinjaTiles scrambled={scrambled} onSolve={submitAnagram} hintRevealed={hintRevealed} hint={q.hint} answered={answered} correctAnswer={q.answer} />
@@ -504,18 +514,15 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       </div>
       <div className="power-btns">
         {q.type === 'anagram' && (
-          <button className="power-btn" onClick={doShuffle} disabled={spades < 20 || answered}>
-            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>20♠</span>
+          <button className="power-btn" onClick={doShuffle} disabled={spades < SHUFFLE_COST || answered}>
+            🔀 SHUFFLE<br /><span style={{ color: T.gold }}>{SHUFFLE_COST}♠</span>
           </button>
         )}
         {q.hint && (
-          <button className="power-btn" onClick={doHint} disabled={spades < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
           </button>
         )}
-        <button className="power-btn" onClick={doSkip} disabled={spades < 50 || skipUsed || answered}>
-          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
-        </button>
       </div>
     </div>
   );

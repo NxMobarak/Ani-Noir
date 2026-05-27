@@ -1,6 +1,6 @@
 import T from '../../constants/theme';
 import { shuffle } from '../../utils/helpers';
-import { MAIN_LEVELS, QUESTIONS_PER_STAGE } from '../shared/config';
+import { MAIN_LEVELS, QUESTIONS_PER_STAGE, HINT_COST } from '../shared/config';
 import StageQuizPage from '../../components/StageQuizPage';
 import CircularTimer from '../../components/CircularTimer';
 import level1 from './questions/level1';
@@ -23,14 +23,14 @@ export default function EmojiWarsPage({ spades, setSpades, showFeedback }) {
     });
   };
 
-  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades: sp, skipUsed }) => (
+  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, streak, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, spades: sp }) => (
     <div>
       <div className="progress-bar"><div className="progress-fill" style={{ width: `${progress}%` }} /></div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, padding: '2px 0' }}>
         <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontSize: 13, color: '#22c55e' }}>✓ {score}</span>
-          {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+          {streak >= 3 && <span className="combo-badge">🔥 {streak}x</span>}
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
@@ -59,13 +59,10 @@ export default function EmojiWarsPage({ spades, setSpades, showFeedback }) {
       </div>
       <div className="power-btns">
         {q.hint && (
-          <button className="power-btn" onClick={doHint} disabled={sp < 30 || hintRevealed || answered}>
-            💡 HINT<br /><span style={{ color: T.gold }}>30♠</span>
+          <button className="power-btn" onClick={doHint} disabled={sp < HINT_COST || hintRevealed || answered}>
+            💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
           </button>
         )}
-        <button className="power-btn" onClick={doSkip} disabled={sp < 50 || skipUsed || answered}>
-          ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
-        </button>
       </div>
     </div>
   );

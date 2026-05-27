@@ -1,4 +1,4 @@
-import { QUESTIONS_PER_STAGE, MAIN_LEVELS } from '../shared/config';
+import { QUESTIONS_PER_STAGE, MAIN_LEVELS, HINT_COST } from '../shared/config';
 import { shuffle } from '../../utils/helpers';
 import StageQuizPage from '../../components/StageQuizPage';
 import CircularTimer from '../../components/CircularTimer';
@@ -19,12 +19,12 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
     return shuffle(stageQuestions);
   };
 
-  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, doSkip, spades: sp, skipUsed }) => {
-    // When hint is revealed, pick one wrong option to blacken/disable
-    let blackenedIdx = null;
+  const renderQuestion = ({ q, qIndex, questions, progress, timeLeft, maxTime, score, combo, streak, answered, selectedOption, correctOption, hintRevealed, currentMainLevel, currentStage, submitMCQ, doHint, spades: sp }) => {
+    // When hint is revealed, disable/disappear one wrong option
+    let disabledIdx = null;
     if (hintRevealed) {
       const wrongIndices = q.options.map((_, i) => i).filter(i => i !== q.correct);
-      blackenedIdx = wrongIndices[qIndex % wrongIndices.length];
+      disabledIdx = wrongIndices[qIndex % wrongIndices.length];
     }
 
     return (
@@ -34,7 +34,7 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
           <span style={{ fontSize: 12, color: T.textMid }}>{MAIN_LEVELS[currentMainLevel].name} · S{currentStage+1} · Q{qIndex+1}/{questions.length}</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ fontSize: 13, color: '#22c55e' }}>✓ {score}</span>
-            {combo >= 3 && <span className="combo-badge">🔥 {combo}x</span>}
+            {streak >= 3 && <span className="combo-badge">🔥 {streak}x</span>}
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
@@ -45,12 +45,9 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
           <div className="question-text question-enter" style={{ fontSize: 15, fontStyle: 'italic', lineHeight: 1.6, color: T.text }}>
             "{q.text}"
           </div>
-          {hintRevealed && q.hint && (
-            <div style={{ display: 'none' }}>{q.hint}</div>
-          )}
           <div className="question-options-enter">
           {q.options.map((opt, idx) => {
-            const isBlackened = blackenedIdx === idx && !answered;
+            const isDisabled = disabledIdx === idx && !answered;
             let cls = 'option-btn';
             if (answered) {
               cls += ' answered-visible';
@@ -62,8 +59,8 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
                 key={`${qIndex}-${idx}`}
                 className={cls}
                 onClick={() => submitMCQ(idx)}
-                disabled={answered || isBlackened}
-                style={isBlackened ? { opacity: 0.25, textDecoration: 'line-through', pointerEvents: 'none' } : {}}
+                disabled={answered || isDisabled}
+                style={isDisabled ? { opacity: 0.25, textDecoration: 'line-through', pointerEvents: 'none' } : {}}
               >
                 {opt}
               </button>
@@ -72,11 +69,8 @@ export default function DialogueClashPage({ spades, setSpades, showFeedback }) {
           </div>
         </div>
         <div className="power-btns">
-          <button className="power-btn" onClick={doHint} disabled={sp < 30 || hintRevealed || answered}>
-            🚫 ELIMINATE<br /><span style={{ color: T.gold }}>30♠</span>
-          </button>
-          <button className="power-btn" onClick={doSkip} disabled={sp < 50 || skipUsed || answered}>
-            ⏩ SKIP<br /><span style={{ color: T.gold }}>50♠</span>
+          <button className="power-btn" onClick={doHint} disabled={sp < HINT_COST || hintRevealed || answered}>
+            🚫 ELIMINATE<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
           </button>
         </div>
       </div>
