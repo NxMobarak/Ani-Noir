@@ -225,7 +225,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .hero-banner .btn { position:relative;z-index:1;width:fit-content; }
 
 /* ─── GAME MODE CARDS ─────────────────────────────────────── */
-.game-mode-card { display:flex;flex-direction:column;align-items:center;gap:3px;background:#13161f;border:1px solid rgba(244,63,94,0.15);border-radius:12px;padding:10px 5px 8px;cursor:pointer;transition:all 0.2s;text-align:center;width:100%; }
+.game-mode-card { display:flex;flex-direction:column;align-items:center;gap:4px;background:#181b26;border:1px solid rgba(244,63,94,0.15);border-radius:12px;padding:12px 6px 10px;cursor:pointer;transition:all 0.2s;text-align:center;width:100%; }
 .game-mode-card:hover { transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2); }
 .game-mode-card.glow-brain { border-color:rgba(244,63,94,0.2); }
 .game-mode-card.glow-brain:hover { border-color:rgba(244,63,94,0.5);box-shadow:0 0 12px rgba(244,63,94,0.15),0 4px 12px rgba(0,0,0,0.2); }
