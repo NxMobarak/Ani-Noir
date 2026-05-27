@@ -177,7 +177,33 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   }, [phase, currentClip, currentLevel]);
 
   // ─── Game Logic ───────────────────────────────────────────
-  const handleWrong = useCallback((selected) => {
+  // Use refs so setTimeout callbacks always see latest values
+  const currentClipRef = useRef(currentClip);
+  const scoreRef = useRef(score);
+  const progressRef = useRef(progress);
+  currentClipRef.current = currentClip;
+  scoreRef.current = score;
+  progressRef.current = progress;
+
+  const advanceToNext = () => {
+    const nextClip = currentClipRef.current + 1;
+    if (nextClip >= CLIPS_PER_LEVEL || nextClip >= levelClips.length) {
+      const finalScore = scoreRef.current;
+      const passed = finalScore >= PASS_THRESHOLD;
+      const updated = { ...progressRef.current };
+      if (!updated[currentLevel] || finalScore > (updated[currentLevel]?.score || 0)) {
+        updated[currentLevel] = { score: finalScore, passed };
+      }
+      setProgress(updated);
+      saveProgress(updated);
+      if (passed) addXP(XP_REWARDS.LEVEL_COMPLETE);
+      setPhase('result');
+    } else {
+      setCurrentClip(nextClip);
+    }
+  };
+
+  const handleWrong = (selected) => {
     clearAllTimers();
     setAnswered(true);
     setWasCorrect(false);
@@ -185,9 +211,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     playWrong();
     showFeedback(selected ? `Wrong! It was "${currentAnswer}"` : `Time's up! Answer: "${currentAnswer}"`);
     setTimeout(() => advanceToNext(), 2500);
-  }, [clearAllTimers, currentAnswer, showFeedback]);
+  };
 
-  const handleCorrect = useCallback((selected) => {
+  const handleCorrect = (selected) => {
     clearAllTimers();
     setAnswered(true);
     setWasCorrect(true);
@@ -202,14 +228,14 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setScore(s => s + 1);
     showFeedback(earnedStars === 3 ? 'Perfect! +3 stars' : earnedStars === 2 ? 'Great! +2 stars' : 'Correct! +1 star');
     setTimeout(() => advanceToNext(), 2000);
-  }, [clearAllTimers, timeLeft, showFeedback]);
+  };
 
-  const submitOption = useCallback((opt) => {
+  const submitOption = (opt) => {
     if (answered) return;
     opt === currentAnswer ? handleCorrect(opt) : handleWrong(opt);
-  }, [answered, currentAnswer, handleCorrect, handleWrong]);
+  };
 
-  const doSkip = useCallback(() => {
+  const doSkip = () => {
     if (spades < SKIP_COST || answered) return;
     const newSkips = skipsUsed + 1;
     setSkipsUsed(newSkips);
@@ -225,33 +251,16 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     showFeedback(`Skipped! (${MAX_SKIPS - newSkips} left)`);
     setTimeout(() => advanceToNext(), 800);
-  }, [spades, answered, skipsUsed, clearAllTimers, showFeedback, setSpades]);
+  };
 
-  const doHint = useCallback(() => {
+  const doHint = () => {
     if (spades < HINT_COST || hintUsed || answered) return;
     setSpades(s => s - HINT_COST);
     setHintUsed(true);
     const wrongOptions = currentOptions.filter(opt => opt !== currentAnswer);
     setHiddenOption(wrongOptions[Math.floor(Math.random() * wrongOptions.length)]);
     showFeedback('1 wrong option removed!');
-  }, [spades, hintUsed, answered, currentOptions, currentAnswer, setSpades, showFeedback]);
-
-  const advanceToNext = useCallback(() => {
-    const nextClip = currentClip + 1;
-    if (nextClip >= CLIPS_PER_LEVEL || nextClip >= levelClips.length) {
-      const passed = score >= PASS_THRESHOLD;
-      const updated = { ...progress };
-      if (!updated[currentLevel] || score > (updated[currentLevel]?.score || 0)) {
-        updated[currentLevel] = { score, passed };
-      }
-      setProgress(updated);
-      saveProgress(updated);
-      if (passed) addXP(XP_REWARDS.LEVEL_COMPLETE);
-      setPhase('result');
-    } else {
-      setCurrentClip(nextClip);
-    }
-  }, [currentClip, levelClips.length, score, progress, currentLevel]);
+  };
 
   const startLevel = useCallback((levelIdx) => {
     if (levelIdx > 0 && !progress[levelIdx - 1]?.passed) return;
