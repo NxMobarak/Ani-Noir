@@ -43,6 +43,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   const [earnedSpades, setEarnedSpades] = useState(0);
   const [earnedXP, setEarnedXP] = useState(0);
   const timerRef = useRef(null);
+  const stageStartTimeRef = useRef(null);
 
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
@@ -109,6 +110,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     setSelectedOption(null);
     setCorrectOption(null);
     setStageStartTime(Date.now());
+    stageStartTimeRef.current = Date.now();
     setStageElapsed(0);
     setEarnedSpades(0);
     setEarnedXP(0);
@@ -220,7 +222,7 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       setStageProgress(updated);
       saveStageProgress(mode, updated);
       setFinalScore(fs);
-      setStageElapsed(Math.round((Date.now() - stageStartTime) / 1000));
+      setStageElapsed(Math.round((Date.now() - stageStartTimeRef.current) / 1000));
       clearTimer();
       setPhase('result');
     }

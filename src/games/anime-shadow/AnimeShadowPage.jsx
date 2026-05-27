@@ -103,6 +103,9 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
   const [progress, setProgress] = useState(getProgress);
   const [earnedSpades, setEarnedSpades] = useState(0);
   const [earnedXP, setEarnedXP] = useState(0);
+  const [levelStartTime, setLevelStartTime] = useState(null);
+  const [levelElapsed, setLevelElapsed] = useState(0);
+  const levelStartTimeRef = useRef(null);
 
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
@@ -193,19 +196,22 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
       if (!updated[currentLevel] || finalScore > (updated[currentLevel]?.score || 0)) {
         updated[currentLevel] = { score: finalScore, stars, passed: stars >= 1 };
       }
-      // Level bonus
+      // Level bonus - always give XP
+      const xpReward = getStageXP(stars);
+      if (xpReward > 0) {
+        addXP(xpReward);
+        setEarnedXP(prev => prev + xpReward);
+      }
       if (stars >= 1) {
         const wasAlreadyPassed = progress[currentLevel] && progress[currentLevel].stars >= 1;
         if (!wasAlreadyPassed) {
           setSpades(s => s + SPADES_LEVEL_BONUS);
           setEarnedSpades(prev => prev + SPADES_LEVEL_BONUS);
-          const xpReward = getStageXP(stars);
-          addXP(xpReward);
-          setEarnedXP(prev => prev + xpReward);
         }
       }
       setProgress(updated);
       saveProgress(updated);
+      setLevelElapsed(Math.round((Date.now() - levelStartTimeRef.current) / 1000));
       setPhase('result');
     } else {
       setCurrentIdx(nextIdx);
@@ -282,6 +288,9 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     setHintLetters([]);
     setEarnedSpades(0);
     setEarnedXP(0);
+    setLevelStartTime(Date.now());
+    levelStartTimeRef.current = Date.now();
+    setLevelElapsed(0);
     setPhase('playing');
   };
 
@@ -356,6 +365,9 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
     const stars = getStars(score);
     const passed = stars >= 1;
     const accuracyPct = Math.round((score / Math.min(CHARS_PER_LEVEL, levelChars.length)) * 100);
+    const mins = Math.floor(levelElapsed / 60);
+    const secs = levelElapsed % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
     ];
@@ -368,6 +380,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
         title={passed ? 'Level Cleared!' : 'Level Failed'}
         subtitle={`${score}/${Math.min(CHARS_PER_LEVEL, levelChars.length)} correct`}
         stars={stars}
+        timeTaken={timeStr}
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}

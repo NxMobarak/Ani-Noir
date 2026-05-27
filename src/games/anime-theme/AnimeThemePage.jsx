@@ -125,6 +125,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const [progress, setProgress] = useState(getProgress);
   const [earnedSpades, setEarnedSpades] = useState(0);
   const [earnedXP, setEarnedXP] = useState(0);
+  const [levelStartTime, setLevelStartTime] = useState(null);
+  const [levelElapsed, setLevelElapsed] = useState(0);
   const [clips] = useState(getClipsManifest);
 
   const timerRef = useRef(null);
@@ -211,12 +213,14 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const streakRef = useRef(streak);
   const earnedSpadesRef = useRef(earnedSpades);
   const earnedXPRef = useRef(earnedXP);
+  const levelStartTimeRef = useRef(levelStartTime);
   currentClipRef.current = currentClip;
   scoreRef.current = score;
   progressRef.current = progress;
   streakRef.current = streak;
   earnedSpadesRef.current = earnedSpades;
   earnedXPRef.current = earnedXP;
+  levelStartTimeRef.current = levelStartTime;
 
   const advanceToNext = () => {
     const nextClip = currentClipRef.current + 1;
@@ -239,8 +243,13 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       }
       setProgress(updated);
       saveProgress(updated);
+      setLevelElapsed(Math.round((Date.now() - levelStartTimeRef.current) / 1000));
       setPhase('result');
     } else {
+      // Reset answered state before changing clip so the useEffect can call startClip
+      setAnswered(false);
+      setWasCorrect(null);
+      setSelectedOption(null);
       setCurrentClip(nextClip);
     }
   };
@@ -307,6 +316,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setStreak(0);
     setEarnedSpades(0);
     setEarnedXP(0);
+    setLevelStartTime(Date.now());
+    setLevelElapsed(0);
     setPhase('playing');
   }, [progress]);
 
@@ -348,6 +359,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     const stars = getStars(score);
     const passed = stars >= 1;
     const accuracyPct = Math.round((score / Math.min(CLIPS_PER_LEVEL, levelClips.length)) * 100);
+    const mins = Math.floor(levelElapsed / 60);
+    const secs = levelElapsed % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
     ];
@@ -360,6 +374,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         title={passed ? 'Level Cleared!' : 'Not Quite!'}
         subtitle={`${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct`}
         stars={stars}
+        timeTaken={timeStr}
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
