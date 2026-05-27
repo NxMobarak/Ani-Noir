@@ -124,7 +124,7 @@ function getClipsManifest() {
     // Level 4
     'l4-01-assassination-classroom.m4a',
     'l4-02-teasing-master-takagi-san.m4a',
-    'l4-03-dr-stone.m4a',
+    'l4-03-dr.-stone.m4a',
     'l4-04-bna-brand-new-animal.m4a',
     'l4-05-stein-gates.m4a',
     'l4-06-spy-x-family.m4a',
