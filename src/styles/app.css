@@ -1,6 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }
-body { background: #07080f; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; overscroll-behavior: none; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+body { background: #07080f; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; overscroll-behavior: none; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 button { color: #f1f5f9; cursor: pointer; font-family: inherit; }
 input { font-family: inherit; }
 ::-webkit-scrollbar { width: 4px; }

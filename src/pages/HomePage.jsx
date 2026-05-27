@@ -146,7 +146,12 @@ export default function HomePage() {
       {/* DAILY CHALLENGE */}
       <section className="card" aria-label="Daily Challenge">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 26 }} aria-hidden="true">📅</span>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <rect x="2" y="5" width="32" height="29" rx="4" fill="#1a1d2e" stroke="#f43f5e" strokeWidth="1.5"/>
+            <rect x="2" y="5" width="32" height="10" rx="4" fill="#f43f5e"/>
+            <text x="18" y="13" textAnchor="middle" fontSize="7" fontWeight="700" fill="#fff">{new Date().toLocaleString('en', { month: 'short' }).toUpperCase()}</text>
+            <text x="18" y="29" textAnchor="middle" fontSize="13" fontWeight="800" fill="#f1f5f9">{new Date().getDate()}</text>
+          </svg>
           <div style={{ flex: 1 }}>
             <span style={{ fontWeight: 700, fontSize: 13 }}>Daily Challenge</span>
             <span style={{ fontSize: 9, color: T.textDim, display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
