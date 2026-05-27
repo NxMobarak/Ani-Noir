@@ -49,7 +49,6 @@ export default function AnimeQuizPage({ spades, setSpades, showFeedback }) {
             const isDisabled = disabledIdx === idx && !answered;
             let cls = 'option-btn';
             if (answered) {
-              cls += ' answered-visible';
               if (idx === correctOption) cls += ' correct';
               else if (idx === selectedOption) cls += ' wrong';
             }

@@ -373,6 +373,24 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     if (!passed) buttons.push({ label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' });
     if (passed && currentLevel < 4) buttons.push({ label: 'Next Level \u2192', onClick: () => startLevel(currentLevel + 1), variant: 'primary' });
 
+    const shareThemeResult = async () => {
+      const starStr = Array(3).fill(0).map((_, i) => i < stars ? '\u2B50' : '\u2606').join('');
+      const text = `AniNoir Anime Theme - ${LEVEL_NAMES[currentLevel]}: ${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)} ${starStr} #AniNoir`;
+      if (navigator.share) {
+        try { await navigator.share({ title: 'AniNoir', text }); return; } catch (e) {}
+      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        showFeedback('Result copied to clipboard!');
+      } catch (e) { showFeedback('Result copied to clipboard!'); }
+    };
+
     return (
       <ResultScreen
         passed={passed}
@@ -383,6 +401,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         accuracy={`${accuracyPct}%`}
         spadesEarned={earnedSpades}
         xpEarned={earnedXP}
+        onShare={shareThemeResult}
         buttons={buttons}
       />
     );
@@ -432,43 +451,22 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       </div>
 
       {/* MCQ Options */}
-      {!answered && (
-        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {currentOptions.filter(opt => opt !== hiddenOption).map((opt, i) => (
-            <button key={opt} className="option-btn" onClick={() => submitOption(opt)}
+      <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {currentOptions.filter(opt => opt !== hiddenOption).map((opt, i) => {
+          let cls = 'option-btn';
+          if (answered) {
+            if (opt === currentAnswer) cls += ' correct';
+            else if (opt === selectedOption) cls += ' wrong';
+          }
+          return (
+            <button key={opt} className={cls} onClick={() => submitOption(opt)} disabled={answered}
               style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, borderRadius: 12, animationDelay: `${i * 0.08}s` }}>
               <span style={{ color: T.teal, marginRight: 10, fontWeight: 800 }}>{String.fromCharCode(65 + i)}.</span>
               {opt}
             </button>
-          ))}
-        </div>
-      )}
-
-      {/* Reveal after answer */}
-      {answered && (
-        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {currentOptions.map((opt, i) => {
-            const isCorrect = opt === currentAnswer;
-            const isSelected = opt === selectedOption;
-            const cls = isCorrect ? 'theme-option-correct' : (isSelected && !isCorrect) ? 'theme-option-wrong' : '';
-            return (
-              <div key={opt} className={cls} style={{
-                padding: '14px 16px', fontSize: 14, fontWeight: 600, borderRadius: 12,
-                border: `2px solid ${T.border}`, background: T.card, color: T.text,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                transition: 'all 0.3s',
-              }}>
-                <span>
-                  <span style={{ color: T.teal, marginRight: 10, fontWeight: 800 }}>{String.fromCharCode(65 + i)}.</span>
-                  {opt}
-                </span>
-                {isCorrect && <span style={{ fontSize: 16, color: '#22c55e' }}>✓</span>}
-                {isSelected && !isCorrect && <span style={{ fontSize: 16, color: '#ef4444' }}>✗</span>}
-              </div>
-            );
-          })}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       {/* Hint Button Only */}
       {!answered && (
