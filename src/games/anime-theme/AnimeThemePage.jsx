@@ -1,17 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import T from '../../constants/theme';
-import { playCorrect, playWrong, playKeyTap } from '../../utils/audio';
+import { playCorrect, playWrong } from '../../utils/audio';
 import { addXP, XP_REWARDS } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
 import '../../styles/shadow-quiz.css';
-
-const BackspaceIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
-    <line x1="18" y1="9" x2="12" y2="15"/>
-    <line x1="12" y1="9" x2="18" y2="15"/>
-  </svg>
-);
 
 // Audio files are in /public/audio/ with format: l{level}-{number}-{answer-with-hyphens}.mp3 or .m4a
 // Example: l1-01-naruto.mp3, l2-05-attack-on-titan.m4a
@@ -21,18 +13,10 @@ const CLIPS_PER_LEVEL = 10;
 const AUDIO_PLAY_DURATION = 10;
 const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
-const HINT_COST = 100;
 const MAX_SKIPS = 3;
-const MAX_HINT_WRONG = 3;
 const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_theme_progress';
 const CLIPS_KEY = 'ani_theme_clips';
-
-const KEYBOARD_ROWS = [
-  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-];
 
 // Parse filename to extract answer
 // l1-01-naruto.mp3 → "Naruto"
@@ -40,7 +24,6 @@ const KEYBOARD_ROWS = [
 function parseFilename(filename) {
   const withoutExt = filename.replace(/\.(mp3|m4a)$/, '');
   const parts = withoutExt.split('-');
-  // First part is level (l1), second is number (01), rest is answer
   const answerParts = parts.slice(2);
   return answerParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
 }
@@ -51,7 +34,7 @@ function parseLevel(filename) {
   return match ? parseInt(match[1], 10) : 1;
 }
 
-// Generate random wrong options from other answers in same level
+// Generate 4 MCQ options (1 correct + 3 wrong)
 function generateOptions(correctAnswer, allAnswers) {
   const others = allAnswers.filter(a => a !== correctAnswer);
   const shuffled = others.sort(() => Math.random() - 0.5);
@@ -60,9 +43,6 @@ function generateOptions(correctAnswer, allAnswers) {
   return options;
 }
 
-// Scan for audio files - uses a manifest approach
-// Since we can't dynamically scan folders in browser, we use a clips list
-// User adds filenames to this list OR we detect from pre-built manifest
 function getClipsForLevel(level, allClips) {
   return allClips
     .filter(f => parseLevel(f) === level)
@@ -86,7 +66,6 @@ function getClipsManifest() {
     const stored = localStorage.getItem(CLIPS_KEY);
     if (stored) return JSON.parse(stored);
   } catch {}
-  // Actual uploaded clips - add new filenames here when uploading more levels
   return [
     // Level 1
     'l1-01-my-hero-academia.m4a',
@@ -152,15 +131,11 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const [currentClip, setCurrentClip] = useState(0);
   const [score, setScore] = useState(0);
   const [skipsUsed, setSkipsUsed] = useState(0);
-  const [hintWrong, setHintWrong] = useState(0);
-  const [guess, setGuess] = useState('');
   const [timeLeft, setTimeLeft] = useState(TIMER_TOTAL);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(null);
-  const [hintUsed, setHintUsed] = useState(false);
-  const [hintLetters, setHintLetters] = useState([]);
-  const [countdown, setCountdown] = useState(3);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [progress, setProgress] = useState(getProgress);
   const [totalStars, setTotalStars] = useState(0);
   const [clips] = useState(getClipsManifest);
@@ -174,7 +149,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const currentFilename = levelClips[currentClip];
   const currentAnswer = currentFilename ? parseFilename(currentFilename) : '';
   const allLevelAnswers = levelClips.map(f => parseFilename(f));
-  // Memoize options so they don't reshuffle on every re-render (e.g. timer tick)
+
+  // Memoize options so they don't reshuffle on every re-render
   const currentOptions = useMemo(() => {
     if (!currentFilename) return [];
     return generateOptions(currentAnswer, allLevelAnswers);
@@ -191,11 +167,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   };
 
   const startClip = useCallback(() => {
-    setGuess('');
     setAnswered(false);
     setWasCorrect(null);
-    setHintUsed(false);
-    setHintLetters([]);
+    setSelectedOption(null);
     setTimeLeft(TIMER_TOTAL);
     setAudioPlaying(true);
 
@@ -227,7 +201,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
 
   useEffect(() => {
     if (timeLeft === 0 && !answered && phase === 'playing') {
-      handleWrong();
+      handleWrong(null);
     }
   }, [timeLeft, answered, phase]);
 
@@ -238,28 +212,21 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     return () => clearAllTimers();
   }, [phase, currentClip]);
 
-  const handleWrong = () => {
+  const handleWrong = (selected) => {
     clearAllTimers();
     setAnswered(true);
     setWasCorrect(false);
+    setSelectedOption(selected);
     playWrong();
-    if (hintUsed) {
-      const newHintWrong = hintWrong + 1;
-      setHintWrong(newHintWrong);
-      if (newHintWrong >= MAX_HINT_WRONG) {
-        showFeedback('Game Over! 3 wrong after hints');
-        setTimeout(() => setPhase('gameover'), 1500);
-        return;
-      }
-    }
     showFeedback(`Wrong! Answer: ${currentAnswer}`);
-    setTimeout(() => startCountdown(), 1500);
+    setTimeout(() => advanceToNext(), 2500);
   };
 
-  const handleCorrect = () => {
+  const handleCorrect = (selected) => {
     clearAllTimers();
     setAnswered(true);
     setWasCorrect(true);
+    setSelectedOption(selected);
     playCorrect();
 
     const elapsed = TIMER_TOTAL - timeLeft;
@@ -269,46 +236,15 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setTotalStars(s => s + earnedStars);
     setScore(s => s + 1);
     showFeedback(`Correct! +${earnedStars} star${earnedStars > 1 ? 's' : ''}`);
-    setTimeout(() => startCountdown(), 1500);
+    setTimeout(() => advanceToNext(), 2000);
   };
-
-  const submitGuess = () => {
-    if (answered || !guess.trim()) return;
-    // Build full guess merging hinted letters with typed
-    const fullGuess = getFullGuess();
-    const normalized = fullGuess.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const correct = currentAnswer.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (normalized === correct) {
-      handleCorrect();
-    } else {
-      handleWrong();
-    }
-  };
-
-  // Build full answer by merging typed letters with hinted letters (like shadow game)
-  const getFullGuess = useCallback(() => {
-    const name = currentAnswer;
-    let typedIdx = 0;
-    let result = '';
-    for (let i = 0; i < name.length; i++) {
-      if (name[i] === ' ') {
-        result += ' ';
-      } else if (hintLetters.includes(i)) {
-        result += name[i];
-      } else {
-        result += (guess[typedIdx] || '');
-        typedIdx++;
-      }
-    }
-    return result;
-  }, [currentAnswer, guess, hintLetters]);
 
   const submitOption = (opt) => {
     if (answered) return;
     if (opt === currentAnswer) {
-      handleCorrect();
+      handleCorrect(opt);
     } else {
-      handleWrong();
+      handleWrong(opt);
     }
   };
 
@@ -327,21 +263,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     }
     clearAllTimers();
     setAnswered(true);
-    setTimeout(() => startCountdown(), 800);
-  };
-
-  const doHint = () => {
-    if (spades < HINT_COST || hintUsed || answered) return;
-    setSpades(s => s - HINT_COST);
-    setHintUsed(true);
-    showFeedback(`Hint! -${HINT_COST}♠ Choose from options`);
-  };
-
-  const startCountdown = () => {
-    // 3 second delay then advance — countdown shown in reveal info area
-    countdownRef.current = setTimeout(() => {
-      advanceToNext();
-    }, 3000);
+    setTimeout(() => advanceToNext(), 800);
   };
 
   const advanceToNext = () => {
@@ -369,35 +291,9 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setCurrentClip(0);
     setScore(0);
     setSkipsUsed(0);
-    setHintWrong(0);
     setTotalStars(0);
     setPhase('playing');
   };
-
-  const addLetter = (letter) => { if (!answered) { setGuess(g => g + letter); playKeyTap(); } };
-  const removeLetter = () => { if (!answered) { setGuess(g => g.slice(0, -1)); playKeyTap(); } };
-  const addSpace = () => { if (!answered) setGuess(g => g + ' '); };
-
-  // Physical keyboard support
-  useEffect(() => {
-    if (phase !== 'playing' || answered) return;
-    const handleKeyDown = (e) => {
-      if (e.repeat) return;
-      const key = e.key;
-      if (key === 'Backspace') {
-        e.preventDefault();
-        removeLetter();
-      } else if (key === 'Enter') {
-        e.preventDefault();
-        submitGuess();
-      } else if (/^[a-zA-Z]$/.test(key)) {
-        e.preventDefault();
-        addLetter(key.toUpperCase());
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, answered, guess]);
 
   // ─── Level Select ─────────────────────────────────────────
   if (phase === 'levels') {
@@ -430,8 +326,6 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       </section>
     );
   }
-
-  // (countdown phase removed — delay handled via setTimeout in playing phase)
 
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
@@ -466,7 +360,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     );
   }
 
-  // ─── Playing ──────────────────────────────────────────────
+  // ─── Playing (MCQ) ────────────────────────────────────────
   if (!currentFilename) return <div className="card"><p>No clips available for this level yet! Upload audio files to /public/audio/</p></div>;
 
   return (
@@ -499,110 +393,88 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       }}>
         <div style={{ fontSize: 40, marginBottom: 8 }}>{audioPlaying ? '🎶' : '🔇'}</div>
         <div style={{ fontSize: 12, color: audioPlaying ? T.teal : T.textDim, fontWeight: 600 }}>
-          {audioPlaying ? 'Playing...' : 'Audio ended — Guess now!'}
+          {audioPlaying ? 'Playing...' : 'Audio ended — Pick your answer!'}
         </div>
       </div>
 
-      {/* Letter Blanks — typing & hints appear here (like shadow game) */}
-      {!hintUsed && !answered && currentAnswer && (
-        <div className="sg-hint-display" aria-label="Anime name letters">
-          {(() => {
-            const name = currentAnswer;
-            let typedIdx = 0;
-            return name.split('').map((letter, i) => {
-              const isSpace = letter === ' ';
-              const isHinted = hintLetters.includes(i);
-              let display = '_';
-              let className = 'sg-hint-letter';
-
-              if (isSpace) {
-                display = ' ';
-                className += ' space';
-              } else if (isHinted) {
-                display = letter.toUpperCase();
-                className += ' shown';
-              } else {
-                const typedChar = guess[typedIdx];
-                typedIdx++;
-                if (typedChar) {
-                  display = typedChar.toUpperCase();
-                  className += ' typed';
-                }
-              }
-
-              return (
-                <span key={i} className={className}>
-                  {display}
-                </span>
-              );
-            });
-          })()}
-        </div>
-      )}
-
-      {/* Reveal Info */}
-      {answered && (
-        <div className="sg-reveal-info" aria-live="polite">
-          <div className={`sg-reveal-name ${wasCorrect ? 'correct' : 'wrong'}`}>
-            {wasCorrect ? `✓ ${currentAnswer}` : `✗ Answer: ${currentAnswer}`}
-          </div>
-          <div className="sg-reveal-next">Next theme in 3s...</div>
-        </div>
-      )}
-
-      {/* Hint Options (when hint used) — keyboard hides, 4 MCQ options show */}
-      {hintUsed && !answered && (
-        <div style={{ padding: '12px 14px 10px', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+      {/* MCQ Options */}
+      {!answered && (
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {currentOptions.map((opt, i) => (
-            <button key={i} className="option-btn" onClick={() => submitOption(opt)}
-              style={{ padding: '12px 14px', fontSize: 14 }}>
+            <button
+              key={i}
+              className="option-btn"
+              onClick={() => submitOption(opt)}
+              style={{
+                padding: '14px 16px',
+                fontSize: 14,
+                fontWeight: 600,
+                borderRadius: 12,
+                border: `1px solid ${T.border}`,
+                background: T.card,
+                color: T.text,
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span style={{ color: T.teal, marginRight: 10, fontWeight: 800 }}>{String.fromCharCode(65 + i)}.</span>
               {opt}
             </button>
           ))}
         </div>
       )}
 
-      {/* Keyboard (like shadow game — only when hint NOT used) */}
-      {!hintUsed && !answered && (
-        <div className="sg-keyboard">
-          <div className="sg-keyboard-main">
-            {KEYBOARD_ROWS.slice(0, 2).map((row, ri) => (
-              <div key={ri} className="sg-keyboard-row">
-                {row.map(letter => (
-                  <button key={letter} className="sg-key" onClick={() => addLetter(letter)} aria-label={letter}>{letter}</button>
-                ))}
+      {/* Reveal after answer */}
+      {answered && (
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {currentOptions.map((opt, i) => {
+            const isCorrect = opt === currentAnswer;
+            const isSelected = opt === selectedOption;
+            let bg = T.card;
+            let borderColor = T.border;
+            if (isCorrect) { bg = 'rgba(16, 185, 129, 0.15)'; borderColor = 'rgba(16, 185, 129, 0.6)'; }
+            else if (isSelected && !isCorrect) { bg = 'rgba(239, 68, 68, 0.15)'; borderColor = 'rgba(239, 68, 68, 0.6)'; }
+
+            return (
+              <div
+                key={i}
+                style={{
+                  padding: '14px 16px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  borderRadius: 12,
+                  border: `2px solid ${borderColor}`,
+                  background: bg,
+                  color: T.text,
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>
+                  <span style={{ color: T.teal, marginRight: 10, fontWeight: 800 }}>{String.fromCharCode(65 + i)}.</span>
+                  {opt}
+                </span>
+                {isCorrect && <span style={{ fontSize: 18 }}>✓</span>}
+                {isSelected && !isCorrect && <span style={{ fontSize: 18 }}>✗</span>}
               </div>
-            ))}
-            <div className="sg-keyboard-row">
-              {KEYBOARD_ROWS[2].map(letter => (
-                <button key={letter} className="sg-key" onClick={() => addLetter(letter)} aria-label={letter}>{letter}</button>
-              ))}
-              <button className="sg-key-backspace" onClick={removeLetter} aria-label="Backspace">
-                <BackspaceIcon />
-              </button>
-            </div>
+            );
+          })}
+          <div style={{ textAlign: 'center', marginTop: 8 }}>
+            <div style={{ fontSize: 12, color: T.textDim }}>Next in 2s...</div>
           </div>
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Skip Button */}
       {!answered && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 14px 10px' }}>
-          {!hintUsed && (
-            <button className="power-btn" onClick={submitGuess} style={{ width: '100%', background: 'var(--sg-crimson)', color: 'var(--sg-text)', fontSize: 16, fontWeight: 800, letterSpacing: 2 }}>
-              GO
-            </button>
-          )}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
-              ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
-            </button>
-            {!hintUsed && (
-              <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST} style={{ flex: 1 }}>
-                💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
-              </button>
-            )}
-          </div>
+        <div style={{ padding: '0 14px 10px' }}>
+          <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST}
+            style={{ width: '100%', padding: '12px', fontSize: 13 }}>
+            ⏩ SKIP <span style={{ color: T.gold }}>{SKIP_COST}♠</span>
+          </button>
         </div>
       )}
     </div>
