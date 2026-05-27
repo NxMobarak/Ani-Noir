@@ -13,8 +13,8 @@ const BackspaceIcon = () => (
   </svg>
 );
 
-// Audio files are in /public/audio/ with format: l{level}-{number}-{answer-with-hyphens}.mp3
-// Example: l1-01-naruto.mp3, l2-05-attack-on-titan.mp3
+// Audio files are in /public/audio/ with format: l{level}-{number}-{answer-with-hyphens}.mp3 or .m4a
+// Example: l1-01-naruto.mp3, l2-05-attack-on-titan.m4a
 
 const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const CLIPS_PER_LEVEL = 10;
@@ -36,9 +36,9 @@ const KEYBOARD_ROWS = [
 
 // Parse filename to extract answer
 // l1-01-naruto.mp3 → "Naruto"
-// l2-03-attack-on-titan.mp3 → "Attack On Titan"
+// l2-03-attack-on-titan.m4a → "Attack On Titan"
 function parseFilename(filename) {
-  const withoutExt = filename.replace('.mp3', '');
+  const withoutExt = filename.replace(/\.(mp3|m4a)$/, '');
   const parts = withoutExt.split('-');
   // First part is level (l1), second is number (01), rest is answer
   const answerParts = parts.slice(2);
