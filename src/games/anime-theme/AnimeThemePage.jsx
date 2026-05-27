@@ -13,6 +13,7 @@ const CLIPS_PER_LEVEL = 10;
 const AUDIO_PLAY_DURATION = 10;
 const TIMER_TOTAL = 30;
 const SKIP_COST = 50;
+const HINT_COST = 100;
 const MAX_SKIPS = 3;
 const PASS_THRESHOLD = 8;
 const STORAGE_KEY = 'ani_theme_progress';
@@ -131,6 +132,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const [currentClip, setCurrentClip] = useState(0);
   const [score, setScore] = useState(0);
   const [skipsUsed, setSkipsUsed] = useState(0);
+  const [hintUsed, setHintUsed] = useState(false);
+  const [hiddenOption, setHiddenOption] = useState(null);
   const [timeLeft, setTimeLeft] = useState(TIMER_TOTAL);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [answered, setAnswered] = useState(false);
@@ -170,6 +173,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     setAnswered(false);
     setWasCorrect(null);
     setSelectedOption(null);
+    setHintUsed(false);
+    setHiddenOption(null);
     setTimeLeft(TIMER_TOTAL);
     setAudioPlaying(true);
 
@@ -264,6 +269,17 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     clearAllTimers();
     setAnswered(true);
     setTimeout(() => advanceToNext(), 800);
+  };
+
+  const doHint = () => {
+    if (spades < HINT_COST || hintUsed || answered) return;
+    setSpades(s => s - HINT_COST);
+    setHintUsed(true);
+    // Pick a random wrong option to hide
+    const wrongOptions = currentOptions.filter(opt => opt !== currentAnswer);
+    const toHide = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+    setHiddenOption(toHide);
+    showFeedback(`Hint! -${HINT_COST}♠ · 1 option removed`);
   };
 
   const advanceToNext = () => {
@@ -400,7 +416,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
       {/* MCQ Options */}
       {!answered && (
         <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {currentOptions.map((opt, i) => (
+          {currentOptions.filter(opt => opt !== hiddenOption).map((opt, i) => (
             <button
               key={i}
               className="option-btn"
@@ -468,13 +484,19 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Skip Button */}
+      {/* Skip & Hint Buttons */}
       {!answered && (
-        <div style={{ padding: '0 14px 10px' }}>
+        <div style={{ padding: '0 14px 10px', display: 'flex', gap: 8 }}>
           <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST}
-            style={{ width: '100%', padding: '12px', fontSize: 13 }}>
+            style={{ flex: 1, padding: '12px', fontSize: 13 }}>
             ⏩ SKIP <span style={{ color: T.gold }}>{SKIP_COST}♠</span>
           </button>
+          {!hintUsed && (
+            <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST}
+              style={{ flex: 1, padding: '12px', fontSize: 13 }}>
+              💡 HINT <span style={{ color: T.gold }}>{HINT_COST}♠</span>
+            </button>
+          )}
         </div>
       )}
     </div>
