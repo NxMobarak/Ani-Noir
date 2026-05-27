@@ -4,6 +4,7 @@ import { shuffle } from '../utils/helpers';
 import { playCorrect, playWrong } from '../utils/audio';
 import { addXP } from '../utils/xpSystem';
 import WordNinjaTiles from '../components/WordNinjaTiles';
+import ResultScreen from '../components/ResultScreen';
 
 // Import level 5 from ALL game modes
 import quizL5 from '../games/anime-quiz/questions/level5';
@@ -148,22 +149,15 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
 
       {/* Already completed */}
       {completed && answered && (
-        <div style={{
-          textAlign: 'center', padding: 16, background: T.card,
-          borderRadius: 12, border: `1px solid ${T.border}`, marginBottom: 16
-        }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>
-            {(storedResult ?? (selectedOption === correctAnswer)) ? '✅' : '❌'}
-          </div>
-          <p style={{ color: T.textMid, fontSize: 14 }}>
-            {(storedResult ?? (selectedOption === correctAnswer))
-              ? "You've completed today's challenge!"
-              : "Better luck tomorrow!"}
-          </p>
-          <p style={{ color: T.textDim, fontSize: 12, marginTop: 4 }}>
-            Correct Answer: <span style={{ color: T.success, fontWeight: 700 }}>{correctAnswer}</span>
-          </p>
-        </div>
+        <ResultScreen
+          passed={storedResult ?? (selectedOption === correctAnswer)}
+          gameOver={!(storedResult ?? (selectedOption === correctAnswer))}
+          title={(storedResult ?? (selectedOption === correctAnswer)) ? 'Challenge Complete!' : 'Better Luck Tomorrow!'}
+          subtitle={`Correct Answer: ${correctAnswer}`}
+          reward={(storedResult ?? (selectedOption === correctAnswer)) ? String(DAILY_REWARD_SPADES) : ''}
+          rewardIcon={'\u2660'}
+          buttons={[]}
+        />
       )}
 
       {/* Wrong answer - show correct answer immediately */}
