@@ -71,12 +71,10 @@ export default function SearchPage({ showFeedback }) {
     return (
       <article aria-label={`Details for ${selected.title}`} style={{ padding: 16 }}>
         <button
+          className="btn btn-secondary"
           onClick={() => setSelected(null)}
           aria-label="Back to results"
-          style={{
-            background: 'none', border: 'none', color: T.teal,
-            fontSize: 14, cursor: 'pointer', marginBottom: 12, padding: 0
-          }}
+          style={{ marginBottom: 12, fontSize: 13 }}
         >
           ← Back to results
         </button>

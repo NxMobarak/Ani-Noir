@@ -332,7 +332,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', marginBottom: 8 }}>
-        <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ background: 'none', border: 'none', color: T.text, fontSize: 18, marginRight: 12 }}>←</button>
+        <button className="btn btn-secondary" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ fontSize: 13, marginRight: 12 }}>← Back</button>
         <div style={{ flex: 1 }}>
           {streak >= 3 && <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: 10 }}>🔥 {streak}x</span>}
         </div>

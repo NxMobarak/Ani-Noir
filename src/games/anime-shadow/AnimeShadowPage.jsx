@@ -414,7 +414,7 @@ export default function ShadowQuizPage({ spades, setSpades, showFeedback }) {
 
       {/* ─── Header ───────────────────────────────────────────── */}
       <div className="sg-header">
-        <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ background: 'none', border: 'none', color: 'var(--sg-text)', fontSize: 18 }}>←</button>
+        <button className="btn btn-secondary" onClick={() => { clearAllTimers(); setPhase('levels'); }} style={{ fontSize: 13 }}>← Back</button>
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sg-success)' }}>✓ {score}</div>
       </div>

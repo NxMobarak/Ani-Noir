@@ -412,8 +412,8 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
     <div className="shadow-game question-swap-in" key={currentClip} style={{ height: 'auto', minHeight: '70vh' }}>
       {/* Header */}
       <div className="sg-header">
-        <button className="back-btn" onClick={() => { clearAllTimers(); setPhase('levels'); }}
-          style={{ background: 'none', border: 'none', color: T.text, fontSize: 18 }}>←</button>
+        <button className="btn btn-secondary" onClick={() => { clearAllTimers(); setPhase('levels'); }}
+          style={{ fontSize: 13 }}>← Back</button>
         <div style={{ flex: 1 }}>
           {streak >= 3 && <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: 10 }}>🔥 {streak}x</span>}
         </div>
