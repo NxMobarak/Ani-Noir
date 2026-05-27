@@ -9,7 +9,7 @@ const CURRENT_VERSION = 3;
 const schemas = {
   ani_spades: (val) => {
     const n = parseInt(val);
-    return !isNaN(n) && n >= 0 ? n : 100;
+    return !isNaN(n) && n >= 0 ? n : 10000;
   },
   ani_badges: (val) => {
     if (!Array.isArray(val)) return [];
