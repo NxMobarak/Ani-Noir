@@ -36,6 +36,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
   const [finalScore, setFinalScore] = useState(0);
   const [stageProgress, setStageProgress] = useState(() => getStageProgress(mode));
   const [scrambled, setScrambled] = useState([]);
+  const [stageStartTime, setStageStartTime] = useState(null);
+  const [stageElapsed, setStageElapsed] = useState(0);
+  const [earnedSpades, setEarnedSpades] = useState(0);
+  const [earnedXP, setEarnedXP] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -102,6 +106,10 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
     setAnswered(false);
     setSelectedOption(null);
     setCorrectOption(null);
+    setStageStartTime(Date.now());
+    setStageElapsed(0);
+    setEarnedSpades(0);
+    setEarnedXP(0);
     const t = MAIN_LEVELS[mainIdx].timeSeconds;
     setTimeLeft(t);
     setMaxTime(t);
@@ -148,11 +156,14 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         const wasAlreadyPassed = stageProgress[key] && stageProgress[key].stars >= MIN_STARS_TO_UNLOCK;
         if (!wasAlreadyPassed) {
           setSpades(s => s + STAGE_REWARD);
+          setEarnedSpades(prev => prev + STAGE_REWARD);
           // Award XP for stage completion
           if (fs >= QUESTIONS_PER_STAGE) {
             addXP(XP_REWARDS.STAGE_PERFECT);
+            setEarnedXP(prev => prev + XP_REWARDS.STAGE_PERFECT);
           } else {
             addXP(XP_REWARDS.STAGE_COMPLETE);
+            setEarnedXP(prev => prev + XP_REWARDS.STAGE_COMPLETE);
           }
         }
         let newTotalStars = 0;
@@ -168,7 +179,9 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         }
         if (newTotalStars >= STARS_TO_UNLOCK_LEVEL && oldTotalStars < STARS_TO_UNLOCK_LEVEL) {
           setSpades(s => s + MAIN_LEVEL_REWARD);
+          setEarnedSpades(prev => prev + MAIN_LEVEL_REWARD);
           addXP(XP_REWARDS.LEVEL_COMPLETE);
+          setEarnedXP(prev => prev + XP_REWARDS.LEVEL_COMPLETE);
           showFeedback(`${MAIN_LEVELS[currentMainLevel].name} mastered! +${MAIN_LEVEL_REWARD} spades!`);
         }
         let allLevelsMastered = true;
@@ -192,12 +205,14 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
         }
         if (allLevelsMastered && !wasAllLevelsMastered) {
           setSpades(s => s + ALL_LEVELS_REWARD);
+          setEarnedSpades(prev => prev + ALL_LEVELS_REWARD);
           showFeedback(`ALL levels mastered! +${ALL_LEVELS_REWARD} spades!`);
         }
       }
       setStageProgress(updated);
       saveStageProgress(mode, updated);
       setFinalScore(fs);
+      setStageElapsed(Math.round((Date.now() - stageStartTime) / 1000));
       clearTimer();
       setPhase('result');
     }
@@ -220,7 +235,9 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
+        setEarnedSpades(prev => prev + bonus);
         addXP(XP_REWARDS.COMBO_BONUS);
+        setEarnedXP(prev => prev + XP_REWARDS.COMBO_BONUS);
         playCombo();
         showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {
@@ -251,7 +268,9 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       if (newCombo >= 3) {
         const bonus = Math.floor(newCombo / 3) * 5;
         setSpades(s => s + bonus);
+        setEarnedSpades(prev => prev + bonus);
         addXP(XP_REWARDS.COMBO_BONUS);
+        setEarnedXP(prev => prev + XP_REWARDS.COMBO_BONUS);
         playCombo();
         showFeedback(`Correct! ${newCombo}x Combo +${bonus} spades`);
       } else {
@@ -410,14 +429,21 @@ export default function StageQuizPage({ mode, getQuestionPool, spades, setSpades
       buttons.push({ label: 'Retry', onClick: () => startStage(currentMainLevel, currentStage), variant: 'primary' });
     }
 
+    const accuracyPct = Math.round((finalScore / QUESTIONS_PER_STAGE) * 100);
+    const mins = Math.floor(stageElapsed / 60);
+    const secs = stageElapsed % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
     return (
       <ResultScreen
         passed={passed}
         title={passed ? 'Stage Cleared!' : 'Stage Failed'}
         subtitle={`You scored ${finalScore}/${QUESTIONS_PER_STAGE}`}
         stars={stars}
-        reward={passed ? String(STAGE_REWARD) : ''}
-        rewardIcon="\u2660"
+        timeTaken={timeStr}
+        accuracy={`${accuracyPct}%`}
+        spadesEarned={earnedSpades}
+        xpEarned={earnedXP}
         onShare={shareResult}
         buttons={buttons}
       />

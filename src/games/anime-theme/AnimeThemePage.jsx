@@ -297,12 +297,14 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
 
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
+    const accuracyPct = Math.round((score / Math.min(CLIPS_PER_LEVEL, levelClips.length)) * 100);
     return (
       <ResultScreen
         passed={false}
         gameOver={true}
         title="Game Over"
         subtitle={`You scored ${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)}`}
+        accuracy={`${accuracyPct}%`}
         buttons={[
           { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
           { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
@@ -314,6 +316,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   // ─── Result ───────────────────────────────────────────────
   if (phase === 'result') {
     const passed = score >= PASS_THRESHOLD;
+    const accuracyPct = Math.round((score / Math.min(CLIPS_PER_LEVEL, levelClips.length)) * 100);
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
     ];
@@ -325,6 +328,7 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
         passed={passed}
         title={passed ? 'Level Cleared!' : 'Not Quite!'}
         subtitle={`${score}/${Math.min(CLIPS_PER_LEVEL, levelClips.length)} correct`}
+        accuracy={`${accuracyPct}%`}
         buttons={buttons}
       />
     );

@@ -44,24 +44,28 @@ function ConfettiBurst() {
  * Used across all game modes for a consistent, polished result experience.
  * 
  * Props:
- * - passed: boolean - whether the player passed/cleared
- * - title: string - main title ("Stage Cleared!", "Level Cleared!", "Game Over")
- * - subtitle: string - score display ("You scored 5/5", "3/10 correct")
- * - stars: number (0-3) - optional star count for stage modes
- * - reward: string - optional reward text ("+5 earned!")
- * - rewardIcon: string - icon for reward (default: "♠")
- * - stats: array of { icon, label, value } - optional stats to display
- * - buttons: array of { label, onClick, variant } - action buttons
- * - onShare: function - optional share handler
- * - gameOver: boolean - if true, shows game over style (skull instead of trophy)
+ * - passed: boolean
+ * - title: string
+ * - subtitle: string
+ * - stars: number (0-3)
+ * - spadesEarned: number - spades earned this round
+ * - xpEarned: number - XP earned this round
+ * - timeTaken: string - e.g. "1:23" or "45s"
+ * - accuracy: string - e.g. "100%" or "80%"
+ * - stats: array of { icon, label, value } - additional custom stats
+ * - buttons: array of { label, onClick, variant }
+ * - onShare: function
+ * - gameOver: boolean
  */
 export default function ResultScreen({
   passed = true,
   title = 'Stage Cleared!',
   subtitle = '',
   stars = 0,
-  reward = '',
-  rewardIcon = '♠',
+  spadesEarned = 0,
+  xpEarned = 0,
+  timeTaken = '',
+  accuracy = '',
   stats = [],
   buttons = [],
   onShare,
@@ -75,6 +79,23 @@ export default function ResultScreen({
   }, []);
 
   const emoji = gameOver ? '💀' : passed ? '🏆' : '😓';
+
+  // Build stats array with time/accuracy/rewards
+  const allStats = [];
+  if (timeTaken) {
+    allStats.push({ icon: '⏱️', label: 'Time Taken', value: timeTaken });
+  }
+  if (accuracy) {
+    allStats.push({ icon: '🎯', label: 'Accuracy', value: accuracy });
+  }
+  if (spadesEarned > 0) {
+    allStats.push({ icon: '♠', label: 'Spades', value: `+${spadesEarned}` });
+  }
+  if (xpEarned > 0) {
+    allStats.push({ icon: '⚡', label: 'XP', value: `+${xpEarned}` });
+  }
+  // Add any custom stats passed in
+  allStats.push(...stats);
 
   return (
     <div className="result-screen-v2">
@@ -99,8 +120,8 @@ export default function ResultScreen({
         <h2 className="result-title-v2">{title}</h2>
         <p className="result-subtitle-v2">{subtitle}</p>
 
-        {/* Stars (only for stage modes) */}
-        {stars > 0 || passed ? (
+        {/* Stars (only for stage modes with stars) */}
+        {stars > 0 && (
           <div className="result-stars-section">
             {Array.from({ length: 3 }).map((_, i) => (
               <span key={i} className={`result-star ${i < stars ? 'result-star-filled' : 'result-star-empty'}`}>
@@ -108,26 +129,19 @@ export default function ResultScreen({
               </span>
             ))}
           </div>
-        ) : null}
-
-        {/* Reward pill */}
-        {reward && (
-          <div className="result-reward-pill">
-            <span className="result-reward-text">+{reward}{rewardIcon} earned!</span>
-          </div>
         )}
 
-        {/* Stats section */}
-        {stats.length > 0 && (
+        {/* Stats section (Time, Accuracy, Spades, XP) */}
+        {allStats.length > 0 && (
           <div className="result-stats-section">
-            {stats.map((stat, idx) => (
+            {allStats.map((stat, idx) => (
               <div key={idx} className="result-stat-item">
                 <span className="result-stat-icon">{stat.icon}</span>
                 <div className="result-stat-content">
                   <span className="result-stat-label">{stat.label}</span>
                   <span className="result-stat-value">{stat.value}</span>
                 </div>
-                {idx < stats.length - 1 && <div className="result-stat-divider" />}
+                {idx < allStats.length - 1 && <div className="result-stat-divider" />}
               </div>
             ))}
           </div>

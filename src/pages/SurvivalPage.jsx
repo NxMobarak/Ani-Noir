@@ -136,6 +136,7 @@ export default function SurvivalPage({ spades, setSpades, showFeedback }) {
         subtitle={`Final Score: ${score}`}
         stats={[
           { icon: '🔥', label: 'Best Streak', value: streak > 0 ? `${streak}x` : 'N/A' },
+          { icon: '🎯', label: 'Questions', value: `${score} correct` },
         ]}
         buttons={[
           { label: 'Play Again', onClick: startGame, variant: 'primary' },

@@ -247,12 +247,14 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
 
   // ─── Game Over ────────────────────────────────────────────
   if (phase === 'gameover') {
+    const accuracyPct = Math.round((score / Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)) * 100);
     return (
       <ResultScreen
         passed={false}
         gameOver={true}
         title="Game Over"
         subtitle={`You got ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
+        accuracy={`${accuracyPct}%`}
         buttons={[
           { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
           { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
@@ -264,6 +266,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   // ─── Result ───────────────────────────────────────────────
   if (phase === 'result') {
     const passed = score >= PASS_THRESHOLD;
+    const accuracyPct = Math.round((score / Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)) * 100);
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
     ];
@@ -275,7 +278,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         passed={passed}
         title={passed ? 'Level Cleared!' : 'Level Failed'}
         subtitle={`${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
-        reward={passed ? '' : ''}
+        accuracy={`${accuracyPct}%`}
         buttons={buttons}
       />
     );

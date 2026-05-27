@@ -154,8 +154,8 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
           gameOver={!(storedResult ?? (selectedOption === correctAnswer))}
           title={(storedResult ?? (selectedOption === correctAnswer)) ? 'Challenge Complete!' : 'Better Luck Tomorrow!'}
           subtitle={`Correct Answer: ${correctAnswer}`}
-          reward={(storedResult ?? (selectedOption === correctAnswer)) ? String(DAILY_REWARD_SPADES) : ''}
-          rewardIcon={'\u2660'}
+          spadesEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_SPADES : 0}
+          xpEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_XP : 0}
           buttons={[]}
         />
       )}
