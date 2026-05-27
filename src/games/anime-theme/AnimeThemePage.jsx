@@ -109,15 +109,23 @@ export default function AnimeThemePage({ spades, setSpades, showFeedback }) {
   const audioRef = useRef(null);
   const audioTimerRef = useRef(null);
 
-  const levelClips = getClipsForLevel(currentLevel + 1, clips);
+  const levelClips = useMemo(() => getClipsForLevel(currentLevel + 1, clips), [currentLevel, clips]);
   const currentFilename = levelClips[currentClip];
   const currentAnswer = currentFilename ? parseFilename(currentFilename) : '';
   const allLevelAnswers = useMemo(() => levelClips.map(f => parseFilename(f)), [levelClips]);
 
-  const currentOptions = useMemo(() => {
-    if (!currentFilename) return [];
-    return generateOptions(currentAnswer, allLevelAnswers);
-  }, [currentFilename, currentAnswer, allLevelAnswers]);
+  const [currentOptions, setCurrentOptions] = useState([]);
+
+  // Generate options only when the clip changes, not on every render
+  useEffect(() => {
+    if (!currentFilename) {
+      setCurrentOptions([]);
+      return;
+    }
+    const answer = parseFilename(currentFilename);
+    const answers = levelClips.map(f => parseFilename(f));
+    setCurrentOptions(generateOptions(answer, answers));
+  }, [currentFilename, levelClips]);
 
   // ─── Timer & Audio Management ─────────────────────────────
   const clearAllTimers = useCallback(() => {
