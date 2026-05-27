@@ -16,8 +16,10 @@ import level5ana from '../games/word-ninja/questions/level5';
 // Re-export shared config
 export {
   MAIN_LEVELS, STAGES_PER_LEVEL, QUESTIONS_PER_STAGE,
-  getStars, MIN_STARS_TO_UNLOCK, MIN_CORRECT_TO_PASS,
-  STARS_TO_UNLOCK_LEVEL, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD
+  getStars, MIN_STARS_TO_UNLOCK,
+  STARS_TO_UNLOCK_LEVEL, STAGE_REWARD, MAIN_LEVEL_REWARD, ALL_LEVELS_REWARD,
+  getStageXP, SPADES_PER_CORRECT, SPADES_STREAK_3, SPADES_STREAK_5,
+  SPADES_STAGE_BONUS, SPADES_WRONG_PENALTY, HINT_COST, SHUFFLE_COST
 } from '../games/shared/config';
 
 // Deduplicate helper
@@ -54,7 +56,7 @@ export const levels = [
   { name: "Kage", minCorrect: 5, timeSeconds: 15, reward: 100 },
 ];
 
-export function getRandomQuestions(level, count = 5) {
+export function getRandomQuestions(level, count = 10) {
   const pool = questionBank.filter(q => q.level === level);
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

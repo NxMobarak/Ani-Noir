@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import T from '../../constants/theme';
 import { playCorrect, playWrong, playCombo } from '../../utils/audio';
-import { addXP, XP_REWARDS } from '../../utils/xpSystem';
+import { addXP } from '../../utils/xpSystem';
 import BackButton from '../../components/BackButton';
 import ResultScreen from '../../components/ResultScreen';
+import CircularTimer from '../../components/CircularTimer';
 
 import level1 from './questions/level1';
 import level2 from './questions/level2';
@@ -15,11 +16,31 @@ const LEVELS = [level1, level2, level3, level4, level5];
 const LEVEL_NAMES = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 const QUESTIONS_PER_LEVEL = 10;
 const TIMER_TOTAL = 30;
-const SKIP_COST = 50;
 const HINT_COST = 100;
-const MAX_SKIPS = 3;
-const PASS_THRESHOLD = 8;
+const STARS_TO_UNLOCK = 2;
 const STORAGE_KEY = 'ani_frame_progress';
+
+// Spade rewards
+const SPADES_PER_CORRECT = 5;
+const SPADES_STREAK_3 = 10;
+const SPADES_STREAK_5 = 20;
+const SPADES_LEVEL_BONUS = 50;
+const SPADES_WRONG_PENALTY = -5;
+
+// Star thresholds
+function getStars(correct) {
+  if (correct >= 10) return 3;
+  if (correct >= 8) return 2;
+  if (correct >= 5) return 1;
+  return 0;
+}
+
+function getStageXP(stars) {
+  if (stars >= 3) return 30;
+  if (stars >= 2) return 20;
+  if (stars >= 1) return 10;
+  return 0;
+}
 
 // Shuffle options and track correct index
 function shuffleOptions(options, correctIdx) {
@@ -46,7 +67,6 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [skipsUsed, setSkipsUsed] = useState(0);
   const [hintUsed, setHintUsed] = useState(false);
   const [hiddenOption, setHiddenOption] = useState(null);
   const [timeLeft, setTimeLeft] = useState(TIMER_TOTAL);
@@ -55,6 +75,8 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [progress, setProgress] = useState(getProgress);
   const [shuffledData, setShuffledData] = useState({ shuffled: [], correctIndex: 0 });
+  const [earnedSpades, setEarnedSpades] = useState(0);
+  const [earnedXP, setEarnedXP] = useState(0);
 
   const timerRef = useRef(null);
   const advanceRef = useRef(null);
@@ -73,6 +95,13 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   const clearAllTimers = () => {
     clearInterval(timerRef.current);
     clearTimeout(advanceRef.current);
+  };
+
+  // Get streak reward
+  const getStreakReward = (currentStreak) => {
+    if (currentStreak >= 5 && currentStreak % 5 === 0) return SPADES_STREAK_5;
+    if (currentStreak >= 3 && currentStreak % 3 === 0) return SPADES_STREAK_3;
+    return SPADES_PER_CORRECT;
   };
 
   // Timer
@@ -100,7 +129,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     setSelectedOption(optIdx);
     setStreak(0);
     playWrong();
-    showFeedback(`Wrong! Answer: ${shuffledData.shuffled[shuffledData.correctIndex]}`);
+    setSpades(s => Math.max(0, s + SPADES_WRONG_PENALTY));
+    setEarnedSpades(prev => prev + SPADES_WRONG_PENALTY);
+    showFeedback(`Wrong! Answer: ${shuffledData.shuffled[shuffledData.correctIndex]} · ${SPADES_WRONG_PENALTY}♠`);
     advanceRef.current = setTimeout(() => advanceToNext(), 2500);
   };
 
@@ -114,14 +145,19 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     const newStreak = streak + 1;
     setStreak(newStreak);
 
-    if (newStreak >= 3 && newStreak % 3 === 0) {
-      const bonus = 50;
-      setSpades(s => s + bonus);
+    const reward = getStreakReward(newStreak);
+    setSpades(s => s + reward);
+    setEarnedSpades(prev => prev + reward);
+
+    if (newStreak >= 5 && newStreak % 5 === 0) {
       playCombo();
-      showFeedback(`🔥 ${newStreak}x Streak! +${bonus}♠`);
+      showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
+    } else if (newStreak >= 3 && newStreak % 3 === 0) {
+      playCombo();
+      showFeedback(`Correct! 🔥 ${newStreak}x Streak! +${reward}♠`);
     } else {
       playCorrect();
-      showFeedback('Correct!');
+      showFeedback(`Correct! +${reward}♠`);
     }
 
     advanceRef.current = setTimeout(() => advanceToNext(), 1500);
@@ -140,13 +176,23 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     const nextIdx = currentIdx + 1;
     if (nextIdx >= QUESTIONS_PER_LEVEL || nextIdx >= levelQuestions.length) {
       const finalScore = score;
+      const stars = getStars(finalScore);
       const updated = { ...progress };
       if (!updated[currentLevel] || finalScore > (updated[currentLevel]?.score || 0)) {
-        updated[currentLevel] = { score: finalScore, passed: finalScore >= PASS_THRESHOLD };
+        updated[currentLevel] = { score: finalScore, stars, passed: stars >= 1 };
+      }
+      if (stars >= 1) {
+        const wasAlreadyPassed = progress[currentLevel] && progress[currentLevel].stars >= 1;
+        if (!wasAlreadyPassed) {
+          setSpades(s => s + SPADES_LEVEL_BONUS);
+          setEarnedSpades(prev => prev + SPADES_LEVEL_BONUS);
+          const xpReward = getStageXP(stars);
+          addXP(xpReward);
+          setEarnedXP(prev => prev + xpReward);
+        }
       }
       setProgress(updated);
       saveProgress(updated);
-      if (finalScore >= PASS_THRESHOLD) addXP(XP_REWARDS.LEVEL_COMPLETE);
       setPhase('result');
     } else {
       setCurrentIdx(nextIdx);
@@ -157,25 +203,6 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
       setHintUsed(false);
       setHiddenOption(null);
     }
-  };
-
-  const doSkip = () => {
-    if (spades < SKIP_COST || answered) return;
-    const newSkips = skipsUsed + 1;
-    setSkipsUsed(newSkips);
-    setSpades(s => s - SKIP_COST);
-    setStreak(0);
-    showFeedback(`Skipped! -${SKIP_COST}♠ (${newSkips}/${MAX_SKIPS})`);
-    if (newSkips >= MAX_SKIPS) {
-      clearAllTimers();
-      setAnswered(true);
-      showFeedback('Game Over! 3 skips used');
-      setTimeout(() => setPhase('gameover'), 1500);
-      return;
-    }
-    clearAllTimers();
-    setAnswered(true);
-    advanceRef.current = setTimeout(() => advanceToNext(), 800);
   };
 
   const doHint = () => {
@@ -194,18 +221,19 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
   };
 
   const startLevel = (levelIdx) => {
-    if (levelIdx > 0 && !progress[levelIdx - 1]?.passed) return;
+    if (levelIdx > 0 && !(progress[levelIdx - 1]?.stars >= STARS_TO_UNLOCK)) return;
     setCurrentLevel(levelIdx);
     setCurrentIdx(0);
     setScore(0);
     setStreak(0);
-    setSkipsUsed(0);
     setHintUsed(false);
     setHiddenOption(null);
     setTimeLeft(TIMER_TOTAL);
     setAnswered(false);
     setWasCorrect(null);
     setSelectedOption(null);
+    setEarnedSpades(0);
+    setEarnedXP(0);
     setPhase('playing');
   };
 
@@ -221,12 +249,13 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         <div className="card" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: T.teal }}>🎬 FRAME GUESS</h2>
           <p style={{ fontSize: 12, color: T.textMid }}>Guess the anime from a screenshot!</p>
-          <p style={{ fontSize: 11, color: T.gold, marginTop: 4 }}>10 frames per level · Need 8/10 to unlock next</p>
+          <p style={{ fontSize: 11, color: T.gold, marginTop: 4 }}>10 frames per level · Need {STARS_TO_UNLOCK}★ to unlock next</p>
         </div>
         {LEVEL_NAMES.map((name, idx) => {
-          const unlocked = idx === 0 || progress[idx - 1]?.passed;
+          const unlocked = idx === 0 || (progress[idx - 1]?.stars >= STARS_TO_UNLOCK);
           const levelData = progress[idx];
           const hasQs = LEVELS[idx] && LEVELS[idx].length > 0;
+          const prevStars = idx > 0 ? (progress[idx - 1]?.stars || 0) : 0;
           return (
             <button key={idx} className="level-card" onClick={() => hasQs && unlocked && startLevel(idx)}
               style={{ opacity: unlocked && hasQs ? 1 : 0.5, cursor: unlocked && hasQs ? 'pointer' : 'not-allowed' }}>
@@ -234,7 +263,7 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
               <div className="level-info">
                 <div className="level-name">{name}</div>
                 <div className="level-meta">
-                  {!unlocked ? 'Need 8/10 on previous level' : !hasQs ? 'Coming soon' : levelData ? `${levelData.score}/10 correct` : '10 frames · 30s timer'}
+                  {!unlocked ? `Need ${STARS_TO_UNLOCK}★ on ${LEVEL_NAMES[idx-1]} (${prevStars}/${STARS_TO_UNLOCK}★)` : !hasQs ? 'Coming soon' : levelData ? `${levelData.score}/10 correct · ${levelData.stars || 0}★` : '10 frames · 30s timer'}
                 </div>
               </div>
               <span style={{ color: T.textDim, fontSize: 20 }}>{unlocked && hasQs ? '›' : ''}</span>
@@ -245,27 +274,10 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
     );
   }
 
-  // ─── Game Over ────────────────────────────────────────────
-  if (phase === 'gameover') {
-    const accuracyPct = Math.round((score / Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)) * 100);
-    return (
-      <ResultScreen
-        passed={false}
-        gameOver={true}
-        title="Game Over"
-        subtitle={`You got ${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
-        accuracy={`${accuracyPct}%`}
-        buttons={[
-          { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
-          { label: 'Retry', onClick: () => startLevel(currentLevel), variant: 'primary' },
-        ]}
-      />
-    );
-  }
-
   // ─── Result ───────────────────────────────────────────────
   if (phase === 'result') {
-    const passed = score >= PASS_THRESHOLD;
+    const stars = getStars(score);
+    const passed = stars >= 1;
     const accuracyPct = Math.round((score / Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)) * 100);
     const buttons = [
       { label: '\u2190 Levels', onClick: () => setPhase('levels'), variant: 'secondary' },
@@ -278,7 +290,10 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         passed={passed}
         title={passed ? 'Level Cleared!' : 'Level Failed'}
         subtitle={`${score}/${Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)} correct`}
+        stars={stars}
         accuracy={`${accuracyPct}%`}
+        spadesEarned={earnedSpades}
+        xpEarned={earnedXP}
         buttons={buttons}
       />
     );
@@ -298,15 +313,10 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         <div style={{ fontSize: 14, fontWeight: 700, color: T.success }}>✓ {score}</div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {Array.from({ length: MAX_SKIPS }).map((_, i) => (
-            <span key={i} style={{ fontSize: 16, opacity: i < (MAX_SKIPS - skipsUsed) ? 1 : 0.2 }}>⏩</span>
-          ))}
-        </div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: timeLeft <= 10 ? T.error : T.text }}>{timeLeft}s</div>
-        <div style={{ fontSize: 10, color: T.textMid }}>Q{currentIdx + 1}/{Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)}</div>
+      {/* Timer + Question Count */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginBottom: 12 }}>
+        <CircularTimer timeLeft={timeLeft} maxTime={TIMER_TOTAL} />
+        <div style={{ fontSize: 10, color: T.textMid, marginTop: 4 }}>Q{currentIdx + 1}/{Math.min(QUESTIONS_PER_LEVEL, levelQuestions.length)}</div>
       </div>
 
       {/* Frame Image */}
@@ -337,12 +347,9 @@ export default function FrameGuessPage({ spades, setSpades, showFeedback }) {
         })}
       </div>
 
-      {/* Skip + Hint Buttons */}
+      {/* Hint Button Only */}
       {!answered && (
         <div style={{ display: 'flex', gap: 8, padding: '0 0 10px' }}>
-          <button className="power-btn" onClick={doSkip} disabled={spades < SKIP_COST} style={{ flex: 1 }}>
-            ⏩ SKIP<br /><span style={{ color: T.gold }}>{SKIP_COST}♠</span>
-          </button>
           <button className="power-btn" onClick={doHint} disabled={spades < HINT_COST || hintUsed} style={{ flex: 1, opacity: hintUsed ? 0.4 : 1 }}>
             💡 HINT<br /><span style={{ color: T.gold }}>{HINT_COST}♠</span>
           </button>

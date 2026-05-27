@@ -16,7 +16,7 @@ import dialogueL5 from '../games/dialogue-clash/questions/level5';
 import frameGuessL5 from '../games/frame-guess/questions/level5';
 
 const DAILY_KEY = 'ani_daily';
-const DAILY_REWARD_SPADES = 50;
+const DAILY_REWARD_SPADES = 300;
 const DAILY_REWARD_XP = 300;
 
 // Build daily question pool from all game modes level 5
@@ -65,7 +65,6 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
     setAnswered(true);
     setSelectedOption(option);
 
-    // For MCQ questions, 'correct' is an index number. For anagram, 'answer' is a string.
     let isCorrect = false;
     if (question.type === 'mcq' || (typeof question.correct === 'number' && question.options)) {
       isCorrect = option === question.options[question.correct];
@@ -117,9 +116,9 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
   const wasWrong = answered && (storedResult === false || (selectedOption && selectedOption !== correctAnswer));
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: '12px 20px' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+      <div style={{ textAlign: 'center', marginBottom: 16 }}>
         <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
         <h2 style={{ color: T.text, marginBottom: 4, fontSize: 18 }}>Daily Challenge</h2>
         <p style={{ color: T.textDim, fontSize: 12 }}>
@@ -147,17 +146,19 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
         </div>
       )}
 
-      {/* Already completed */}
+      {/* Already completed - Result box moved upward */}
       {completed && answered && (
-        <ResultScreen
-          passed={storedResult ?? (selectedOption === correctAnswer)}
-          gameOver={!(storedResult ?? (selectedOption === correctAnswer))}
-          title={(storedResult ?? (selectedOption === correctAnswer)) ? 'Challenge Complete!' : 'Better Luck Tomorrow!'}
-          subtitle={`Correct Answer: ${correctAnswer}`}
-          spadesEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_SPADES : 0}
-          xpEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_XP : 0}
-          buttons={[]}
-        />
+        <div style={{ marginTop: 0 }}>
+          <ResultScreen
+            passed={storedResult ?? (selectedOption === correctAnswer)}
+            gameOver={!(storedResult ?? (selectedOption === correctAnswer))}
+            title={(storedResult ?? (selectedOption === correctAnswer)) ? 'Challenge Complete!' : 'Better Luck Tomorrow!'}
+            subtitle={`Correct Answer: ${correctAnswer}`}
+            spadesEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_SPADES : 0}
+            xpEarned={(storedResult ?? (selectedOption === correctAnswer)) ? DAILY_REWARD_XP : 0}
+            buttons={[]}
+          />
+        </div>
       )}
 
       {/* Wrong answer - show correct answer immediately */}
@@ -174,54 +175,58 @@ export default function DailyPage({ spades, setSpades, showFeedback }) {
       )}
 
       {/* Question */}
-      <div style={{
-        background: T.card, borderRadius: 12, padding: 16, marginBottom: 16,
-        border: `1px solid ${T.border}`
-      }}>
-        <p style={{ color: T.text, fontSize: 15, textAlign: 'center', margin: 0 }}>
-          {question.text || question.emoji || question.question || ''}
-        </p>
-      </div>
+      {!completed && (
+        <>
+          <div style={{
+            background: T.card, borderRadius: 12, padding: 16, marginBottom: 16,
+            border: `1px solid ${T.border}`
+          }}>
+            <p style={{ color: T.text, fontSize: 15, textAlign: 'center', margin: 0 }}>
+              {question.text || question.emoji || question.question || ''}
+            </p>
+          </div>
 
-      {/* Answer section */}
-      {isAnagram ? (
-        <WordNinjaTiles
-          scrambled={question.scrambled || (question.answer || '').split('').sort(() => Math.random() - 0.5)}
-          onSolve={handleAnagramSolve}
-          hintRevealed={false}
-          hint={question.hint}
-          answered={answered}
-          correctAnswer={correctAnswer}
-        />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {(question.options || []).map((opt, i) => {
-            const isSelected = selectedOption === opt;
-            const isCorrect = opt === correctAnswer;
-            let bg = T.card;
-            let borderColor = T.border;
-            if (answered) {
-              if (isCorrect) { bg = 'rgba(34,197,94,0.15)'; borderColor = T.success; }
-              else if (isSelected && !isCorrect) { bg = 'rgba(244,63,94,0.15)'; borderColor = T.error; }
-            }
-            return (
-              <button
-                key={i}
-                onClick={() => handleAnswer(opt)}
-                disabled={answered}
-                style={{
-                  padding: '12px 16px', borderRadius: 10,
-                  background: bg, border: `1px solid ${borderColor}`,
-                  color: T.text, fontSize: 14, textAlign: 'left',
-                  cursor: answered ? 'default' : 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
+          {/* Answer section */}
+          {isAnagram ? (
+            <WordNinjaTiles
+              scrambled={question.scrambled || (question.answer || '').split('').sort(() => Math.random() - 0.5)}
+              onSolve={handleAnagramSolve}
+              hintRevealed={false}
+              hint={question.hint}
+              answered={answered}
+              correctAnswer={correctAnswer}
+            />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(question.options || []).map((opt, i) => {
+                const isSelected = selectedOption === opt;
+                const isCorrect = opt === correctAnswer;
+                let bg = T.card;
+                let borderColor = T.border;
+                if (answered) {
+                  if (isCorrect) { bg = 'rgba(34,197,94,0.15)'; borderColor = T.success; }
+                  else if (isSelected && !isCorrect) { bg = 'rgba(244,63,94,0.15)'; borderColor = T.error; }
+                }
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleAnswer(opt)}
+                    disabled={answered}
+                    style={{
+                      padding: '12px 16px', borderRadius: 10,
+                      background: bg, border: `1px solid ${borderColor}`,
+                      color: T.text, fontSize: 14, textAlign: 'left',
+                      cursor: answered ? 'default' : 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
