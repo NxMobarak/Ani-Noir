@@ -163,9 +163,9 @@ export default function HomePage() {
       </section>
 
       {/* GAME MODES */}
-      <section aria-label="Game Modes" style={{ marginBottom: 10 }}>
-        <h2 className="card-title" style={{ color: '#94a3b8', fontSize: 12, padding: '0 2px 8px' }}>GAME MODES</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }} role="group" aria-label="Game modes">
+      <section className="card" aria-label="Game Modes">
+        <h2 className="card-title" style={{ color: '#94a3b8', fontSize: 12, marginBottom: 10 }}>GAME MODES</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }} role="group" aria-label="Game modes">
           {[
             ['/quiz', '🧠', 'Anime Quiz', 'Test your general anime knowledge', 'brain'],
             ['/ninja', '🔤', 'Word Ninja', 'Guess the anime by words', 'brain'],
